@@ -1,0 +1,15 @@
+node_modules
+dist
+coverage
+src/routeTree.gen.ts
+.tanstack
+.env
+.env.*
+!.env.example
+*.log
+.git
+.gitignore
+.vscode
+.idea
+Dockerfile
+.dockerignore

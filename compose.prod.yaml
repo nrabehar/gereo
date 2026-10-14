@@ -1,0 +1,168 @@
+name: gereo
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: 10m
+    max-file: "5"
+
+x-hardening: &hardening
+  security_opt:
+    - no-new-privileges:true
+  cap_drop:
+    - ALL
+
+x-database-url: &database-url postgresql://${POSTGRES_USER:-gereo}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@postgres:5432/${POSTGRES_DB:-gereo}?schema=public
+
+services:
+  nginx:
+    image: nginxinc/nginx-unprivileged:1.30-alpine
+    restart: unless-stopped
+    <<: *hardening
+    ports:
+      - "${HTTP_PORT:-80}:8080"
+    environment:
+      API_UPSTREAM_HOST: api:3000
+      SERVER_NAME: ${SERVER_NAME:-_}
+      RATE_LIMIT_RPS: ${RATE_LIMIT_RPS:-20}
+      RATE_LIMIT_BURST: ${RATE_LIMIT_BURST:-40}
+      CLIENT_MAX_BODY_SIZE: ${CLIENT_MAX_BODY_SIZE:-10m}
+    volumes:
+      - ./infra/nginx/templates/api.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - ./infra/nginx/snippets:/etc/nginx/snippets:ro
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/healthz"]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+    networks:
+      - edge
+    logging: *logging
+
+  api:
+    build:
+      context: ./api
+      target: production
+    image: ${API_IMAGE:-gereo/api:latest}
+    restart: unless-stopped
+    <<: *hardening
+    read_only: true
+    tmpfs:
+      - /tmp
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      LOG_LEVEL: ${API_LOG_LEVEL:-info}
+      TRUST_PROXY: "true"
+      SWAGGER_ENABLED: ${SWAGGER_ENABLED:-false}
+      CORS_ORIGINS: ${CORS_ORIGINS:-}
+      DATABASE_URL: *database-url
+      DATABASE_POOL_MAX: ${DATABASE_POOL_MAX:-10}
+      REDIS_URL: redis://:${REDIS_PASSWORD:?REDIS_PASSWORD is required}@redis:6379/0
+      THROTTLE_TTL_MS: ${THROTTLE_TTL_MS:-60000}
+      THROTTLE_LIMIT: ${THROTTLE_LIMIT:-100}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    deploy:
+      replicas: ${API_REPLICAS:-1}
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+    stop_grace_period: 30s
+    networks:
+      - edge
+      - data
+    logging: *logging
+
+  migrate:
+    build:
+      context: ./api
+      target: migrator
+    image: ${API_MIGRATOR_IMAGE:-gereo/api-migrator:latest}
+    restart: "no"
+    <<: *hardening
+    environment:
+      DATABASE_URL: *database-url
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - data
+    logging: *logging
+
+  postgres:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    shm_size: 256m
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-gereo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:-gereo}
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+    networks:
+      - data
+    logging: *logging
+
+  redis:
+    image: redis:8.10-alpine
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    command:
+      - redis-server
+      - --requirepass
+      - ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
+      - --appendonly
+      - "yes"
+      - --maxmemory
+      - ${REDIS_MAXMEMORY:-256mb}
+      - --maxmemory-policy
+      - ${REDIS_MAXMEMORY_POLICY:-noeviction}
+    environment:
+      REDISCLI_AUTH: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+    networks:
+      - data
+    logging: *logging
+
+networks:
+  edge:
+  data:
+    internal: true
+
+volumes:
+  postgres-data:
+  redis-data:

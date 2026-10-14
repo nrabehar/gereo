@@ -1,0 +1,128 @@
+name: gereo-dev
+
+services:
+  proxy:
+    image: nginxinc/nginx-unprivileged:1.30-alpine
+    ports:
+      - "${DEV_PROXY_PORT:-8080}:8080"
+    environment:
+      API_UPSTREAM_HOST: api:3000
+      WEB_UPSTREAM_HOST: web:5173
+    volumes:
+      - ./infra/nginx/templates/dev.conf.template:/etc/nginx/templates/default.conf.template:ro
+    depends_on:
+      - api
+      - web
+
+  web:
+    build:
+      context: ./web
+      target: development
+    environment:
+      VITE_APP_NAME: ${VITE_APP_NAME:-Gereo}
+      VITE_API_BASE_URL: /api
+      VITE_DEV_API_PROXY_TARGET: http://api:3000
+      VITE_DEV_USE_POLLING: ${DEV_USE_POLLING:-false}
+    ports:
+      - "${WEB_PORT:-5173}:5173"
+    develop:
+      watch:
+        - action: sync
+          path: ./web/src
+          target: /app/src
+          ignore:
+            - routeTree.gen.ts
+        - action: sync
+          path: ./web/public
+          target: /app/public
+        - action: sync
+          path: ./web/index.html
+          target: /app/index.html
+        - action: rebuild
+          path: ./web/package.json
+        - action: rebuild
+          path: ./web/package-lock.json
+        - action: sync+restart
+          path: ./web/vite.config.ts
+          target: /app/vite.config.ts
+
+  api:
+    build:
+      context: ./api
+      target: development
+    command: ["npm", "run", "start:debug"]
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      LOG_LEVEL: ${API_LOG_LEVEL:-debug}
+      TRUST_PROXY: "true"
+      SWAGGER_ENABLED: "true"
+      CORS_ORIGINS: http://localhost:${DEV_PROXY_PORT:-8080},http://localhost:${WEB_PORT:-5173}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-gereo}:${POSTGRES_PASSWORD:-gereo}@postgres:5432/${POSTGRES_DB:-gereo}?schema=public
+      REDIS_URL: redis://redis:6379/0
+    ports:
+      - "${API_PORT:-3000}:3000"
+      - "127.0.0.1:${API_DEBUG_PORT:-9229}:9229"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    develop:
+      watch:
+        - action: sync
+          path: ./api/src
+          target: /app/src
+          ignore:
+            - generated/
+        - action: sync
+          path: ./api/test
+          target: /app/test
+        - action: sync+exec
+          path: ./api/prisma
+          target: /app/prisma
+          exec:
+            command: npx prisma generate
+        - action: rebuild
+          path: ./api/package.json
+        - action: rebuild
+          path: ./api/package-lock.json
+        - action: sync+restart
+          path: ./api/nest-cli.json
+          target: /app/nest-cli.json
+        - action: sync+restart
+          path: ./api/tsconfig.json
+          target: /app/tsconfig.json
+
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-gereo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-gereo}
+      POSTGRES_DB: ${POSTGRES_DB:-gereo}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:8.10-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "127.0.0.1:${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  postgres-data:
+  redis-data:

@@ -51,7 +51,7 @@ api/src
 ├── main.ts                 bootstrap
 ├── app.module.ts           composition root
 ├── bootstrap/              HTTP setup: security, CORS, versioning, validation, Swagger
-├── config/                 Zod-validated environment + typed AppConfigService
+├── config/                 Zod-validated environment, one `*.config.ts` per domain (app, db, logger, throttle) + typed ConfigService
 ├── core/                   infrastructure, imported once by AppModule
 │   ├── database/           PrismaService (driver adapter pg)
 │   ├── redis/              Redis client provider
@@ -76,7 +76,7 @@ Rules:
 - Controllers map HTTP ↔ DTOs; services hold rules; repositories hold queries. Responses go through response DTOs, never raw Prisma models.
 - `core` modules are global infrastructure; `common` contains pure, reusable pieces.
 - Routes are prefixed with `/api` and URI-versioned (`/api/v1/...`). Health endpoints are version-neutral.
-- Configuration is read only through `AppConfigService`; the process refuses to start on invalid environment.
+- Configuration is read only through `ConfigService` (e.g. `config.db.url`); the process refuses to start on invalid environment.
 - When a domain becomes large or needs independent deployment, it can move to its own Nest app with minimal changes, because its boundary is already explicit.
 
 Path aliases (`api/tsconfig.json`). `nest build` rewrites them to relative paths in `dist`, and Vitest resolves them through `resolve.tsconfigPaths`. Imports keep the `.js` extension required by ESM:
@@ -86,7 +86,7 @@ Path aliases (`api/tsconfig.json`). `nest build` rewrites them to relative paths
 | `#/*`        | `src/modules/*`           | `import { UsersModule } from '#/users/users.module.js'`       |
 | `@core/*`    | `src/core/*`              | `import { PrismaService } from '@core/database/prisma.service.js'` |
 | `@common/*`  | `src/common/*`            | `import { PaginationQueryDto } from '@common/dto/pagination.dto.js'` |
-| `$config/*`  | `src/config/*`            | `import { AppConfigService } from '$config/app-config.service.js'` |
+| `$config/*`  | `src/config/*`            | `import { ConfigService } from '$config/config.service.js'` |
 | `$prisma/*`  | `src/generated/prisma/*`  | `import type { User } from '$prisma/client.js'`               |
 | `@/*`        | `src/*`                   | `import { AppModule } from '@/app.module.js'`                 |
 

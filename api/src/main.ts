@@ -5,7 +5,7 @@ import { Logger } from 'nestjs-pino';
 import { AppModule } from '@/app.module.js';
 import { configureApp } from '@/bootstrap/configure-app.js';
 import { setupSwagger } from '@/bootstrap/swagger.js';
-import { AppConfigService } from '$config/app-config.service.js';
+import { ConfigService } from '$config/config.service.js';
 
 const bootstrap = async (): Promise<void> => {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -15,12 +15,12 @@ const bootstrap = async (): Promise<void> => {
   app.useLogger(app.get(Logger));
   configureApp(app);
 
-  const config = app.get(AppConfigService);
-  if (config.get('SWAGGER_ENABLED')) {
+  const config = app.get(ConfigService);
+  if (config.app.swaggerEnabled) {
     setupSwagger(app);
   }
 
-  await app.listen(config.get('PORT'), config.get('HOST'));
+  await app.listen(config.app.port, config.app.host);
 };
 
 await bootstrap();

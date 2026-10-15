@@ -3,15 +3,15 @@ import { randomUUID } from 'node:crypto';
 import { Module } from '@nestjs/common';
 import { LoggerModule as PinoLoggerModule } from 'nestjs-pino';
 
-import { AppConfigService } from '$config/app-config.service.js';
+import { ConfigService } from '$config/config.service.js';
 
 @Module({
   imports: [
     PinoLoggerModule.forRootAsync({
-      inject: [AppConfigService],
-      useFactory: (config: AppConfigService) => ({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
         pinoHttp: {
-          level: config.get('LOG_LEVEL'),
+          level: config.logger.level,
           genReqId: (req, res) => {
             const header = req.headers['x-request-id'];
             const id =
@@ -32,7 +32,7 @@ import { AppConfigService } from '$config/app-config.service.js';
           autoLogging: {
             ignore: (req) => req.url?.startsWith('/api/health') ?? false,
           },
-          transport: config.isProduction
+          transport: config.app.isProduction
             ? undefined
             : {
                 target: 'pino-pretty',

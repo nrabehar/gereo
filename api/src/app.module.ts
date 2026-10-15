@@ -3,7 +3,7 @@ import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 import { PrismaExceptionFilter } from '@common/filters/prisma-exception.filter.js';
-import { AppConfigService } from '$config/app-config.service.js';
+import { ConfigService } from '$config/config.service.js';
 import { ConfigModule } from '$config/config.module.js';
 import { DatabaseModule } from '@core/database/database.module.js';
 import { HealthModule } from '@core/health/health.module.js';
@@ -18,11 +18,11 @@ import { UsersModule } from '#/users/users.module.js';
     DatabaseModule,
     RedisModule,
     ThrottlerModule.forRootAsync({
-      inject: [AppConfigService],
-      useFactory: (config: AppConfigService) => [
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => [
         {
-          ttl: config.get('THROTTLE_TTL_MS'),
-          limit: config.get('THROTTLE_LIMIT'),
+          ttl: config.throttle.ttlMs,
+          limit: config.throttle.limit,
         },
       ],
     }),

@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { PrismaPg } from '@prisma/adapter-pg';
 
-import { AppConfigService } from '$config/app-config.service.js';
+import { ConfigService } from '$config/config.service.js';
 import { PrismaClient } from '$prisma/client.js';
 
 @Injectable()
@@ -13,11 +13,11 @@ export class PrismaService
   extends PrismaClient
   implements OnModuleInit, OnModuleDestroy
 {
-  constructor(config: AppConfigService) {
+  constructor(config: ConfigService) {
     super({
       adapter: new PrismaPg({
-        connectionString: config.get('DATABASE_URL'),
-        max: config.get('DATABASE_POOL_MAX'),
+        connectionString: config.db.url,
+        max: config.db.poolMax,
       }),
     });
   }

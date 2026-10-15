@@ -1,18 +1,23 @@
 import { Global, Module } from '@nestjs/common';
 import { ConfigModule as NestConfigModule } from '@nestjs/config';
 
-import { AppConfigService } from './app-config.service.js';
-import { validateEnv } from './env.schema.js';
+import appConfig from './app.config.js';
+import { ConfigService } from './config.service.js';
+import { validate } from './config.validator.js';
+import dbConfig from './db.config.js';
+import loggerConfig from './logger.config.js';
+import throttleConfig from './throttle.config.js';
 
 @Global()
 @Module({
   imports: [
     NestConfigModule.forRoot({
       cache: true,
-      validate: validateEnv,
+      load: [appConfig, dbConfig, loggerConfig, throttleConfig],
+      validate,
     }),
   ],
-  providers: [AppConfigService],
-  exports: [AppConfigService],
+  providers: [ConfigService],
+  exports: [ConfigService],
 })
 export class ConfigModule {}

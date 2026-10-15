@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { Redis } from 'ioredis';
 
-import { AppConfigService } from '$config/app-config.service.js';
+import { ConfigService } from '$config/config.service.js';
 import { REDIS_CLIENT } from './redis.constants.js';
 
 @Global()
@@ -15,10 +15,10 @@ import { REDIS_CLIENT } from './redis.constants.js';
   providers: [
     {
       provide: REDIS_CLIENT,
-      inject: [AppConfigService],
-      useFactory: (config: AppConfigService): Redis => {
+      inject: [ConfigService],
+      useFactory: (config: ConfigService): Redis => {
         const logger = new Logger('Redis');
-        const client = new Redis(config.get('REDIS_URL'), {
+        const client = new Redis(config.db.redisUrl, {
           lazyConnect: false,
           maxRetriesPerRequest: 3,
           enableReadyCheck: true,

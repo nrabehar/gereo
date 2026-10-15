@@ -33,7 +33,7 @@ export const envSchema = z.object({
 
 export type Env = z.infer<typeof envSchema>;
 
-export const validateEnv = (config: Record<string, unknown>): Env => {
+export const validate = (config: Record<string, unknown>): Env => {
   const result = envSchema.safeParse(config);
   if (!result.success) {
     throw new Error(
@@ -42,3 +42,5 @@ export const validateEnv = (config: Record<string, unknown>): Env => {
   }
   return result.data;
 };
+
+export const parseEnv = (): Env => validate(process.env);

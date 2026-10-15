@@ -2,19 +2,19 @@ import { ValidationPipe, VersioningType } from '@nestjs/common';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import helmet from 'helmet';
 
-import { AppConfigService } from '$config/app-config.service.js';
+import { ConfigService } from '$config/config.service.js';
 
 export const configureApp = (app: NestExpressApplication): void => {
-  const config = app.get(AppConfigService);
+  const config = app.get(ConfigService);
 
-  if (config.get('TRUST_PROXY')) {
+  if (config.app.trustProxy) {
     app.set('trust proxy', 1);
   }
 
   app.disable('x-powered-by');
   app.use(helmet());
 
-  const origins = config.get('CORS_ORIGINS');
+  const origins = config.app.corsOrigins;
   app.enableCors({
     origin: origins.length > 0 ? origins : false,
     credentials: true,

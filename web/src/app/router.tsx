@@ -6,22 +6,22 @@ import { NotFound } from '@ui/not-found'
 import { RouteError } from '@ui/route-error'
 
 export type RouterContext = {
-  queryClient: QueryClient
+	queryClient: QueryClient
 }
 
 export const createAppRouter = (queryClient: QueryClient) =>
-  createRouter({
-    routeTree,
-    context: { queryClient },
-    defaultPreload: 'intent',
-    defaultPreloadStaleTime: 0,
-    scrollRestoration: true,
-    defaultErrorComponent: RouteError,
-    defaultNotFoundComponent: NotFound,
-  })
+	createRouter({
+		routeTree,
+		context: { queryClient },
+		defaultPreload: 'intent',
+		defaultPreloadStaleTime: 0,
+		scrollRestoration: true,
+		defaultErrorComponent: RouteError,
+		defaultNotFoundComponent: NotFound,
+	})
 
 declare module '@tanstack/react-router' {
-  interface Register {
-    router: ReturnType<typeof createAppRouter>
-  }
+	interface Register {
+		router: ReturnType<typeof createAppRouter>
+	}
 }

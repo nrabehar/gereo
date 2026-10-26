@@ -15,6 +15,7 @@ An expense request (the object) has one status. The payout it produces is a tran
 | Draft | Saved, not sent. Nobody else sees it |
 | Awaiting vote | The policy requires a vote and the linked vote is open |
 | Awaiting approval | Waiting for the required approvals ("1 of 2 approved") |
+| Needs changes | An approver asked the requester to change the request (SPD-06). No approvals count until the requester edits (SPD-07) |
 | Approved | Approvals complete, payout not yet sent (short, or held, see SPD-11 and SPD-15) |
 | Paying | Payout transaction Initiated or Pending |
 | Paid | Payout Confirmed |
@@ -69,7 +70,7 @@ Expense, Fee and Reversal rows, each with the request reference, the approvers a
 
 **Story:** As a person who can initiate spending, I want to ask my group to pay someone from a wallet or a project, with the amount, the payee, a receipt or quote and a note, so that spending is requested openly and nobody pays from their own pocket and hopes to be repaid.
 
-**Conversation:** The group's spending today runs on phone calls and memory (info.md problems 1 and 2). Open Collective's model is the best precedent: submit, approve, pay, everyone sees (`raw/04-projects-voting-governance.md` section 3). Policy text is shown on the form (`raw/08-competitor-ux-comparison.md` section 6.7; SPD-02). A request is a submission only, no money moves until the payout (SPD-10), so the screen says so. First-time payee, wrong-number and wrong-person risk is real: 25 percent of Sub-Saharan mobile money owners have sent money to the wrong person and half never recovered it (design-foundations section 1 point 1; `raw/07-ui-ux-best-practices.md` section 2.8 R-S3, section 2.6 R-E1 and R-E4). Moves client money when paid: legal-gate. Screen 18 of the P0 wireframe list.
+**Conversation:** The group's spending today runs on phone calls and memory (info.md problems 1 and 2). Open Collective's model is the best precedent: submit, approve, pay, everyone sees (`raw/04-projects-voting-governance.md` section 3). Policy text is shown on the form (`raw/08-competitor-ux-comparison.md` section 6.7; SPD-02). A request is a submission only, no money moves until the payout (SPD-10), so the screen says so. First-time payee, wrong-number and wrong-person risk is real: 25 percent of Sub-Saharan mobile money owners have sent money to the wrong person and half never recovered it (design-foundations section 1 point 1; `raw/07-ui-ux-best-practices.md` section 2.8 R-S3, section 2.6 R-E1 and R-E4). Moves client money when paid: legal-gate.
 
 **Preconditions:** The person holds Wallet: initiate spend on the source wallet. The wallet is not frozen for new requests (see SPD-15).
 **Trigger:** The person taps "Ask to spend" from a wallet, a project, or a decision.
@@ -172,7 +173,7 @@ Expense, Fee and Reversal rows, each with the request reference, the approvers a
 
 **Story:** When I open the app, I want to see which requests are waiting for me, with the amount and how long they have waited, so I can approve quickly and the group is never blocked by my silence.
 
-**Conversation:** "What needs me now" is the first block of the home: pending approvals, votes closing, contributions due (`raw/08-competitor-ux-comparison.md` section 6.2). Approvers are the bottleneck: pending approvals notify immediately, then once after 24 hours (`raw/07-ui-ux-best-practices.md` section 8.8 R-NT3). Approvals that happen only by email fail for members without email (`raw/08` section 6.7). Screen 19 of the P0 wireframe list.
+**Conversation:** "What needs me now" is the first block of the home: pending approvals, votes closing, contributions due (`raw/08-competitor-ux-comparison.md` section 6.2). Approvers are the bottleneck: pending approvals notify immediately, then once after 24 hours (`raw/07-ui-ux-best-practices.md` section 8.8 R-NT3). Approvals that happen only by email fail for members without email (`raw/08` section 6.7).
 
 **Preconditions:** The person holds approve spend on at least one wallet with an open request, or approve purchase on a project with one.
 **Trigger:** A request becomes Awaiting approval, or the person opens "Approvals".

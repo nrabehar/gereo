@@ -28,13 +28,31 @@ Evidence labels in the raw reports: [V] verified, [S] secondary, [U] unverified 
 
 Only the share template moves money. The other three read the ledger and send alerts. Rules never edit or reverse past entries.
 
+**Founder decisions that shape this epic** ([05-decisions.md](../05-decisions.md)). D3: every Confirmed credit into a wallet is income for that wallet, including a credit made by another rule, so share rules chain from wallet to wallet; cycle detection and a maximum chain depth are mandatory (RUL-06). D5: the leftover ariary of a share run is a visible Rounding line credited to Gereo, always under 1 Ar per destination, shown on the receipt and disclosed in the terms (RUL-07, ACC-13). D1 and D4 are not owned here: a share rule moves money only inside the same owner or group, and on a group wallet that move is authorised once, when a holder of Wallet: edit rules saves the rule (GRP-13 AC4), never at each firing. A rule can never send group money out of the group.
+
+**Vocabulary.** A share rule is one line: one source wallet, one percent, one destination. CON calls a named set of such lines a split rule. The engine treats each line as the unit; the personal builder (RUL-03) creates one line at a time and the group builder (CON-11) creates several in one save.
+
+**Rule states** (one shared table for this file; CON uses Active for On and Ended for a rule deleted here):
+
+| State | Meaning | Applies |
+| --- | --- | --- |
+| On | The rule runs on future income or watches the wallet | Every template |
+| Paused | Switched off by a person; resumes with one tap | Every template |
+| Waiting for vote | A group change is stored but not applied; the old version stays in force (RUL-13) | A chip on a version of a share rule |
+| Needs attention | The last run could not complete, or a destination is closed or held; the reason is shown | Share rule |
+| Stopped | The wallet is closed; history is kept (WAL-05) | Every template |
+
+A deleted rule is not a state: it leaves the list and keeps "(deleted)" after its name on past entries.
+
+**Firing outcomes** (RUL-12): Moved (a share wrote entries, including "Moved after re-run" for a re-run of CON-15 or RUL-12), Alert sent (cap, goal or low-balance), Skipped (a run was due and was not done, with a reason code).
+
 **Conventions used in this file**
 
-- Message keys: UI `rul.<screen>.<element>`, errors `err.rul.<code>`. Notifications use the base keys already in the NTF event catalogue (`msg.rul.fired`, `msg.rul.cap_reached`, `msg.rul.low_balance`, `msg.rul.goal_reached`, `msg.rul.goal_behind`, `msg.rul.skipped`, `msg.rul.group_changed`). This epic defines no new notification key, no new SMS template and no new fallback parameter. The RUL rows of the catalogue use in-app and push only, so no RUL event produces SMS and `ntf.sms_window.*` is not used here. All text exists in Malagasy, French and English. Wording in quotes is intent, not final copy.
-- Amounts are integer ariary shown as `12 500 Ar`. Percentages in rules are whole numbers. No number in this file is a decision; each is a named parameter below or an open question.
-- Rule-produced ledger entries carry the rule name and rule version, are flagged as rule-made (so they are never treated as income by another rule), and are classified Split in the controlled type vocabulary shared with CON and WAL-15.
+- Message keys: UI `rul.<screen>.<element>`, errors `err.rul.<code>`. Notifications use the base keys already in the NTF event catalogue (`msg.rul.fired`, `msg.rul.cap_reached`, `msg.rul.low_balance`, `msg.rul.goal_reached`, `msg.rul.goal_behind`, `msg.rul.skipped`, `msg.rul.group_changed`). This epic defines no new notification key, no new SMS template and no new fallback parameter. The RUL rows of the catalogue use in-app and push only, so no RUL event produces SMS and `ntf.sms_window.*` is not used here; the one SMS in this area is the CON-15 failure message for a group wallet, which replaces `msg.rul.skipped` there (RUL-12 AC9). All text exists in Malagasy, French and English. Wording in quotes is intent, not final copy.
+- Amounts are integer ariary shown as `12 500 Ar`. Percentages in rules are whole numbers. Every number in this file is a named parameter below.
+- Rule-produced ledger entries carry the rule name, the rule version and the hop number, are flagged as rule-made (for the "Made by a rule" filter and the "Why" line only: they are still income for the wallet that receives them, decision D3), and are classified Split, or Rounding for the line to Gereo, in the controlled type vocabulary shared with CON and WAL-15.
 - A wallet balance is always the sum of its ledger entries (WAL-03). Rules read it; they never store a balance.
-- On a personal wallet the person holds every wallet permission. On a group wallet, `edit rules` is checked for every create, edit, pause, resume and delete (RUL-13).
+- On a personal wallet the person holds every wallet permission. On a group wallet, Wallet: edit rules is checked for every create, edit, pause, resume and delete (RUL-13).
 - A rule applies to future income only. A change or a new rule never touches income already received (info.md, wallet rules; CON-13).
 - Times are shown in Madagascar time (Indian/Antananarivo, UTC+3).
 
@@ -42,20 +60,20 @@ Only the share template moves money. The other three read the ledger and send al
 
 | Parameter | Meaning | Starting value or status |
 | --- | --- | --- |
-| `RULE_MAX_PER_WALLET` | Most rules of any kind on one wallet | TBD |
-| `RULE_NAME_MAX` | Maximum characters in a rule name | TBD |
-| `SHARE_MAX_DESTINATIONS` | Most share rules, or destinations, on one wallet | TBD (CON-11 calls the group equivalent `split_max_destinations`; one value is wanted) |
-| `RULE_CHAIN_DEPTH_MAX` | Longest allowed chain of wallets that pass money on | TBD (same value as CON `split_chain_depth_max`) |
-| `PREVIEW_INCOME_COUNT` | Recent incomes used by the live preview | Up to 3, as in CON-12; to confirm |
-| `PREVIEW_LOOKBACK` | How far back the preview looks for incomes | TBD |
-| `CAP_PERIOD_OPTIONS` | Periods a spending cap may use (for example week, month) | TBD |
-| `CAP_WARNING_PERCENT` | Optional share of the cap at which an early warning is sent | Open (off unless decided) |
-| `GOAL_CHECK_DAY` | Day and hour of the weekly goal-behind check | TBD, aligned with `ntf.digest_day` |
-| `RULE_RETRY_MAX`, `RULE_RETRY_BACKOFF` | Retries for a transient failure while a rule runs | TBD |
-| `RULE_HISTORY_PAGE_SIZE` | Firings per page | Same as `HISTORY_PAGE_SIZE` (WAL) |
-| `RULE_HISTORY_RETENTION` | How long firing history is kept | Not shorter than `RECORD_RETENTION_YEARS` (WAL); TBD |
+| `RULE_MAX_PER_WALLET` | Most rules of any kind on one wallet | 10 (five shares plus the three alert templates leave room; one wallet with more than ten rules cannot be read in one summary, 07 UI/UX 8.5) |
+| `RULE_NAME_MAX` | Maximum characters in a rule name | 40 (fits one line of a ledger row at 200 percent text) |
+| `SHARE_MAX_DESTINATIONS` | Most share rules, or destinations, on one wallet | 5. This file owns the name; CON `split_max_destinations` is the same value and must not be set separately (07 UI/UX 8.1 R-G4) |
+| `RULE_CHAIN_DEPTH_MAX` | Most hops in a chain of wallets that pass money on, counted from the wallet where the money first arrived | 3. This file owns the name; CON `split_chain_depth_max` is the same value (07 UI/UX 8.2 R-RB4) |
+| `PREVIEW_INCOME_COUNT` | Recent incomes used by the live preview | 3, as in CON-12 |
+| `PREVIEW_LOOKBACK` | How far back the preview looks for incomes | 90 days (about three monthly pay periods) |
+| `CAP_PERIOD_OPTIONS` | Periods a spending cap may use | Week and month, the cycles groups and households use (02 personal finance). Month runs from the 1st; a pay-day start is later |
+| `CAP_WARNING_PERCENT` | Share of the cap at which one early warning is sent | 80, on by default, the same level SPD-14 shows (a hypothesis, 07 UI/UX 8.2 R-RB5 [U]). A person may switch it off on their own cap |
+| `GOAL_CHECK_DAY` | Day and hour of the weekly goal-behind check | The day and hour of `ntf.digest_day` (NTF), so the item lands in the digest of NTF-14 |
+| `RULE_RETRY_MAX`, `RULE_RETRY_BACKOFF` | Retries for a transient failure while a rule runs | 3 retries, after 1, 5 and 15 minutes |
+| `RULE_HISTORY_PAGE_SIZE` | Firings per page | Same as `HISTORY_PAGE_SIZE` (WAL), 20 |
+| `RULE_HISTORY_RETENTION` | How long firing history is kept | `RECORD_RETENTION_YEARS` (WAL), 5, because a firing is part of the ledger story of an entry |
 
-**Defaults proposed here, to validate** (each repeated in Open questions): rounding is down to whole ariary per share and the leftover stays in the source wallet (same as CON-12 and CON-14); income means Confirmed money that comes from outside the owner (see RUL-07); several share rules each take their percent of the original income, so order never changes the amounts.
+**Defaults decided here** (each closed in Open questions): income is every Confirmed credit (D3); each share is rounded down to a whole ariary and the leftover is a Rounding line to Gereo (D5); several share rules each take their percent of the whole credit, so order never changes the amounts and the MVP has no reordering.
 
 ---
 
@@ -67,7 +85,7 @@ Only the share template moves money. The other three read the ledger and send al
 **Priority:** P0
 **Release:** MVP
 **Actor:** Individual, Member, Permission holder
-**Permission needed:** none for own wallets; `view balance` to see rules on a group wallet (read-only), `edit rules` to change them
+**Permission needed:** none for own wallets; Wallet: view balance to see rules on a group wallet (read-only), Wallet: edit rules to change them
 **Tags:** offline
 
 **Story:** As a wallet owner, I want one list of the rules on my wallet with the state of each, so that I always know what will happen to my next income.
@@ -79,19 +97,19 @@ Only the share template moves money. The other three read the ledger and send al
 
 **Acceptance criteria:**
 1. Happy path. The list shows one card per rule: the rule as a sentence in the person's language, a state chip (On, Paused, Waiting for vote, Needs attention, Stopped) with icon and word, the last time it fired and what it did ("Moved 20 000 Ar to Savings, yesterday"), and for alert rules the current reading ("Spent 120 000 of 200 000 Ar this month").
-2. Business rule. Cards are grouped by template (Share, Spending cap, Goal, Low-balance alert). Within share rules the order is the application order (RUL-05). A button "Add a rule" opens RUL-02.
+2. Business rule. Cards are grouped by template (Share, Spending cap, Goal, Low-balance alert). Within share rules the order is the order of creation, which is also the order of application (RUL-07). A button "Add a rule" opens RUL-02.
 3. Business rule. At the top, a link "What happens when money arrives" opens the combined summary (RUL-05) and a link "Rule history" opens RUL-12.
-4. Business rule. "Stopped" is used for a rule on a closed wallet ("Stopped: wallet closed", WAL-05) and keeps its history. A share rule whose destination is closed shows "Needs attention" with the reason, never "On".
-5. Permission. A person without `edit rules` on a group wallet sees the cards read-only: no Add, Edit, Pause or Delete, and one line naming the missing permission and who holds it (`rul.list.permission_needed`). A person without `view balance` sees `rul.list.not_permitted`, not the rules.
+4. Business rule. States come from the table "Rule states". "Stopped" is used for a rule on a closed wallet ("Stopped: wallet closed", WAL-05) and keeps its history. A share rule whose destination is closed or held by Gereo shows "Needs attention" with the reason, never "On".
+5. Permission. A person without Wallet: edit rules on a group wallet sees the cards read-only: no Add, Edit, Pause or Delete, and one line naming the missing permission and who holds it (`rul.list.permission_needed`). A person without Wallet: view balance sees `rul.list.not_permitted`, not the rules.
 6. States. Empty: one sentence on what rules do and the four template choices as buttons, no illustration-only screen. Loading: skeleton cards. Refresh failure: the cached list stays with "Could not update. Retry".
 7. Offline. The list renders from cache with "Updated hh:mm". All actions that change a rule are disabled with `wal.offline.needs_connection`.
 8. No ledger entry and no notification. Reading is not audited.
 9. Accessibility and language. Each card reads as one sentence to a screen reader including its state; state is never by colour alone; sentence word order is tested at 2x text expansion in the three languages.
 
 **Data:** Wallet rule (read), Rule firing (read, last result), Ledger entry (read, for alert readings), Membership (read).
-**Depends on:** WAL-03, WAL-01, GRP-06.
+**Depends on:** WAL-03, WAL-01, GRP-06, WAL-05.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Does a person with only `view history` (not `view balance`) see rules? Should the list show a count of firings this month?
+**Open questions:** Closed: a person with only Wallet: view history and not Wallet: view balance does not see the rule list, because a rule shows percents and amounts that reveal the balance; they still see the rule name and "Why" line on each entry and the firing history (RUL-12). Closed: no count of firings on the list; the last firing and the history link are enough.
 
 ---
 
@@ -101,7 +119,7 @@ Only the share template moves money. The other three read the ledger and send al
 **Priority:** P0
 **Release:** MVP
 **Actor:** Individual, Permission holder
-**Permission needed:** none for own wallets; `edit rules` for a group wallet
+**Permission needed:** none for own wallets; Wallet: edit rules for a group wallet
 **Tags:** audit
 
 **Story:** As a wallet owner, I want to pick a rule from a short list of named templates, so that I can automate my money without learning a rule builder.
@@ -114,18 +132,18 @@ Only the share template moves money. The other three read the ledger and send al
 **Acceptance criteria:**
 1. Happy path. The screen shows exactly four choices, each with icon, a name, and one plain sentence of what it does and whether it moves money: "Share each income" (moves money), "Spending cap" (alert only), "Goal with a date" (alert only), "Low-balance alert" (alert only). Keys `rul.template.*`.
 2. Business rule. No blank builder, no fifth template and no custom code exist. A template not offered cannot be created through any other screen or request.
-3. Business rule. A wallet may hold several rules. Duplicates are checked per template: a second spending cap for the same period, a second goal on the same wallet (the goal is one shared record, WAL-04) and a second low-balance rule are blocked with `err.rul.already_exists` and a link to edit the existing one. Several share rules are allowed up to `SHARE_MAX_DESTINATIONS`.
-4. Business rule. At `RULE_MAX_PER_WALLET` the choices are disabled and `rul.template.limit_reached` says why.
-5. Business rule. The type of the wallet may pre-select a template (a savings wallet suggests Goal, a budget wallet suggests Spending cap) but never hides the others.
-6. Business rule, group wallet. Without `edit rules` the screen is not reachable and the person sees the missing permission named (`err.wal.permission_missing`). Choosing a template on a group wallet that needs a vote follows RUL-13.
+3. Business rule. A wallet may hold several rules. Duplicates are checked per template: a second spending cap for the same period, a second goal on the same wallet (the goal is one shared record, WAL-04) and a second low-balance rule are blocked with `err.rul.already_exists` and a link to edit the existing one. Several share rules are allowed up to `SHARE_MAX_DESTINATIONS`, after which the Share choice is disabled with `rul.template.share_limit_reached`.
+4. Business rule. At `RULE_MAX_PER_WALLET` all choices are disabled and `rul.template.limit_reached` says why.
+5. Business rule. The type of the wallet pre-selects a template (a savings wallet highlights Goal, a budget wallet highlights Spending cap) but never hides or reorders the others; the four stay in the same order for everyone.
+6. Business rule, group wallet. Without Wallet: edit rules the screen is not reachable and the person sees the missing permission named (`err.wal.permission_missing`). Saving a share rule on a group wallet that needs a vote follows RUL-13.
 7. Business rule. Choosing needs only Tier 1 (ACC-07). No identity prompt appears for creating a rule.
 8. States. Loading: skeleton buttons. Offline: the screen opens but each choice is disabled with `wal.offline.needs_connection`; no rule is queued from the phone.
 9. Audit. Only the later save writes `rule.created` (RUL-03, RUL-09, RUL-10, RUL-11). Browsing templates writes nothing.
 
 **Data:** Wallet rule (read, for duplicates), Wallet (read), Permission (read).
-**Depends on:** RUL-01, WAL-01, ACC-07, GRP-08.
+**Depends on:** RUL-01, WAL-01, ACC-07, GRP-08, RUL-13.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Value of `RULE_MAX_PER_WALLET`. Is a wallet-type suggestion wanted, or does it risk steering people? When Gereo adds a template after the MVP, may a group switch it off for its wallets?
+**Open questions:** Closed: `RULE_MAX_PER_WALLET` is 10 (shared definitions). Closed: the wallet-type suggestion stays as a highlight only (AC5); to be watched in the paper test, no decision waits on it. Closed: a template added after the MVP is available to every wallet; a group switch for it is a later question, not an MVP one.
 
 ---
 
@@ -134,8 +152,8 @@ Only the share template moves money. The other three read the ledger and send al
 **Type:** User story
 **Priority:** P0
 **Release:** MVP
-**Actor:** Individual (own wallet); Permission holder with `edit rules` for a group wallet through CON-11
-**Permission needed:** none for own wallets; `edit rules` for a group wallet
+**Actor:** Individual (own wallet); Permission holder with Wallet: edit rules for a group wallet through CON-11
+**Permission needed:** none for own wallets; Wallet: edit rules for a group wallet
 **Tags:** ledger, audit
 
 **Story:** As a wallet owner, I want to say "when income arrives in this wallet, move this percent to that wallet" by filling three slots in a sentence, so that part of every income is set aside without me doing it.
@@ -147,20 +165,20 @@ Only the share template moves money. The other three read the ledger and send al
 
 **Acceptance criteria:**
 1. Happy path. The screen is one sentence with three tappable slots: the source wallet (fixed to this wallet), the percent (numeric keypad, whole numbers) and the destination wallet (picker of open wallets). The person may name the rule in short text (at most `RULE_NAME_MAX`); a default name is proposed ("Share income"). Below the sentence sit the live preview (RUL-04) and the button "Save rule".
-2. Business rule, percent. Each share is a whole number from 1 to 100. The total of all active share rules on the wallet, including this one, must be at most 100. Above it, Save is blocked and the message names the excess ("Together your rules take 120 percent. Lower one by 20", `err.rul.percent_over_100`).
+2. Business rule, percent. Each share is a whole number from 1 to 100. The total of all share rules on the wallet that are On, Paused or Waiting for vote, including this one, must be at most 100, so resuming a rule never breaks the limit. Above it, Save is blocked and the message names the excess ("Together your rules take 120 percent. Lower one by 20", `err.rul.percent_over_100`).
 3. Business rule, remainder. When the total is below 100, a line states "The other [N] percent stays in [wallet]". This is a normal, valid state and needs no confirmation.
-4. Business rule, destinations. The destination must be an open wallet the person can receive into, different from the source. For personal rules the destination is another wallet of the same owner. A destination that is a group wallet or another person's wallet is not offered in the MVP (open question). The number of share rules is limited to `SHARE_MAX_DESTINATIONS`.
-5. Business rule, loop. The builder blocks any choice that would create a cycle, using RUL-06. A choice that cannot be saved is shown inline with the reason, never only after Save.
-6. Business rule, rounding and effect. The sentence area states in words how rounding works (RUL-07 AC4) and says "Applies to income that arrives after you save. Past income is not touched." (`rul.share.future_only`).
+4. Business rule, destinations. The destination must be an open wallet the person can receive into, different from the source. For personal rules the destination is another wallet of the same owner; for a group wallet it is another wallet of the same group (CON-11 AC5). A group wallet, a personal wallet of someone else or another Gereo user is not offered as a destination of a personal rule, and a group rule never offers a member's personal wallet: those moves need the approvals of GRP-13. The number of share rules on a wallet is limited to `SHARE_MAX_DESTINATIONS`.
+5. Business rule, loop and depth. The builder blocks any choice that would create a cycle or a chain longer than `RULE_CHAIN_DEPTH_MAX`, using RUL-06, taking into account what the destination wallet already passes on (decision D3). A choice that cannot be saved is shown inline with the reason, never only after Save.
+6. Business rule, rounding and effect. The sentence area states in words how rounding works (RUL-07 AC3: each destination gets its percent rounded down, and the leftover ariary, under 1 Ar per destination, goes to Gereo as a Rounding line, decision D5) and says "Applies to income that arrives after you save. Past income is not touched." (`rul.share.future_only`). The first time a person saves a share rule, the rounding line links to the terms (ACC-13).
 7. Business rule. Saving does not move money, so no confirmation sheet is needed beyond the restated sentence on the Save button ("Save: 20 percent of each income to Savings"). If an active destination is later closed, RUL-12 explains skipped runs.
 8. States. Saving shows progress; a double tap creates one rule (idempotency key). A failure creates nothing and keeps the typed values. Offline: Save is disabled with `wal.offline.needs_connection`.
 9. Ledger and audit. No ledger entry at save time. Audit entry `rule.created` with wallet, template, values, rule version 1, actor, time. For a group wallet the entry is `splitrule.created` as in CON-11.
 10. Accessibility and language. Sliders are not the only input; every slot is reachable by keyboard and screen reader and read as part of one sentence. The same slot order is kept in Malagasy, French and English where grammar allows.
 
 **Data:** Wallet rule (write, version 1), Wallet (read), Audit entry (write).
-**Depends on:** RUL-02, RUL-04, RUL-06, WAL-01, WAL-12, CON-11 (group version), GRP-15.
+**Depends on:** RUL-02, RUL-04, RUL-06, RUL-07, RUL-13, WAL-01, WAL-12, CON-11 (group version), GRP-15, ACC-13.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Whole percents only, or also decimals (CON-11 asks the same)? May a personal rule send to a group wallet or to another Gereo user (WAL-13 transfers exist but are PIN-gated)? Does a share rule with a fixed amount ("move 5 000 Ar") belong in the MVP (default: no, percent only)?
+**Open questions:** Closed: whole percents only, the same as CON-11; decimals add reading effort and rounding lines for no stated need. Closed: a personal rule never sends to a group wallet or to another Gereo user; a person who wants that uses WAL-13, which asks for the PIN and the recipient check on every send, and a rule would skip both. Closed: no fixed-amount share in the MVP (percent only, 02 personal finance Takeaways item 2).
 
 ---
 
@@ -170,7 +188,7 @@ Only the share template moves money. The other three read the ledger and send al
 **Priority:** P0
 **Release:** MVP
 **Actor:** Individual, Permission holder
-**Permission needed:** none for own wallets; `edit rules` and `view history` for a group wallet
+**Permission needed:** none for own wallets; Wallet: edit rules and Wallet: view history for a group wallet
 **Tags:** ledger, offline
 
 **Story:** When I am about to save or change a share rule, I want to see how it would have split my last incomes, so I can trust it before it touches real money.
@@ -182,19 +200,19 @@ Only the share template moves money. The other three read the ledger and send al
 
 **Acceptance criteria:**
 1. Happy path. Under the sentence a preview shows the last up to `PREVIEW_INCOME_COUNT` incomes found within `PREVIEW_LOOKBACK` on this wallet, using the rule on income as defined in RUL-07. Each line reads "Salary 400 000 Ar on 5 Oct: 80 000 Ar would go to Savings, 320 000 Ar would stay" (key `rul.preview.line`). It updates as the person types.
-2. Business rule. The preview applies the same rounding as the engine (RUL-07 AC4) and always adds up: destination amounts plus what stays equals the income to the ariary.
-3. Business rule. Existing active rules on the wallet are included, so the line shows the effect of all of them together with the draft (the same data as RUL-05). A paused rule is shown as "paused, not counted".
+2. Business rule. The preview applies the same rounding as the engine (RUL-07 AC3) and always adds up: destination amounts plus the Rounding line to Gereo plus what stays equals the income to the ariary. A Rounding line above 0 is shown on its own row and named as going to Gereo; at 0 no row is shown.
+3. Business rule. Existing On rules on the wallet are included, so the line shows the effect of all of them together with the draft (the same data as RUL-05). A paused rule is shown as "paused, not counted". When a destination passes money on, the preview shows what that destination would then do with its share, down to `RULE_CHAIN_DEPTH_MAX` hops, as CON-12 AC6 does.
 4. Business rule. If a share would round to 0 Ar the line says "0 Ar, no entry would be made for it".
 5. Business rule. The preview states "Preview only. No money was moved." and shows no provider fee, because moves between wallets are free (WAL-12).
 6. States. With no past income, the preview asks the person to type a sample amount and says so. The person can always type a sample amount instead of or beside real incomes. Loading: skeleton lines. A failed load keeps the sample mode working.
-7. Business rule, group wallet. Without `view history` the person sees only the sample-amount mode with the missing permission named, as in CON-12 AC5.
+7. Business rule, group wallet. Without Wallet: view history the person sees only the sample-amount mode with the missing permission named, as in CON-12 AC5.
 8. Offline. The preview works from cached incomes with "Updated hh:mm"; Save stays disabled.
 9. Privacy. Counterparty numbers are masked as in the ledger. A preview writes no audit entry and no ledger entry.
 
 **Data:** Ledger entry (read), Wallet rule (read, draft), Wallet (read).
-**Depends on:** RUL-03, RUL-07, WAL-15, CON-12 (group version).
+**Depends on:** RUL-03, RUL-07, RUL-06, WAL-15, CON-12 (group version).
 **Pages:** to be filled from the information architecture.
-**Open questions:** Value of `PREVIEW_INCOME_COUNT` and `PREVIEW_LOOKBACK`. May a person with no history yet be shown example incomes (default: no, only a typed sample)?
+**Open questions:** Closed: `PREVIEW_INCOME_COUNT` is 3 and `PREVIEW_LOOKBACK` is 90 days (shared definitions). Closed: a person with no history is shown no invented incomes, only a typed sample, because invented numbers could be read as real money.
 
 ---
 
@@ -204,7 +222,7 @@ Only the share template moves money. The other three read the ledger and send al
 **Priority:** P0
 **Release:** MVP
 **Actor:** Individual, Member, Permission holder
-**Permission needed:** none for own wallets; `view balance` for a group wallet
+**Permission needed:** none for own wallets; Wallet: view balance for a group wallet
 **Tags:** offline
 
 **Story:** When I have several rules on a wallet, I want one summary of what happens to a new income, in order, with the total and what stays, so I am never surprised by where my money went.
@@ -217,18 +235,18 @@ Only the share template moves money. The other three read the ledger and send al
 **Acceptance criteria:**
 1. Happy path. The summary reads as a short ordered list: "When income arrives in Main: 1. 20 percent to Savings. 2. 10 percent to School fees. The other 70 percent stays in Main." It then lists the alerts that watch the wallet (spending cap, goal, low-balance alert) under "Alerts".
 2. Business rule. The summary shows the total of share percentages and the remainder in words, for example "Total moved: 30 percent. Stays: 70 percent". A total of exactly 100 shows "Nothing stays in Main".
-3. Business rule. It shows all states: a Paused rule is listed as "Paused, not applied", a rule waiting for a vote as "Waiting for vote, not applied", a stopped rule as "Stopped".
-4. Business rule. A worked example uses the wallet's last income when one exists, or a typed amount, shown with the same rounding as the engine ("With 100 000 Ar: 20 000 to Savings, 10 000 to School fees, 70 000 stay").
-5. Business rule. The order shown is the order of application (RUL-07). The person with permission may change the order of share rules with up and down buttons; reordering saves a new rule version for each moved rule and applies to future income only.
-6. Business rule, cycles. If a destination passes money on to other wallets (a chain), the summary follows it up to `RULE_CHAIN_DEPTH_MAX` and shows the full path in words ("20 percent to Savings, which sends 50 percent of that to School fees"). It never shows a path that RUL-06 blocks.
-7. States. Loading: skeleton. Offline: readable from cache with "Updated hh:mm". A person without `view balance` on a group wallet sees `rul.summary.not_permitted`.
+3. Business rule. It shows every state of the table "Rule states": a Paused rule is listed as "Paused, not applied", a rule waiting for a vote as "Waiting for vote, not applied", a rule that needs attention with its reason, a stopped rule as "Stopped".
+4. Business rule. A worked example uses the wallet's last income when one exists, or a typed amount, shown with the same rounding as the engine ("With 100 000 Ar: 20 000 to Savings, 10 000 to School fees, 70 000 stay"). When the rounding leaves an amount, the example adds the line "1 Ar rounding goes to Gereo".
+5. Business rule. The order shown is the order of creation, which is the order of application (RUL-07). There are no up and down buttons in the MVP, because each share takes its percent of the whole income and the order changes no amount; the order only decides the order of ledger lines.
+6. Business rule, chains. Because money a rule sends is income for the destination (decision D3), the summary follows every destination that passes money on, up to `RULE_CHAIN_DEPTH_MAX` hops, and shows the full path in words ("20 percent to Savings, which sends 50 percent of that to School fees"). It never shows a path that RUL-06 blocks.
+7. States. Loading: skeleton. Offline: readable from cache with "Updated hh:mm". A person without Wallet: view balance on a group wallet sees `rul.summary.not_permitted`.
 8. Notifications. None.
 9. Accessibility and language. The list is a real ordered list for screen readers; amounts never clip at 200 percent font scale; the sentence works in the three languages.
 
 **Data:** Wallet rule (read), Ledger entry (read, last income), Wallet (read).
 **Depends on:** RUL-01, RUL-03, RUL-07, CON-11, CON-12.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Does reordering matter for share rules (default: no, see RUL-07 AC3), so is reordering only for the display and for alert order? Should the summary show chains across owners?
+**Open questions:** Closed: reordering does not exist in the MVP (AC5). Closed: the summary never shows chains across owners, because a rule can only send inside the same owner or group (RUL-03 AC4).
 
 ---
 
@@ -238,31 +256,31 @@ Only the share template moves money. The other three read the ledger and send al
 **Priority:** P0
 **Release:** MVP
 **Actor:** Individual, Permission holder
-**Permission needed:** none for own wallets; `edit rules` for a group wallet
+**Permission needed:** none for own wallets; Wallet: edit rules for a group wallet
 **Tags:** audit
 
 **Story:** As a wallet owner, I want Gereo to refuse a rule that would send money round in a circle and to tell me in plain words why, so that my money never loops.
 
 **Conversation:** Loop prevention in allocation cascades and a cap on rule chains are required safeguards (07 UI/UX 8.2 R-RB4; 02 personal finance, Risks, "cap rule chains; loop prevention in allocation cascades"; 08 competitor UX 6.5 Open opportunities). People who build rules are not experts, so the message must name the wallets in the loop, not say "cycle detected" (design foundations section 3, plain language). CON-11 AC4 and CON-14 AC4 apply the same rule to group wallets; the check is shared.
 
-**Preconditions:** A person is saving, resuming, reordering or changing a share rule.
-**Trigger:** Save, Resume, or an edit of a destination.
+**Preconditions:** A person is saving, resuming or changing a share rule.
+**Trigger:** Save, Resume, or an edit of a destination or percent.
 
 **Acceptance criteria:**
 1. Happy path. Before the rule is saved, resumed or edited, the system follows all active share rules from the destination and checks whether the source wallet can be reached again. If it can, Save is blocked and the screen explains with the path in words: "This would send money in a circle: Main sends 20 percent to Savings, Savings sends 10 percent to Main. Change one of them." (`err.rul.cycle`, with the wallet names as parameters).
 2. Business rule. A rule that sends to its own wallet is blocked with `err.rul.same_wallet`.
-3. Business rule. A chain longer than `RULE_CHAIN_DEPTH_MAX` is blocked with `err.rul.chain_too_long` naming the limit and the longest path.
+3. Business rule, depth. Depth is the number of hops from the wallet where money first arrives: Main to Savings is one hop, Savings to School fees is a second. A chain longer than `RULE_CHAIN_DEPTH_MAX` hops, counting every wallet the new rule would add above and below it, is blocked with `err.rul.chain_too_long` naming the limit and the longest path. The check also runs when a rule is saved on a wallet that already receives money from others, so a new rule cannot lengthen an existing chain past the limit.
 4. Business rule. The check counts rules that are On, Paused and Waiting for vote, so resuming a paused rule can never create a loop that the person did not see. The check uses the current state of all rules on all wallets the person owns, and for a group on all wallets of that group.
-5. Business rule, run time. The check is repeated when the engine runs (RUL-07). If a loop appears later, for example because another person changed a rule on a wallet the first person does not control, the engine skips the affected run with the reason `cycle_prevented` and nothing is written (RUL-12).
-6. Business rule. Rule-made entries are flagged and are never income for any rule, so even an undetected loop cannot multiply money.
-7. Business rule. The message never reveals wallets the person is not allowed to see: it names them as "a wallet of [group name]" when the person lacks `view balance` there.
+5. Business rule, run time. Both checks are repeated when the engine runs each hop (RUL-07 AC5). If a loop or an over-long chain appears later, for example because another person changed a rule on a wallet the first person does not control, the engine skips the affected hop with the reason `cycle_prevented` or `chain_too_long`, writes nothing for it, and the money stays in the wallet where the hop would have run (RUL-12).
+6. Business rule, no switch-off. Money made by a rule is income for its destination (decision D3), so the save-time check, the run-time check and the depth limit are mandatory: no setting, role or operator action turns any of them off. Each rule-made entry carries its hop number, so a chain can be read hop by hop in the ledger and a test can assert that no entry has a hop number above `RULE_CHAIN_DEPTH_MAX`.
+7. Business rule. The message never reveals wallets the person is not allowed to see: it names them as "a wallet of [group name]" when the person lacks Wallet: view balance there.
 8. States. The message appears inline next to the offending slot, with focus moved to it and also in the error summary at the top. Offline: the check runs on cached rules for guidance only; Save is disabled anyway.
-9. Notifications and audit. A blocked save writes no audit entry and sends nothing. A run skipped for `cycle_prevented` sends `msg.rul.skipped` (RUL-12) and writes an audit entry `rule.skipped` with the path.
+9. Notifications and audit. A blocked save writes no audit entry and sends nothing. A hop skipped for `cycle_prevented` or `chain_too_long` notifies as in RUL-12 AC9 (`msg.rul.skipped` on a personal wallet, `msg.con.split_failed` on a group wallet) and writes an audit entry `rule.skipped` with the path.
 
 **Data:** Wallet rule (read, all linked rules), Audit entry (write on skipped run).
-**Depends on:** RUL-03, RUL-07, RUL-12, CON-11, GRP-15.
+**Depends on:** RUL-03, RUL-07, RUL-12, CON-11, CON-14, GRP-15.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Value of `RULE_CHAIN_DEPTH_MAX`. How much of another owner's wallet names may be shown in a loop message?
+**Open questions:** Closed: `RULE_CHAIN_DEPTH_MAX` is 3 (shared definitions). Closed: names of wallets in a loop message follow AC7: a wallet the person cannot see is named only as "a wallet of [group name]". Because rules only send inside one owner or group (RUL-03 AC4), no wallet of an unrelated person can ever appear.
 
 ---
 
@@ -273,31 +291,31 @@ Only the share template moves money. The other three read the ledger and send al
 **Release:** MVP
 **Actor:** System
 **Permission needed:** none (rule authorised at definition time)
-**Tags:** ledger, audit
+**Tags:** legal-gate, ledger, audit
 
-**Story:** When income is confirmed in a wallet, I want every active share rule to run at once, in a clear order, under its own name, so that I never have to move money by hand and I can see exactly what happened.
+**Story:** When income is confirmed in a wallet, I want every active share rule to run at once, under its own name, and the wallets that receive a share to run their own rules in turn, so that I never have to move money by hand and I can see exactly what happened.
 
-**Conversation:** Automatic application on every income, with loop prevention and each firing logged, is Gereo's stated differentiator and Monzo staff described full automation as "planned for later" (08 competitor UX 6.5 Open opportunities; 02 personal finance, Gaps item 1). Manual sorting is forgotten or runs after fixed payments leave (08 competitor UX 6.5 Avoid). Money must move only on Confirmed, never on Pending, because provider callbacks can double-notify (WAL-07; CON-14 AC8). Group split execution is CON-14: this story defines the shared engine that runs both personal rules and group split rules, and CON-14 stays the reference for group-only behaviour (timing "At a set time", vote-gated versions, members' view). The person decides what counts as income by default, not by guesswork; this is an open question with a proposed default.
+**Conversation:** Automatic application on every income, with loop prevention and each firing logged, is Gereo's stated differentiator and Monzo staff described full automation as "planned for later" (08 competitor UX 6.5 Open opportunities; 02 personal finance, Gaps item 1). Manual sorting is forgotten or runs after fixed payments leave (08 competitor UX 6.5 Avoid). Money must move only on Confirmed, never on Pending, because provider callbacks can double-notify (WAL-07; CON-14 AC8). Group split execution is CON-14: this story defines the shared engine that runs both personal rules and group split rules, and CON-14 stays the reference for group-only behaviour (timing "At a set time", vote-gated versions, members' view). Decision D3 settles what counts as income: every Confirmed credit, whatever its source, so nobody tags deposits by hand and rules chain. Decision D5 settles the leftover ariary: it goes to Gereo as a visible Rounding line. The tag legal-gate is there because crediting Gereo with the rounding amount is platform income that the lawyer must confirm (CON-14).
 
 **Preconditions:** An active rule version exists on the wallet. An income reaches Confirmed after that version's effective time.
-**Trigger:** WAL-07 posts a confirmed deposit, or WAL-13 posts a transfer received from another person, or any other posting classed as Income.
+**Trigger:** Any Confirmed credit into the wallet: WAL-07 posts a deposit, WAL-12 or WAL-13 posts a move or transfer received, a contribution or late fee is paid in (CON-04), or another rule's Split line arrives (a chain hop).
 
 **Acceptance criteria:**
-1. Happy path, income. The engine treats as income, by default, a Confirmed credit that comes from outside the owner: a deposit from mobile money (WAL-06, WAL-07), a transfer received from another person or group (WAL-13), and on a group wallet a deposit classified as Income at deposit time (WAL-06 conversation, CON-14 open question). It does not treat as income: a move between the owner's own wallets (WAL-12), a rule-made entry, a contribution paid to a plan (CON-04, unless the group enabled `contributions_feed_split`, CON-11), a fee, a refund or reversal (WAL-11, WAL-18), and any entry that is not Confirmed.
-2. Business rule, calculation. For each active share rule the engine computes the rule's percent of the whole income, not of what is left after earlier rules. The total of percentages is at most 100 at save time (RUL-03) and is checked again at run time; if it exceeds 100 at run time, the whole run is skipped with reason `percent_over_100` and nothing is written.
-3. Business rule, order. Share rules run in the order shown in RUL-05. Because each takes its percent of the original income, the order does not change any amount. Order does decide the order of the ledger lines, the order of alerts that follow, and which rule is reported first when several are skipped.
-4. Business rule, rounding. Each share is rounded down to a whole ariary. Whatever is left after all shares, including the rounding remainder, stays in the wallet. Destination amounts plus the kept amount always equal the income exactly (default proposed; see open questions).
-5. Business rule, all or nothing. All entries for one income are written in one atomic posting with the income reference: one balanced entry from the wallet to each destination, classified Split, named with the rule name and version (key `rul.ledger.share_line`, for example "20 percent to Savings by rule Share income"). Either every share is written or none. A destination that cannot receive (closed, frozen) makes only its own run Skipped with the reason `destination_closed` or `destination_frozen` while other shares go ahead; the money for the skipped share stays in the wallet (RUL-12).
-6. Business rule, idempotency. One run per income and rule version, enforced by a key built from income ID and rule version. A duplicate callback, a retry or a replay writes nothing more. A transient failure is retried up to `RULE_RETRY_MAX` with `RULE_RETRY_BACKOFF`; a permanent one waits for a person (CON-15 for group wallets).
-7. Business rule, future only. A rule version applies only to incomes Confirmed after its effective time. Incomes received while a rule was paused or before it existed are never split later, even when the rule is resumed.
-8. Business rule, after the run. Once the share postings are done, the engine re-reads the wallet and checks the alert rules (spending cap, goal, low-balance) on the new balance (RUL-09, RUL-10, RUL-11). A failure in a rule never rolls back the income (WAL-07 AC8).
-9. Ledger and audit. Every run, including skipped ones, writes a firing record (RUL-12) and an audit entry `rule.fired` with income reference, rule version, entries written, actor System, time. The income wallet entry, the destination entries and the firing record share one reference ID.
-10. Notifications. A fired share sends `msg.rul.fired` as an in-app item to the wallet owner and, for group wallets, to members with `view history`, batched under NTF-08 so a busy day makes one summary. No push and no SMS for a normal firing.
+1. Happy path, income (decision D3). Every Confirmed credit into a wallet is income for that wallet and triggers that wallet's On share rules: a deposit from mobile money (WAL-06, WAL-07), a transfer received from another person or group (WAL-13), a manual move from another wallet (WAL-12), a contribution or late fee paid into a group wallet (CON-04), and a Split line made by another rule. The ledger chip never changes whether a credit is income. Not income: a reversal or refund entry (WAL-11, WAL-18), a Fee line, a Rounding line, and any entry that is not Confirmed.
+2. Business rule, calculation and order. For each On share rule the engine computes the rule's percent of the whole credit, not of what is left after earlier rules, in the order of creation. The total of percentages is at most 100 at save time (RUL-03) and is checked again at run time; if it exceeds 100 at run time, the whole run is skipped with reason `percent_over_100` and nothing is written. Because each share takes its percent of the whole credit, the order changes no amount; it decides only the order of the ledger lines and which skipped rule is reported first. The credit is the amount actually credited to the wallet, so a provider fee, which is its own Fee line, is never taken off before the percent.
+3. Business rule, rounding (decision D5). Each destination receives its percent of the credit rounded down to a whole ariary. The rounding amount is the floor of (credit times the total of percents divided by 100) minus the sum of the rounded-down destination amounts; it is always under 1 Ar per destination line. The part that stays in the wallet is the credit minus the floor of (credit times the total divided by 100). The rounding amount is written as its own Rounding line from the wallet to Gereo's platform income account, shown on the receipt and in the history, and disclosed in the terms (ACC-13). At 0 no line is written. Destination amounts plus the Rounding line plus the kept amount always equal the credit exactly. Worked example: credit 10 Ar, lines of 33, 33 and 34 percent: destinations get 3, 3 and 3, Gereo gets 1, nothing stays.
+4. Business rule, one posting per hop, skips. All entries of one credit at one wallet are written in one atomic posting with the credit reference: one balanced entry from the wallet to each destination, classified Split and named with the rule name, version and hop number (key `rul.ledger.share_line`, for example "20 percent to Savings by rule Share income"), plus the Rounding line. Either every line is written or none. A destination that cannot receive (closed, or held by an operator for compliance) makes only its own share Skipped with the reason `destination_closed` or `destination_held` while other shares go ahead; the money for the skipped share stays in the wallet (RUL-12). A wallet frozen by Wallet: freeze still sends and receives shares, because the money stays inside the same owner or group; a wallet held by an operator does not run its rules (reason `wallet_held`), as CON-14.
+5. Business rule, chains (decision D3). Each Split line is a Confirmed credit into its destination and runs that wallet's own On rules by this same story, one hop deeper, up to `RULE_CHAIN_DEPTH_MAX` hops. Each hop is its own atomic posting with its own idempotency key. If a later hop fails, earlier hops stay done and the money waits in the wallet where the failed hop would have run (CON-15). The cycle and depth checks of RUL-06 are repeated before each hop; a hop that fails them is skipped with `cycle_prevented` or `chain_too_long` and writes nothing. Every entry carries the rule name, rule version, hop number and the reference of the first credit.
+6. Business rule, idempotency. One run per credit, rule version and destination, enforced by a key built from the credit ID, the rule version and the destination. A duplicate callback, a retry or a replay writes nothing more. A transient failure is retried up to `RULE_RETRY_MAX` with `RULE_RETRY_BACKOFF`; a permanent one waits for a person (CON-15, and the "Run again" of RUL-12 for personal wallets).
+7. Business rule, future only. A rule version applies only to credits Confirmed after its effective time. Credits received while a rule was paused or before it existed are never split later, even when the rule is resumed.
+8. Business rule, after the run. Once the postings of a wallet are done, the engine re-reads that wallet and checks its alert rules (spending cap, goal, low-balance) on the new balance (RUL-09, RUL-10, RUL-11); this applies to every wallet in a chain. A failure in a rule never rolls back the credit (WAL-07 AC8).
+9. Ledger and audit. Every run, including skipped ones, writes a firing record (RUL-12) and an audit entry `rule.fired` with credit reference, rule version, hop, entries written, actor System, time. The credit entry, the destination entries, the Rounding line and the firing record share one reference ID per hop.
+10. Notifications. A fired share sends `msg.rul.fired` as an in-app item to the wallet owner and, for group wallets, to members with Wallet: view history, batched under NTF-08 so a busy day makes one summary. No push and no SMS for a normal firing.
 
 **Data:** Transaction (read), Wallet rule (read), Ledger entry (write), Rule firing (write), Notification (write), Audit entry (write).
-**Depends on:** WAL-07, WAL-13, WAL-12, WAL-11, WAL-18, RUL-03, RUL-06, RUL-12, CON-14, NTF-08.
+**Depends on:** WAL-06, WAL-07, WAL-13, WAL-12, WAL-11, WAL-18, RUL-03, RUL-06, RUL-12, RUL-09, RUL-10, RUL-11, CON-04, CON-14, CON-15, NTF-08, ACC-13, SPD-15.
 **Pages:** to be filled from the information architecture.
-**Open questions:** (1) What counts as income: the default above, or a person tagging each deposit as Income at deposit time, or a per-wallet choice? (2) Rounding: round down with the leftover staying in the wallet (default), or largest-remainder across destinations (07 UI/UX 8.1 R-G3)? One rule must be agreed with CON-12 and WAL so the ledger and preview agree. (3) Are provider fees on the income deducted before the percent is taken? (4) If an income is later reversed (WAL-18), do the rule entries reverse too (default: yes, with a reversing set and a reason, as CON-14 AC8)?
+**Open questions:** Closed by D3: every Confirmed credit is income, so nobody tags deposits and there is no per-wallet choice. Closed by D5: round down per destination, the leftover goes to Gereo as a Rounding line, not largest-remainder and not back to the wallet. Closed: provider fees are never taken off a credit before the percent, because the fee is its own line and the wallet is credited the net amount (CON-14 AC1). Closed: when a credit is reversed (WAL-18), the rule entries reverse down the chain, last hop first, with a reason, and the Rounding line reverses too; a downstream wallet that no longer holds the money is Needs attention for operators (CON-14 AC8, OPS-05). Open, external (lawyer): that crediting the rounding amount to Gereo is lawful platform income and is worded correctly in the terms; default used: the line exists, under 1 Ar per destination, disclosed in ACC-13.
 
 ---
 
@@ -307,7 +325,7 @@ Only the share template moves money. The other three read the ledger and send al
 **Priority:** P1
 **Release:** MVP
 **Actor:** Individual, Permission holder
-**Permission needed:** none for own wallets; `edit rules` for a group wallet
+**Permission needed:** none for own wallets; Wallet: edit rules for a group wallet
 **Tags:** audit, ledger
 
 **Story:** As a wallet owner, I want to switch a rule off for a while, change it or delete it, knowing it never touches money already moved, so that I stay in control and history stays true.
@@ -316,22 +334,21 @@ Only the share template moves money. The other three read the ledger and send al
 
 **Preconditions:** The rule exists and the person holds the permission. The wallet is open (WAL-05 stops rules on a closed one).
 **Trigger:** The person taps Pause, Resume, Edit or Delete on a rule.
-
 **Acceptance criteria:**
 1. Happy path, pause and resume. One tap on Pause sets the rule to Paused and shows the chip on the card and on the wallet card ("Rules paused", WAL-02). Resume sets it back to On. Both apply at once.
 2. Business rule, future only. Pause and resume take effect for incomes confirmed after the moment of the change. Income that arrived while paused is never split when the rule resumes. The screen says so in one sentence (`rul.edit.future_only`) with the effective time ("Applies to income after 14:05").
 3. Business rule, edit. Each save creates a new rule version and shows the effective time. Income already received keeps the version in force when it arrived. Past ledger entries and firings keep the rule name and version that made them. A renamed rule shows the new name on the card and the name at the time on past entries.
-4. Business rule, checks on save. An edit runs the same checks as creation: percent total (RUL-03), loop (RUL-06), duplicates (RUL-02), and, for a changed share, a required preview (RUL-04) that compares old and new outcome on the same sample.
+4. Business rule, checks on save and resume. An edit and a Resume run the same checks as creation: percent total (RUL-03), loop and chain depth (RUL-06), duplicates (RUL-02), and, for a changed share, a required preview (RUL-04) that compares old and new outcome on the same sample. A Resume blocked by RUL-06 stays Paused and names the path.
 5. Business rule, delete. Delete asks one confirmation that restates the rule ("Delete 'Share income'? Past entries stay and keep this name"). A deleted rule stops at once, keeps its history and its name on past entries with "(deleted)" (WAL-14 AC3). It can be recreated but not restored.
 6. Business rule, goal. Deleting a goal rule removes the goal from the wallet after the person agrees, because the goal and the rule are one record (WAL-04 AC3). Editing the goal here is the same as editing it in WAL-04.
-7. Business rule, group wallet. Without `edit rules` no action button is shown. Where the group requires a vote for changes (CON-13, `split_change_requires_vote`), the save creates a proposal and the old version stays active until it passes (RUL-13). Pause may need no vote by default (CON-13 open question).
+7. Business rule, group wallet. Without Wallet: edit rules no action button is shown. Where the group requires a vote for a change to a share rule (CON-13, `split_change_requires_vote`), the save creates a proposal that follows the decision gate of the CON shared definitions and the old version stays active until it passes (RUL-13). Pause, resume and delete need no vote, as in CON-13, and a pause is always one tap.
 8. Concurrency. If another person saved first, the person sees "Changed by [name] at hh:mm. Review" with both versions and chooses; nothing is overwritten silently (WAL-04 AC6).
 9. States and audit. Offline: all actions disabled with `wal.offline.needs_connection`. Failure keeps typed values and says nothing changed. Audit entries `rule.paused`, `rule.resumed`, `rule.edited` (before and after values, version numbers), `rule.deleted`, each with actor and time. No ledger entry is written by any of these actions.
 
 **Data:** Wallet rule (write, version), Audit entry (write), Vote (link, group).
-**Depends on:** RUL-01, RUL-03, RUL-04, RUL-06, RUL-13, WAL-04, WAL-05, CON-13.
+**Depends on:** RUL-01, RUL-03, RUL-04, RUL-06, RUL-13, WAL-04, WAL-05, WAL-14, CON-13, VOT-01.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Does pause need a vote on a group wallet (default: no)? May a deleted rule be restored within some period? Should a rule paused for a long time ask the owner if it is still wanted (default: no)?
+**Open questions:** Closed: pause needs no vote on a group wallet, because a pause only stops money moving and is undone with one tap (CON-13). Closed: a deleted rule cannot be restored; it is recreated, and its history stays under the old name (AC5), which keeps the version history simple. Closed: a long-paused rule asks nothing; it stays visible as Paused on the card and in the summary.
 
 ---
 
@@ -341,7 +358,7 @@ Only the share template moves money. The other three read the ledger and send al
 **Priority:** P1
 **Release:** MVP
 **Actor:** Individual, Permission holder
-**Permission needed:** none for own wallets; `edit rules` for a group wallet
+**Permission needed:** none for own wallets; Wallet: edit rules for a group wallet
 **Tags:** ledger, audit, offline
 
 **Story:** As a wallet owner, I want to set how much I plan to spend from a wallet in a period and be told when I reach it, so that I can slow down before the money is gone.
@@ -353,19 +370,19 @@ Only the share template moves money. The other three read the ledger and send al
 
 **Acceptance criteria:**
 1. Happy path. The sentence reads "When spending from [wallet] in [period] reaches [amount], alert me". Period is chosen from `CAP_PERIOD_OPTIONS`; amount is a whole number of at least 1 Ar on a numeric keypad. The card then shows "Spent 120 000 of 200 000 Ar this month" with a bar and the numbers, never a bar alone.
-2. Business rule, what counts. Spending is the total of Confirmed money-out from this wallet in the period: withdrawals to mobile money (WAL-11), payments to another person or group (WAL-13) and group payouts (SPD). It excludes manual moves between the owner's own wallets (WAL-12 AC5), rule-made shares, fees counted under the payment they belong to, and Failed or Cancelled items. A reversal reduces the spent total (WAL-18).
+2. Business rule, what counts. Spending is the total of Confirmed money-out from this wallet in the period: withdrawals to mobile money (WAL-11), payments to another person or group (WAL-13) and group payouts (SPD-10). It excludes manual moves between the owner's own wallets (WAL-12 AC5), rule-made Split and Rounding lines, fees counted under the payment they belong to, and Failed or Cancelled items. A reversal reduces the spent total (WAL-18). Amounts reserved for approved but unpaid requests are not counted here; SPD-14 adds them in its own "spent or promised" line.
 3. Business rule, period. The period start and end are in Madagascar time and shown on the card ("This month, resets 1 Nov"). On reset the counter starts at zero and the alert can fire again.
-4. Business rule, alert. When the spent total first reaches or passes the cap in a period, the system sends `msg.rul.cap_reached` once for that period, in-app and push, to the wallet owner and, for a group wallet, to holders of `edit rules`. If `CAP_WARNING_PERCENT` is on, one earlier warning is sent at that share, also once per period. Neither blocks any payment.
-5. Business rule, effect on other screens. While the cap is active, "Safe to spend" on the wallet is the lower of Available minus reserved and what remains of the cap (WAL-03 AC4), and the review sheet of WAL-10 adds the line that a payment passes the cap. A cap never stops a payment by itself.
+4. Business rule, alert. When the spent total first reaches or passes the cap in a period, the system sends `msg.rul.cap_reached` once for that period, in-app and push, to the wallet owner and, for a group wallet, to holders of Wallet: edit rules. At `CAP_WARNING_PERCENT` one earlier warning is sent, also once per period, with the same message family and the figures. The alert itself blocks no payment. SPD-14 sends no second message for the same crossing: the keys `msg.rul.*` are the only ones used.
+5. Business rule, effect on other screens. While the cap is active, "Safe to spend" on the wallet is the lower of Available minus reserved and what remains of the cap (WAL-03 AC4), and the review sheet of WAL-10 adds the line that a payment passes the cap. On a personal wallet the cap never stops a payment. On a group wallet the group setting `spend_cap_mode` of SPD-14 (warn by default, or block, or require a vote) decides whether a payout above the cap is stopped; that enforcement belongs to SPD-14, and this story only holds the cap value and the alert.
 6. Business rule, cap raised. If the person raises the cap after it was reached, the alert may fire again only when the new cap is reached.
 7. States. Reading the counter works offline from cache with "Updated hh:mm". Saving and editing need a connection. Loading: skeleton. A failed counter refresh keeps the last number with "Not updated since [time]".
 8. Audit. `rule.created` and `rule.edited` as in RUL-03 and RUL-08. Each alert is a firing record (RUL-12) with the spent total and the cap at that time. No ledger entry is written, because the rule only reads.
 9. Accessibility and language. The alert text includes both numbers and the period ("You have spent 200 000 of your 200 000 Ar cap this month"). It does not blame or shame and has no exclamation marks.
 
 **Data:** Wallet rule (write), Ledger entry (read, spending), Rule firing (write), Notification (write), Audit entry (write).
-**Depends on:** RUL-02, RUL-08, RUL-12, WAL-03, WAL-10, WAL-11, WAL-12, WAL-13, WAL-18, SPD, NTF-04.
+**Depends on:** RUL-02, RUL-08, RUL-12, WAL-03, WAL-10, WAL-11, WAL-12, WAL-13, WAL-18, SPD-10, SPD-14, NTF-04.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Which periods are offered (`CAP_PERIOD_OPTIONS`) and does a month start on the 1st or on the person's pay day? Is an early warning wanted (`CAP_WARNING_PERCENT`)? Does a cap per category or per member belong in a later release (default: no)? Do rule-made shares count as spending (default: no)?
+**Open questions:** Closed: periods are week and month and a month starts on the 1st (`CAP_PERIOD_OPTIONS`); a pay-day start is a later question because it needs field research on pay cycles. Closed: the early warning is on at 80 percent (`CAP_WARNING_PERCENT`), the same as SPD-14. Closed: no cap per category or per member in the MVP. Closed: rule-made Split and Rounding lines do not count as spending, because the money has not left the owner or the group (the Rounding line is under 1 Ar per destination).
 
 ---
 
@@ -375,7 +392,7 @@ Only the share template moves money. The other three read the ledger and send al
 **Priority:** P1
 **Release:** MVP
 **Actor:** Individual, Permission holder
-**Permission needed:** none for own wallets; `edit rules` for a group wallet
+**Permission needed:** none for own wallets; Wallet: edit rules for a group wallet
 **Tags:** audit, offline
 
 **Story:** As a wallet owner, I want to say how much I want in a wallet and by when, and be told if I am on track, behind, or done, so that I save toward something real.
@@ -389,8 +406,8 @@ Only the share template moves money. The other three read the ledger and send al
 1. Happy path. The sentence reads "I want [wallet] to reach [amount] by [date]". Amount is a whole number of at least 1 Ar; date must be in the future and is shown with the Madagascar time zone. Saving shows the goal on the wallet card and detail (WAL-02, WAL-03): `7 500 / 10 000 Ar`, a bar, the percent, the amount left and the date.
 2. Business rule, one goal. A wallet has at most one goal. It is the same record whether created at wallet creation, in WAL-04 or here. Editing it creates a new version and keeps history.
 3. Business rule, progress. Progress counts the wallet's Available balance toward the goal (WAL-03 AC3). The screen also shows the average amount still needed per week until the date, computed from the numbers, as plain information and not as a promise.
-4. Business rule, reached. When Available first reaches or passes the amount, the system sends `msg.rul.goal_reached` once (in-app and push), shows the chip "Goal reached" and keeps the goal on the wallet. If the balance falls below and rises again, the alert is not repeated unless the person raised the goal.
-5. Business rule, behind schedule. At `GOAL_CHECK_DAY`, if the balance is behind the straight-line pace toward the date, the system sends `msg.rul.goal_behind` as a Low item (in-app and digest, no push, no SMS). Behind means below the linear target for that day; the rule is stated in one sentence in the detail ("You planned 10 000 Ar by 31 Dec").
+4. Business rule, reached. When Available first reaches or passes the amount, the system sends `msg.rul.goal_reached` once (in-app and push, to the wallet owner and, on a group wallet, to every member with Wallet: view balance), shows the chip "Goal reached" and keeps the goal on the wallet. If the balance falls below and rises again, the alert is not repeated unless the person raised the goal.
+5. Business rule, behind schedule. At `GOAL_CHECK_DAY`, if the balance is behind the straight-line pace toward the date, the system sends `msg.rul.goal_behind` as a Low item (in-app and digest, no push, no SMS) to the wallet owner and, on a group wallet, to holders of Wallet: edit rules, who can act on it. Behind means below the linear target for that day; the rule is stated in one sentence in the detail ("You planned 10 000 Ar by 31 Dec").
 6. Business rule, date passed. After the target date without reaching the amount, the goal shows "Target date passed" and the person can extend the date or change the amount; no money moves and no fee or penalty applies.
 7. Business rule, removal. Removing the goal (here or in WAL-04) asks the person to agree, ends the goal's alerts and keeps past progress in history.
 8. States. Empty: wallet without a goal shows "Set a goal". Offline: progress reads from cache with "Updated hh:mm"; saving is disabled. A failed refresh keeps the last figures.
@@ -398,9 +415,9 @@ Only the share template moves money. The other three read the ledger and send al
 10. Accessibility and language. The bar has a text alternative with the numbers; dates are written in words in the person's language; nothing is shown by colour alone.
 
 **Data:** Wallet rule (goal, write), Wallet (read), Ledger entry (read, balance), Rule firing (write), Notification (write), Audit entry (write).
-**Depends on:** RUL-02, RUL-08, RUL-12, WAL-01, WAL-03, WAL-04, NTF-14.
+**Depends on:** RUL-02, RUL-08, RUL-12, WAL-01, WAL-03, WAL-04, NTF-04, NTF-14.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Does a goal on a group wallet notify all members or only holders (the catalogue says group members for goal reached)? Should a goal also protect the amount from spending (default: no, see WAL-03 open questions)? Which pace (linear or a stated deposit schedule) defines "behind"?
+**Open questions:** Closed: on a group wallet, goal reached goes to every member with Wallet: view balance (a shared success, as the catalogue says) and goal behind goes to holders of Wallet: edit rules only; the NTF catalogue row EV-RUL-05 must add them. Closed: a goal does not protect the amount from spending (WAL-03). Closed: "behind" means below the straight-line pace between the start and the target date; a stated deposit schedule is a later template because it needs a new input and the MVP has four templates.
 
 ---
 
@@ -410,12 +427,12 @@ Only the share template moves money. The other three read the ledger and send al
 **Priority:** P2
 **Release:** MVP
 **Actor:** Individual, Permission holder
-**Permission needed:** none for own wallets; `edit rules` for a group wallet
+**Permission needed:** none for own wallets; Wallet: edit rules for a group wallet
 **Tags:** audit, offline
 
 **Story:** As a wallet owner, I want to choose a balance level and be alerted when the wallet falls below it, so that I can add money before a bill or a payout fails.
 
-**Conversation:** A low-balance or threshold alert is one of the four launch templates (02 personal finance, Takeaways item 2). Gereo does not guess a level, because a default threshold would be wrong for most wallets, so no low state exists without the person's rule (WAL-19 conversation). The chip "Low balance" on the wallet card is driven by this rule (WAL-19 AC3). For group wallets the alert goes to holders of `edit rules` so that it reaches someone who can act (EV-RUL-03).
+**Conversation:** A low-balance or threshold alert is one of the four launch templates (02 personal finance, Takeaways item 2). Gereo does not guess a level, because a default threshold would be wrong for most wallets, so no low state exists without the person's rule (WAL-19 conversation). The chip "Low balance" on the wallet card is driven by this rule (WAL-19 AC3). For group wallets the alert goes to holders of Wallet: edit rules so that it reaches someone who can act (EV-RUL-03).
 
 **Preconditions:** The wallet is open and has no low-balance rule yet (RUL-02).
 **Trigger:** The person saves the rule; the System later sees Available cross below the level.
@@ -424,7 +441,7 @@ Only the share template moves money. The other three read the ledger and send al
 1. Happy path. The sentence reads "When [wallet] falls below [amount], alert me". Amount is a whole number of at least 1 Ar. After saving the card shows "Alert below 50 000 Ar" and the current Available.
 2. Business rule, crossing. The alert is sent when Available moves from at or above the level to below it, not on every posting while it stays below. It is re-armed when Available is again at or above the level. A newly saved rule on a wallet already below the level shows the chip at once and sends one alert, so the person is not left unaware.
 3. Business rule, what moves it. Any posted entry can cause the crossing: a withdrawal, a payment out, a share made by another rule, a reversal. The check runs after each posting, including the postings of RUL-07.
-4. Business rule, notification. The alert is `msg.rul.low_balance` (in-app and push, no SMS), with the balance and the level in the text and a button "Add money" that opens WAL-06. For a group wallet it goes to holders of `edit rules`.
+4. Business rule, notification. The alert is `msg.rul.low_balance` (in-app and push, no SMS), with the balance and the level in the text and a button "Add money" that opens WAL-06. For a group wallet it goes to holders of Wallet: edit rules.
 5. Business rule, state on the wallet. While Available is below the level, the wallet card and detail show the chip "Low balance" and the line "Below 50 000 Ar" (WAL-19); the chip clears at or above the level. A balance of exactly the level is not low.
 6. Business rule, pending money. Only posted Available counts. Money On its way in is not counted and money On its way out is already deducted (WAL-03 AC1), so the alert does not wait for the provider.
 7. States. Offline: the state reads from cache with "Updated hh:mm"; saving is disabled. A failed refresh keeps the last figure.
@@ -434,7 +451,7 @@ Only the share template moves money. The other three read the ledger and send al
 **Data:** Wallet rule (write), Ledger entry (read), Rule firing (write), Notification (write), Audit entry (write).
 **Depends on:** RUL-02, RUL-07, RUL-08, RUL-12, WAL-03, WAL-19, WAL-06.
 **Pages:** to be filled from the information architecture.
-**Open questions:** May a wallet have several alert levels (default: one)? Should a repeated alert be sent after a number of days still below (default: no, one alert per crossing)?
+**Open questions:** Closed: one alert level per wallet, as RUL-02 AC3 blocks a second low-balance rule. Closed: one alert per crossing and no repeat while below the level, because repeated alerts teach people to ignore them; the chip stays visible meanwhile (WAL-19).
 
 ---
 
@@ -444,7 +461,7 @@ Only the share template moves money. The other three read the ledger and send al
 **Priority:** P0
 **Release:** MVP
 **Actor:** Individual, Member, Permission holder
-**Permission needed:** none for own wallets; `view history` for a group wallet
+**Permission needed:** none for own wallets; Wallet: view history for a group wallet
 **Tags:** ledger, audit, offline
 
 **Story:** When money has moved or an alert has come, I want to see which rule did it, with its name, and when a rule did not run, why, so that I can always explain where my money went.
@@ -457,18 +474,20 @@ Only the share template moves money. The other three read the ledger and send al
 **Acceptance criteria:**
 1. Happy path. The history is a list of firings, newest first, `RULE_HISTORY_PAGE_SIZE` at a time. Each row shows: time, rule name, the income or event that triggered it, the outcome chip (Moved, Alert sent, Skipped) with icon and word, and for a move the amount and destination ("20 000 Ar to Savings by rule Share income").
 2. Business rule, ledger. Every Moved row links to the ledger entries it wrote (WAL-14, via the shared reference ID) and every ledger entry made by a rule shows "Why: 20% to Savings by rule Share income" with a link back to the firing and to the rule. A deleted rule keeps its name followed by "(deleted)" (WAL-14 AC3).
-3. Business rule, skipped runs. A Skipped row states the reason in plain words and says that no money moved and where the income is: "Not moved. [Destination] is closed. Your 100 000 Ar stayed in Main." (keys `rul.history.skipped.*`). Reason codes are: `destination_closed`, `destination_frozen`, `cycle_prevented`, `percent_over_100`, `rule_stopped`, `amount_zero`, `ledger_error`.
+3. Business rule, skipped runs. A Skipped row states the reason in plain words and says that no money moved and where the income is: "Not moved. [Destination] is closed. Your 100 000 Ar stayed in Main." (keys `rul.history.skipped.*`). Reason codes are: `destination_closed`, `destination_held` (operator hold, "Held by Gereo"), `wallet_held`, `cycle_prevented`, `chain_too_long`, `percent_over_100`, `rule_stopped`, `amount_zero`, `ledger_error`. A wallet frozen by Wallet: freeze is not a reason: shares still run (RUL-07 AC4).
 4. Business rule, no hidden skip. Every run the engine decides not to do for a reason in the list above is recorded. A run that is not due (paused rule, income before the rule existed, income not counted as income) is not a skip and is not a row; the rule detail explains these in one sentence.
 5. Business rule, alerts. Cap reached, goal reached, goal behind and low-balance alerts appear as "Alert sent" rows with the figures that caused them. They write no ledger entry.
-6. Business rule, incomes. Under an income, "Rules on this income" lists each outcome in order (WAL-14 AC3), including shares that stayed because the total was under 100 percent ("70 percent stayed in Main").
+6. Business rule, incomes. Under an income, "Rules on this income" lists each outcome in order and hop by hop (WAL-14 AC3), including the Rounding line to Gereo when there is one ("1 Ar rounding to Gereo") and shares that stayed because the total was under 100 percent ("70 percent stayed in Main").
 7. Filters. By rule, by outcome (Moved, Alert sent, Skipped), by date. Each rule's own page shows its history only. A link "See in history" applies the "Made by a rule" filter of WAL-15.
-8. Permission and privacy. On a group wallet the history is visible to members with `view history`; phone numbers are masked as in the ledger. Without it the person sees `rul.history.not_permitted` naming the permission.
-9. States. Empty: "No rule has run yet. When income arrives, you will see it here." Loading: skeleton. Offline: cached rows with "Updated hh:mm". A skipped run raises `msg.rul.skipped` (in-app and push, EV-RUL-06) to the wallet owner and, for group wallets, to holders of `edit rules`, one per skipped run, batched under NTF-08 when many; no SMS.
+8. Permission and privacy. On a group wallet the history is visible to members with Wallet: view history; phone numbers are masked as in the ledger. Without it the person sees `rul.history.not_permitted` naming the permission.
+9. States. Empty: "No rule has run yet. When income arrives, you will see it here." Loading: skeleton. Offline: cached rows with "Updated hh:mm". A skipped run on a personal wallet raises `msg.rul.skipped` (in-app and push, EV-RUL-06) to the owner, one per skipped run, batched under NTF-08 when many, with no SMS because no money was lost. A skipped share on a group wallet is a failed split run and notifies holders of Wallet: edit rules with `msg.con.split_failed` (CON-15, with its SMS fallback under NTF-05), not with `msg.rul.skipped`, so nobody gets two messages for one skip.
 
-**Data:** Rule firing (read), Ledger entry (read), Wallet rule (read, name and version), Transaction (read).
+10. Business rule, run again. On a Skipped row for `destination_closed`, `destination_held` or a transient `ledger_error`, a personal-wallet owner can tap "Run again" once the cause is fixed. The re-run covers only the shares that did not complete, uses the rule version in force when the income arrived and the percent of the original credit, is online only, and is idempotent: a share already written is refused with "Already shared" (the same behaviour as CON-15 AC4 and AC6, which owns the group version). The row then reads "Moved after re-run" and an audit entry `rule.rerun` is written with actor and time.
+
+**Data:** Rule firing (read, write on re-run), Ledger entry (read, write on re-run), Wallet rule (read, name and version), Transaction (read), Audit entry (write on re-run).
 **Depends on:** RUL-07, WAL-14, WAL-15, NTF-01, NTF-08, CON-15.
 **Pages:** to be filled from the information architecture.
-**Open questions:** `RULE_HISTORY_RETENTION`. Is a retry-then-skip shown as one row or as each attempt? Should a skipped run for a closed destination offer a "Run again" button on personal wallets as CON-15 does for groups (default: yes, with the original rule version)?
+**Open questions:** Closed: firing records are kept for `RECORD_RETENTION_YEARS` (shared definitions). Closed: a retry that ends in a skip is one row with the number of attempts in its detail, not one row per attempt, so the list stays readable. Closed: "Run again" is offered on personal wallets (AC10).
 
 ---
 
@@ -478,31 +497,31 @@ Only the share template moves money. The other three read the ledger and send al
 **Priority:** P0
 **Release:** MVP
 **Actor:** Permission holder, Group founder, Member
-**Permission needed:** `edit rules` (Wallet) to create, change, pause, resume or delete any rule on a group wallet; `view balance` to read them
+**Permission needed:** Wallet: edit rules to create, change, pause, resume or delete any rule on a group wallet; Wallet: view balance to read them
 **Tags:** audit, ledger
 
 **Story:** As a group member, I want only people who hold the right permission to change the rules on the group's wallet, and every change to be visible and recorded, so that nobody can quietly change where the group's money goes.
 
-**Conversation:** `edit rules` is one of the eight wallet permissions (conventions section 7) and "Treasurer" is only a bundle (conventions section 2; GRP-07, GRP-08). The group rules that split income are defined in CON-11 (define), CON-12 (preview), CON-13 (change, pause, end and the vote gate) and CON-14 (execution) and this story references them and does not duplicate them. Cap, goal and low-balance rules on a group wallet are not split rules and have no vote gate in CON, so this story fixes who edits them and when the group's vote setting applies (info.md: an important change may need a vote). A vote linked to a rule change is in VOT; the competitive analysis lists automatic vote-triggered rule changes as out of v1, so the first version gates the save behind a vote the person starts (CON-13 open questions; competitive analysis section 7).
+**Conversation:** Wallet: edit rules is a wallet permission (conventions section 7) and "Treasurer" is only a bundle (conventions section 2; GRP-07, GRP-08). GRP-08 treats it as a money-out permission, so granting it asks for the grantor's PIN, because a rule can move group money between the group's wallets without a request at each firing (GRP-13 AC4). The group rules that split income are defined in CON-11 (define), CON-12 (preview), CON-13 (change, pause, end and the vote gate) and CON-14 (execution) and this story references them and does not duplicate them. Cap, goal and low-balance rules on a group wallet are not split rules and have no vote gate in CON, so this story fixes who edits them and when the group's vote setting applies (info.md: an important change may need a vote). A vote linked to a rule change is VOT-01 opened with a proposal reference; the competitive analysis lists automatic vote-triggered rule changes as out of v1, so the first version gates the save behind a vote the person starts (CON-13 open questions; competitive analysis section 7).
 
 **Preconditions:** The wallet belongs to a group. The person is a member.
 **Trigger:** The person opens the rules of a group wallet (RUL-01), or a holder saves, pauses, resumes or deletes a rule.
 
 **Acceptance criteria:**
-1. Happy path. A holder of `edit rules` can create, change, pause, resume and delete the rules of the group wallet using the screens of RUL-02, RUL-03, RUL-08, RUL-09, RUL-10 and RUL-11. Share rules on a group wallet are defined and executed as in CON-11 to CON-14; this story only adds the permission and audit rules that follow.
-2. Business rule, permission check. The permission is checked on the server on every action. Revoking `edit rules` (GRP-08) removes the buttons at the next load and rejects any action in progress with `err.wal.permission_missing`.
-3. Business rule, read-only. A member with `view balance` but not `edit rules` sees every rule and its state in words, read-only, and the name of a person who holds the permission (RUL-01 AC5). A member without `view balance` sees only that the wallet has rules and the missing permission.
-4. Business rule, vote gate. Where the group requires a vote for rule changes (CON-13, setting `split_change_requires_vote`), a save that applies to share rules creates a proposal (VOT) and the old version stays active until it passes. Whether the same gate also applies to cap, goal and low-balance rules is a group setting, not decided here (open question; default: no, because they move no money).
-5. Business rule, no single hand. A rule that moves money to another group wallet is within the group (CON-11 AC5). A rule that would send group money to a person's personal wallet is not available in the MVP, so the approvals of GRP-13 are never bypassed by a rule.
-6. Notification. A saved change to a rule on a group wallet notifies members with `view history` with `msg.rul.group_changed` (in-app and push, EV-RUL-07), stating the rule, what changed and the effective time. For split rules the CON event (`msg.con.split_changed`, EV-CON-13) is used and the two are not both sent for the same change.
-7. Business rule, history. Every firing and every skipped run is visible to members with `view history` (RUL-12). The audit trail of rule changes is visible to the holders of `view permissions` in the group audit (GRP-11).
+1. Happy path. A holder of Wallet: edit rules can create, change, pause, resume and delete the rules of the group wallet using the screens of RUL-02, RUL-03, RUL-08, RUL-09, RUL-10 and RUL-11. Share rules on a group wallet are defined and executed as in CON-11 to CON-14; this story only adds the permission and audit rules that follow.
+2. Business rule, permission check. The permission is checked on the server on every action. Revoking Wallet: edit rules (GRP-08) removes the buttons at the next load and rejects any action in progress with `err.wal.permission_missing`.
+3. Business rule, read-only. A member with Wallet: view balance but not Wallet: edit rules sees every rule and its state in words, read-only, and the name of a person who holds the permission (RUL-01 AC5). A member without Wallet: view balance sees only that the wallet has rules and the missing permission.
+4. Business rule, vote gate. Where the group requires a vote for rule changes (CON-13, setting `split_change_requires_vote`), a save that changes a share rule creates a proposal that follows the decision gate of the CON shared definitions: the change is stored as a snapshot, the vote of VOT-01 and VOT-02 needs at least two distinct voters other than the proposer (the floor of decision D4), a passed vote (VOT-09) lets a holder of Wallet: edit rules apply exactly the stored snapshot within `change_apply_window_days`, the decision is logged (VOT-13), and the old version stays active until then. A group with fewer than three members cannot meet that floor, so its change applies directly and the audit entry says "No vote possible: fewer than three members". Cap, goal and low-balance rules are not gated: they move no money.
+5. Business rule, no single hand. A rule that moves money to another wallet of the same group is within the group and is authorised once, when a holder of Wallet: edit rules saves it, including its vote gate (GRP-13 AC4, CON-11 AC5). A rule that would send group money to a personal wallet or to anyone outside the group is not available in the MVP, so the approvals and votes of GRP-13 are never bypassed by a rule. The rounding line to Gereo needs no approval (GRP-13 AC4, D5).
+6. Notification. A saved change to a rule on a group wallet notifies members with Wallet: view balance (those who can read rules, as CON-13 AC6) with `msg.rul.group_changed` (in-app and push, EV-RUL-07), stating the rule, what changed and the effective time. For share rules the CON event (`msg.con.split_changed`, EV-CON-13) is used instead and the two are never both sent for the same change; `msg.rul.group_changed` covers only cap, goal and low-balance changes.
+7. Business rule, history. Every firing and every skipped run is visible to members with Wallet: view history (RUL-12). The audit trail of rule changes is visible to holders of Group: view audit log in the group audit log (GRP-11).
 8. States. Offline: read-only from cache with "Updated hh:mm"; every change action is disabled. A concurrent save by another holder follows RUL-08 AC8.
 9. Audit. Each create, edit, pause, resume, delete writes the audit entries of RUL-03 and RUL-08 with the actor, the permission used, the rule version, the linked vote when one exists, and time. Rule changes appear in the group audit log (GRP-11).
 
 **Data:** Wallet rule (write), Permission (read), Vote and Decision (link), Audit entry (write), Notification (write).
-**Depends on:** RUL-01, RUL-03, RUL-08, GRP-07, GRP-08, GRP-11, GRP-13, GRP-15, CON-11, CON-12, CON-13, CON-14, VOT, NTF-01.
+**Depends on:** RUL-01, RUL-03, RUL-08, GRP-07, GRP-08, GRP-11, GRP-13, GRP-15, CON-11, CON-12, CON-13, CON-14, VOT-01, VOT-02, VOT-09, VOT-13, NTF-01.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Does the vote gate cover cap, goal and low-balance rules (default: no)? May a rule send group money to members' personal wallets later, and under which approvals? Does the group founder always keep `edit rules` (GRP-14 lock-out rules)?
+**Open questions:** Closed: the vote gate covers share rules only, because cap, goal and low-balance rules move no money. Closed: a rule never sends group money to members' personal wallets in the MVP; if it is wanted later it needs the same authorisation as a payout (GRP-13), so it is a new story, not a setting. Closed: the founder holds Wallet: edit rules like any other holder and can lose it by revocation (GRP-08); no lock-out follows, because Wallet: edit rules is not in the continuity-critical list of GRP-14 and rules already saved keep running until a holder changes them.
 
 ---
 
@@ -510,19 +529,19 @@ Only the share template moves money. The other three read the ledger and send al
 
 | ID | Title | Priority | Depends on |
 | --- | --- | --- | --- |
-| RUL-01 | See the rules on a wallet and whether they are working | P0 | WAL-01, WAL-03, GRP-06 |
-| RUL-02 | Choose one of four ready-made rules | P0 | RUL-01, WAL-01, ACC-07, GRP-08 |
-| RUL-03 | Build a share rule as one sentence | P0 | RUL-02, RUL-04, RUL-06, WAL-12, CON-11, GRP-15 |
-| RUL-04 | See what a rule would have done with my real recent incomes | P0 | RUL-03, RUL-07, WAL-15, CON-12 |
+| RUL-01 | See the rules on a wallet and whether they are working | P0 | WAL-01, WAL-03, WAL-05, GRP-06 |
+| RUL-02 | Choose one of four ready-made rules | P0 | RUL-01, RUL-13, WAL-01, ACC-07, GRP-08 |
+| RUL-03 | Build a share rule as one sentence | P0 | RUL-02, RUL-04, RUL-06, RUL-07, RUL-13, WAL-12, CON-11, GRP-15, ACC-13 |
+| RUL-04 | See what a rule would have done with my real recent incomes | P0 | RUL-03, RUL-06, RUL-07, WAL-15, CON-12 |
 | RUL-05 | See everything that happens when money arrives, in one place | P0 | RUL-01, RUL-03, RUL-07, CON-11, CON-12 |
-| RUL-06 | Stop a rule that would send money in a circle | P0 | RUL-03, RUL-07, RUL-12, CON-11, GRP-15 |
-| RUL-07 | Apply my rules automatically when income arrives | P0 | WAL-07, WAL-13, WAL-12, WAL-18, RUL-03, RUL-06, RUL-12, CON-14, NTF-08 |
-| RUL-08 | Pause, resume, edit or delete a rule, for future income only | P1 | RUL-01, RUL-03, RUL-04, RUL-06, RUL-13, WAL-04, WAL-05, CON-13 |
-| RUL-09 | Set a spending cap and be alerted when it is reached | P1 | RUL-02, RUL-08, RUL-12, WAL-03, WAL-10, WAL-12, WAL-13, SPD, NTF-04 |
-| RUL-10 | Set a goal with a target date and follow it | P1 | RUL-02, RUL-08, RUL-12, WAL-01, WAL-03, WAL-04, NTF-14 |
-| RUL-11 | Be told when a wallet falls below a level I chose | P2 | RUL-02, RUL-07, RUL-08, RUL-12, WAL-03, WAL-19, WAL-06 |
+| RUL-06 | Stop a rule that would send money in a circle | P0 | RUL-03, RUL-07, RUL-12, CON-11, CON-14, GRP-15 |
+| RUL-07 | Apply my rules automatically when income arrives | P0 | WAL-06, WAL-07, WAL-11, WAL-12, WAL-13, WAL-18, RUL-03, RUL-06, RUL-09 to RUL-12, CON-04, CON-14, CON-15, NTF-08, ACC-13, SPD-15 |
+| RUL-08 | Pause, resume, edit or delete a rule, for future income only | P1 | RUL-01, RUL-03, RUL-04, RUL-06, RUL-13, WAL-04, WAL-05, WAL-14, CON-13, VOT-01 |
+| RUL-09 | Set a spending cap and be alerted when it is reached | P1 | RUL-02, RUL-08, RUL-12, WAL-03, WAL-10, WAL-11, WAL-12, WAL-13, WAL-18, SPD-10, SPD-14, NTF-04 |
+| RUL-10 | Set a goal with a target date and follow it | P1 | RUL-02, RUL-08, RUL-12, WAL-01, WAL-03, WAL-04, NTF-04, NTF-14 |
+| RUL-11 | Be told when a wallet falls below a level I chose | P2 | RUL-02, RUL-07, RUL-08, RUL-12, WAL-03, WAL-06, WAL-19 |
 | RUL-12 | See every time a rule ran, and every time it did not | P0 | RUL-07, WAL-14, WAL-15, NTF-01, NTF-08, CON-15 |
-| RUL-13 | Who may change rules on a group wallet, and how it ties to group split rules | P0 | RUL-01, RUL-03, RUL-08, GRP-07, GRP-08, GRP-11, GRP-13, CON-11 to CON-14, VOT |
+| RUL-13 | Who may change rules on a group wallet, and how it ties to group split rules | P0 | RUL-01, RUL-03, RUL-08, GRP-07, GRP-08, GRP-11, GRP-13, GRP-15, CON-11 to CON-14, VOT-01, VOT-02, VOT-09, VOT-13, NTF-01 |
 
 Totals: 13 stories. 9 P0 (RUL-01 to RUL-07, RUL-12, RUL-13), 3 P1 (RUL-08, RUL-09, RUL-10), 1 P2 (RUL-11).
 
@@ -530,28 +549,31 @@ Story IDs match the references already made by WAL: RUL-01 (rules line, WAL-03),
 
 ## Cross-epic dependencies
 
-- **WAL.** WAL-07 and WAL-13 post the incomes the engine reads (RUL-07). WAL-12 manual moves are not income and do not count as spending (RUL-07, RUL-09). WAL-18 reversals reduce a spent total and reverse rule entries (RUL-07, RUL-09). WAL-03 reads the cap for Safe to spend and links the rules line. WAL-04 edits the same goal record (RUL-10). WAL-05 stops rules and pauses rules that send to a closed wallet (RUL-08, RUL-12). WAL-10 shows the cap line on the review sheet (RUL-09). WAL-14 shows the "Why" line and WAL-15 filters "Made by a rule" (RUL-12). WAL-19 uses the low-balance rule for the Low chip (RUL-11). WAL-06 is the "Add money" button of the alert.
-- **ACC.** ACC-07 tier ladder: rules need only Tier 1, because rules move money only inside Gereo (RUL-02). ACC-02 and ACC-03 for sign-in.
-- **GRP.** GRP-07 and GRP-08 (the `edit rules` permission as a bundle item, grant and revoke), GRP-11 (audit log of group-level actions), GRP-13 (no single person moves the group's money, never bypassed by a rule), GRP-15 (wallets within a group as destinations), GRP-06 (home counters), GRP-14 (founder lock-out).
-- **CON.** CON-11 to CON-14 define group split rules and their execution and are the reference for the group version of RUL-03, RUL-04, RUL-05, RUL-07 and RUL-08; CON-15 handles failed split runs and the re-run; CON-04 contributions are not income by default. The same value must be used for `split_max_destinations` and `SHARE_MAX_DESTINATIONS`, and for `split_chain_depth_max` and `RULE_CHAIN_DEPTH_MAX`.
+- **WAL.** WAL-07, WAL-12 and WAL-13 post the credits the engine reads, all of which are income (D3, RUL-07). WAL-12 manual moves out of a wallet are not spending (RUL-09). WAL-18 reversals reduce a spent total and reverse rule entries down the chain (RUL-07, RUL-09). WAL-03 reads the cap for Safe to spend and links the rules line. WAL-04 edits the same goal record (RUL-10). WAL-05 stops rules and sets rules that send to a closed wallet to Needs attention (RUL-08, RUL-12). WAL-10 shows the cap line on the review sheet (RUL-09). WAL-14 shows the "Why" line and WAL-15 filters "Made by a rule" (RUL-12). WAL-19 uses the low-balance rule for the Low chip (RUL-11). WAL-06 is the "Add money" button of the alert.
+- **ACC.** ACC-07 tier ladder: rules need only Tier 1, because rules move money only inside Gereo (RUL-02). ACC-13 terms disclose the Rounding line to Gereo (RUL-03, RUL-07). ACC-02 and ACC-03 for sign-in.
+- **GRP.** GRP-07 and GRP-08 (Wallet: edit rules as a money-out permission, grant and revoke), GRP-11 (group audit log, read with Group: view audit log), GRP-13 (no single person moves the group's money; AC4 authorises a rule once at save), GRP-15 (wallets within a group as destinations), GRP-06 (home counters), GRP-14 (founder and continuity).
+- **CON.** CON-11 to CON-14 define group split rules, the decision gate and their execution and are the reference for the group version of RUL-03, RUL-04, RUL-05, RUL-07 and RUL-08; CON-15 handles failed split runs and the re-run; CON-04 contributions are income (D3). The values of `split_max_destinations` and `split_chain_depth_max` are the values of `SHARE_MAX_DESTINATIONS` and `RULE_CHAIN_DEPTH_MAX`, set here.
 - **NTF.** Event rows EV-RUL-01 to EV-RUL-07 (keys `msg.rul.*`), batching of firing items (NTF-08), centre (NTF-01), preferences (NTF-04), digest of the behind-schedule item (NTF-14). RUL needs no new SMS template and no new window parameter.
-- **SPD.** Group payouts count as spending toward a cap (RUL-09).
-- **VOT.** The vote that gates a group rule change (RUL-13 and CON-13).
-- **OPS.** Operators need to see stuck or repeated skipped runs (CON-15 AC7 for splits; the same view for RUL-12).
+- **SPD.** SPD-10 payouts count as spending toward a cap (RUL-09). SPD-14 owns enforcement of a cap on a group wallet (`spend_cap_mode`). SPD-15 freeze does not stop shares between wallets of the same group (RUL-07 AC4).
+- **VOT.** VOT-01, VOT-02, VOT-09 and VOT-13 carry the vote that gates a group share-rule change (RUL-13, CON-13).
+- **OPS.** Operators need to see stuck or repeated skipped runs (CON-15 AC7 for splits; the same view for RUL-12); OPS-05 handles a reversal that cannot unwind a chain.
 - **XCT.** XCT-04 (offline read) and the three-language sentence order for the rule builder.
 
 ## Open questions
 
-1. **What counts as income (default in RUL-07 AC1).** Confirmed money from outside the owner: mobile money deposits, transfers received from another person or group, and group deposits classified as Income. Excluded: own-wallet moves, rule-made entries, contributions (unless enabled), fees, refunds. Alternatives: the person tags each deposit, or a per-wallet setting. To confirm with CON-14 and WAL-06, which hold the same open question.
-2. **Rounding (default in RUL-07 AC4).** Each share rounded down to a whole ariary and the leftover stays in the wallet, as in CON-12 and CON-14. Alternative: largest-remainder across destinations (07 UI/UX 8.1 R-G3). One rule only, agreed with CON and WAL so that the preview and the ledger match to the ariary.
-3. **Fees on income.** Are provider fees taken off an income before the percentage is calculated (also CON-14)? Depends on who pays the fee (WAL-06 open question).
-4. **Percent precision and fixed amounts.** Whole percents only (default) or decimals; whether "move 5 000 Ar" is a template later (RUL-03).
-5. **Destinations.** May a personal rule send to a group wallet or to another Gereo user? May a group rule send to members' personal wallets (needs GRP-13 approvals and wallet limits)? Default: neither in the MVP.
-6. **Limits.** Values of `RULE_MAX_PER_WALLET`, `SHARE_MAX_DESTINATIONS`, `RULE_CHAIN_DEPTH_MAX`, `PREVIEW_INCOME_COUNT`, `PREVIEW_LOOKBACK`, `RULE_NAME_MAX`.
-7. **Spending cap definition.** Periods offered, month start, whether an early warning is wanted (`CAP_WARNING_PERCENT`), and what counts as spending (RUL-09).
-8. **Goal pace.** What "behind schedule" means (linear pace is the default), the check day, and who is told on a group wallet (RUL-10).
-9. **Vote gate scope.** Does a group's "important change needs a vote" setting cover cap, goal and low-balance rules or only share rules (RUL-13; default: share rules only)? Does pause need a vote (default: no)?
-10. **Permission names.** `edit rules` is a Wallet permission. Confirm that it also covers the goal on a group wallet (WAL-04 uses it as a stand-in).
-11. **Reversal of income.** When an income is reversed (WAL-18), do the rule entries reverse automatically (default: yes) and who is told?
-12. **Failure plan.** When a destination is closed or frozen, should a share wait and run when the destination is back, or be skipped for good (default: skipped, with a "Run again" on the original rule version, RUL-12)?
-13. **Evidence gaps.** No competitor documents a preview or a skipped-run history (08 competitor UX 6.5 [U]); both are hypotheses to test in the field. How many rules a Malagasy user can read in the combined summary before it stops helping is unknown.
+Closed in the stories above and summarised here. Closed items carry the decision; the last two need an outside party.
+
+1. **Closed: what counts as income.** Every Confirmed credit into a wallet, whatever its source (decision D3, RUL-07 AC1). Not income: reversals and refunds, Fee lines, Rounding lines, anything not Confirmed. No tagging by hand and no per-wallet setting.
+2. **Closed: rounding.** Each share is rounded down per destination and the leftover goes to Gereo as a visible Rounding line, shown on the receipt and disclosed in the terms (decision D5, RUL-07 AC3). Not largest-remainder and not back to the wallet.
+3. **Closed: fees on income.** Provider fees are never taken off before the percent; the wallet is credited the net amount and the fee is its own line (CON-14 AC1).
+4. **Closed: percent precision and fixed amounts.** Whole percents only; no fixed-amount share in the MVP (RUL-03).
+5. **Closed: destinations.** A personal rule sends only to another wallet of the same owner; a group rule only to another wallet of the same group; never to another person or to a member's personal wallet in the MVP, because those moves need the approvals of GRP-13 (RUL-03 AC4, RUL-13 AC5).
+6. **Closed: limits.** `RULE_MAX_PER_WALLET` 10, `RULE_NAME_MAX` 40, `SHARE_MAX_DESTINATIONS` 5, `RULE_CHAIN_DEPTH_MAX` 3, `PREVIEW_INCOME_COUNT` 3, `PREVIEW_LOOKBACK` 90 days. Field interviews may tune them; nothing waits on them.
+7. **Closed: spending cap definition.** Week and month, a month from the 1st, early warning at 80 percent, only Confirmed money-out counts, rule-made lines do not (RUL-09). Enforcement on a group wallet belongs to SPD-14.
+8. **Closed: goal pace.** Linear pace, checked at `GOAL_CHECK_DAY`; goal reached goes to every member who can view the balance, goal behind to holders of Wallet: edit rules (RUL-10).
+9. **Closed: vote gate scope.** Share rules only; pause, resume and delete are not gated (RUL-08 AC7, RUL-13 AC4).
+10. **Closed: permission names.** Wallet: edit rules is the permission for every rule, including the goal on a group wallet (WAL-04). Reading rules needs Wallet: view balance; firing history needs Wallet: view history; the audit trail needs Group: view audit log.
+11. **Closed: reversal of income.** Rule entries reverse automatically down the chain, last hop first, with a reason; the Rounding line reverses too (CON-14 AC8).
+12. **Closed: failure plan.** A share whose destination is closed or held is skipped, not queued, and the owner can "Run again" on the original rule version (RUL-12 AC10; CON-15 for groups).
+13. **Open, external (field research): evidence gaps.** No competitor documents a preview or a skipped-run history (08 competitor UX 6.5 [U]); both are hypotheses to test in field interviews. How many rules a Malagasy user can read in the combined summary before it stops helping is unknown. Default used: the four templates, the limits above and the summary as written.
+14. **Open, external (lawyer): the Rounding line to Gereo.** That the rounding amount credited to Gereo is lawful platform income, and the wording in the terms (ACC-13). Default used: the line exists, always under 1 Ar per destination, visible on the receipt.

@@ -33,8 +33,7 @@ No number below is a product decision. Each is a group or system setting with a 
 | `spend_approvals_default` | Approvals needed below the multi-approval threshold | 1, never below 1, never counting the requester (floor, see SPD-02) |
 | `spend_multi_threshold` | Amount at or above which more approvals are needed | Open |
 | `spend_approvals_multi` | Number of approvals at or above that amount | Open (2 or more) |
-| `spend_vote_threshold` | Amount at or above which a vote is required before approvals | Open (no vote required) |
-| `self_approval_allowed` | The requester may approve their own request | Off (see SPD-08) |
+| `spend_vote_threshold` | Amount at or above which a vote is required. A passed vote is the authorisation and replaces approvals (decision D4) | Open (no vote required) |
 | `receipt_required_above` | Amount above which a receipt or quote is mandatory | Open |
 | `attachment_max_size`, `attachment_types` | Limits for attachments | Open |
 | `duplicate_window` | Time within which a same payee and amount raises a warning | Open |
@@ -111,8 +110,8 @@ Expense, Fee and Reversal rows, each with the request reference, the approvers a
 **Trigger:** The form opens or the amount changes.
 
 **Acceptance criteria:**
-1. A policy panel states in one or two sentences, using the live amount: how many approvals are needed, that approvers must hold the approve spend permission and cannot be the requester (unless `self_approval_allowed`), whether a vote is required first, and the wallet's available balance (key `spd.policy.summary` with parameters).
-2. Tiers: below `spend_multi_threshold` the request needs `spend_approvals_default` approval; at or above it needs `spend_approvals_multi`; at or above `spend_vote_threshold` a vote must pass before approvals. Crossing a threshold while typing changes the text and highlights the change with a text note, not colour alone.
+1. A policy panel states in one or two sentences, using the live amount: how many approvals are needed, that approvers must hold the approve spend permission and and never the requester (decision D1), whether a vote is required instead of approvals (decision D4), and the wallet's available balance (key `spd.policy.summary` with parameters).
+2. Tiers: below `spend_multi_threshold` the request needs `spend_approvals_default` approval; at or above it needs `spend_approvals_multi`; at or above `spend_vote_threshold` a vote replaces approvals: the request goes to a vote and, if it passes, the payout starts. Crossing a threshold while typing changes the text and highlights the change with a text note, not colour alone.
 3. Floor: whatever the group sets, at least one approval from a person other than the requester is always needed. A group that never configured a policy gets exactly this floor. The floor can be raised, never lowered.
 4. The panel lists the eligible approvers (names and count). When fewer people can approve than the policy requires (for example the founder is alone), the panel says "You need [N] more people who can approve spending", the Send button is disabled, and a link opens how to ask the people who can grant permissions (GRP).
 5. For a project expense, the panel also states the project purchase approval needed (SPD-13), and the project budget remaining.
@@ -285,7 +284,7 @@ Expense, Fee and Reversal rows, each with the request reference, the approvers a
 1. Before the edit starts, the screen says: "Changing this request will cancel the [N] approvals it already has. Approvers will need to approve again." (key `spd.request.edit_warning`). The person must confirm to continue. A request with no approvals edits without this warning.
 2. Material fields are: source wallet, payee, amount, purpose, linked project or budget line, linked decision or vote, and removing or replacing an attachment. Changing any material field voids all approvals. Adding a note or an attachment does not (SPD-03).
 3. After saving a material change, the status returns to Awaiting approval (or Awaiting vote if the amount crosses a threshold, see SPD-09), the approval count shows "0 of N", and a "Changed" label states what changed (from and to values) on the detail and in the inbox.
-4. Approvers who had approved, and all approvers who can still approve, receive `spd.approval.voided` (push, SMS fallback if unread) with the changed fields. A vote already open for the request is notified and reset or restarted per VOT rules (SPD-09).
+4. Approvers who had approved, and all approvers who can still approve (or, on a money vote, the voters), receive `spd.approval.voided` (push, SMS fallback if unread) with the changed fields. A vote already open for the request is notified and reset or restarted per VOT rules (SPD-09).
 5. The policy is re-evaluated with the new amount (SPD-02). If the new amount needs a vote or more approvals, the requester sees this before saving.
 6. A request that was Approved and waiting for payout (held for a freeze, SPD-15, or a provider outage, SPD-11) is moved back to Awaiting approval by the edit; the reserved funds are released.
 7. Version history: each edit creates a new version. Approvals record the version they apply to. Old versions remain readable with who changed what and when, for approvers and permission holders.
@@ -317,10 +316,10 @@ Expense, Fee and Reversal rows, each with the request reference, the approvers a
 **Trigger:** The requester, the payee or an approver who already approved opens the request or tries to approve.
 
 **Acceptance criteria:**
-1. By default, the requester cannot approve their own request (`self_approval_allowed` off). The approve button is absent for them and a note says "You asked for this payment, so someone else must approve it" (key `spd.approval.self_blocked`). The rule is enforced on the server, not only on the screen.
+1. The requester can never approve their own request (decision D1, no setting exists to change it). The approve button is absent for them and a note says "You asked for this payment, so someone else must approve it" (key `spd.approval.self_blocked`). The rule is enforced on the server, not only on the screen.
 2. By default, a person who is the payee (for example a member reimbursed) cannot approve it either, with the same kind of note. A person who already approved cannot approve again.
 3. The policy counts only distinct eligible approvers. A group with only one person who can approve, and who is also the requester, sees on the form "You need another person who can approve spending" and cannot send (SPD-02). This is the intended friction: the founder starting alone must grant the permission to a second person.
-4. If a group sets `self_approval_allowed` on, the request shows "Approved by the person who asked" on the detail and in the ledger, and the setting change itself is audited and visible to all members. Open question below on whether that setting is allowed at all, or limited to small groups and small amounts.
+4. There is no setting that lets a requester approve their own request, in any group, at any amount. A group with one person who can approve is told on the form that a second approver is needed.
 5. Permission and relationship changes are re-checked at execution (SPD-10): an approver who lost the permission, left the group or became the payee since approving no longer counts, and the request returns to Awaiting approval with the missing count.
 6. The requester sees the list of eligible approvers and who has approved (names), so they know who to ask; they can send a nudge reminder to those who have not (maximum one per approver per `approval_reminder_after`) (key `spd.approval.nudge`).
 7. A permission holder cannot grant themselves the approve spend permission to unblock their own request: granting needs another person with grant permission (GRP) and is audited.
@@ -330,7 +329,7 @@ Expense, Fee and Reversal rows, each with the request reference, the approvers a
 **Data:** Expense request (read), Approval (read, write refusal), Membership (read), Permission (read), Audit entry (write).
 **Depends on:** SPD-05, GRP (permissions, grant audit).
 **Pages:** to be filled from the information architecture.
-**Open questions:** Can the requester approve their own request? Default proposed: no, with `self_approval_allowed` off and not changeable in the MVP, which blocks single-person groups from spending until a second approver exists. Alternative to decide with the founder: allow self-approval only below a small amount and only in groups of fewer than a set number of members. Can a payee who is also an approver approve? Default: no.
+**Open questions:** Can a payee who is also an approver approve? Default: no.
 
 ---
 
@@ -353,11 +352,11 @@ Expense, Fee and Reversal rows, each with the request reference, the approvers a
 **Acceptance criteria:**
 1. When the policy requires a vote, sending the request creates a linked vote (VOT) with the question prefilled as a full sentence with the consequence ("Pay 300 000 Ar to Rado for roof repair from the Repairs wallet"), the amount, payee and wallet, the passing rule, the quorum and the deadline from the group's vote settings. The request status is Awaiting vote and no approver is asked yet.
 2. The request detail shows the vote's state (quorum progress, time left, current count) and links to it. The requester cannot edit the vote's question to differ from the request; the question is derived from the request.
-3. Vote passes (quorum met and majority reached): the system writes the result to the decision log, links the Decision to the request, changes the status to Awaiting approval and sends the request to approvers (key `spd.request.vote_passed`). Approvers see the vote result and link on the detail (SPD-05).
+3. Vote passes (quorum met, majority reached, and at least two distinct voters other than the requester voted, decision D4): the system writes the result to the decision log, links the Decision to the request, and starts the payout after the SPD-10 checks, with no approvers involved (key `spd.request.vote_passed`). The request detail shows the vote result and who voted Yes as the authorisation.
 4. Vote fails or no quorum: the request becomes Rejected with the reason "The group did not approve" or "Quorum not reached", the requester is told with the counts and the next step ("You can propose it again", key `spd.request.vote_failed`). No money moved. Policy for no-quorum (extend, close as invalid, fall back) follows the vote settings (VOT).
 5. Edit (SPD-07) of a request while a vote is open resets or restarts the vote and notifies voters, because the vote must be about exactly what is paid.
 6. Cancelling the request closes the vote with "Withdrawn by the requester".
-7. The vote result does not release money by itself. After a pass, normal approvals apply (SPD-05, SPD-08).
+7. A passed vote is the authorisation (decision D4). The payout still re-runs every SPD-10 check (balance, freeze, spending cap, version unchanged) and stops with a reason if one fails. The requester's own Yes vote may count toward the majority but never toward the minimum of two other voters.
 8. Voters see the request's essential facts, never attachments or private notes unless the group allows it. A guest voter opening a vote link sees amount, purpose, payee display name and the passing rule.
 9. Offline: the vote status is readable from cache; casting the vote is a VOT behaviour. Creating the linked vote needs a connection.
 10. Audit: the link between request, vote and decision is recorded with times and the people involved.
@@ -365,7 +364,7 @@ Expense, Fee and Reversal rows, each with the request reference, the approvers a
 **Data:** Expense request (write status, link), Vote (create, read), Decision (write on close, VOT), Notification (write), Audit entry (write).
 **Depends on:** SPD-01, SPD-02, SPD-05, VOT (vote linked to an action, decision log), GRP.
 **Pages:** to be filled from the information architecture.
-**Open questions:** After a vote passes, do approvers still need to approve, or does the vote replace approvals (default proposed: approvals still required, which keeps the no single administrator rule)? Which majority and quorum apply by default for money votes? Can a request be created after the vote (decision exists first)? Allowed via the decision link in SPD-13.
+**Open questions:** Which majority and quorum apply by default for money votes? Can a request be created after the vote (decision exists first)? Allowed via the decision link in SPD-13.
 
 ---
 
@@ -639,7 +638,7 @@ Story IDs of other epics are named by capability because their files are not fin
 - **ACC:** PIN on every money-out approval, new-device signal for the pause screen (SPD-05), identity tier for requesters and approvers at the right level, SIM-swap re-verification, self-service PIN reset (SPD-05, SPD-15).
 - **WAL:** wallet balance and available balance with reservation (SPD-01, SPD-10), fee estimate, payout transaction and statuses, in-transit posting model and reversing entries (SPD-10, SPD-11), wallet frozen state and outgoing blocks (SPD-15), reconciliation (SPD-10, SPD-11), transaction reference and report-a-payment (SPD-11).
 - **RUL:** spending cap rule and its editor (SPD-14); thresholds and spending policy editor if the policy is treated as a wallet rule (SPD-02); loop and conflict checks for cap rules.
-- **GRP:** permissions Wallet: initiate spend and approve spend, Project: approve purchase; "Effective access" panel; permission grant audit (SPD-08); the settings for thresholds, `self_approval_allowed`, and who can edit the policy (SPD-02); list of eligible approvers.
+- **GRP:** permissions Wallet: initiate spend and approve spend, Project: approve purchase; "Effective access" panel; permission grant audit (SPD-08); the settings for thresholds and who can edit the policy (SPD-02); list of eligible approvers.
 - **VOT:** vote linked to an action "approve an expense"; vote creation from a request with derived question; decision log entry on close with link back to the ledger; no-quorum fallback; guest voter link view (SPD-09, SPD-13, SPD-15 lifting by vote).
 - **PRJ:** project linked to a wallet, budget lines and remaining budget, project timeline merging tasks, expenses and decisions, approve purchase gate (SPD-13); project close behaviour.
 - **EVT:** none in the MVP; a later hook if an event expense (event-linked purchase) is allowed.
@@ -651,8 +650,8 @@ Story IDs of other epics are named by capability because their files are not fin
 
 ## Open questions
 
-1. **Can the requester approve their own request?** Default proposed: no, always (`self_approval_allowed` off). Consequence: a group with a single permission holder cannot spend until a second approver exists. Alternative to decide with the founder: allow self-approval only for small amounts in small groups (SPD-08). Related: may a payee who is also an approver approve? Default: no.
-2. **Do votes replace approvals or precede them?** Default proposed: a passed vote sends the expense to the approvers, who still approve (SPD-09). info.md says "approvals by several people or a vote"; confirm that both apply together above the vote threshold.
+1. **Closed by decision D1:** the requester can never approve their own request. Consequence kept: a group with a single permission holder cannot spend until a second approver exists.
+2. **Closed by decision D4:** a passed vote is the authorisation and replaces approvals; approvers apply below the vote threshold.
 3. **PIN on every approval or only the final?** Default proposed: every approval (SPD-05).
 4. **One rejection: close or pause?** Default proposed: one rejection pauses as "Needs changes" (SPD-06).
 5. **Project spending gates.** Is the project approve purchase gate in addition to the wallet approve spend gate, or can one approval cover both? Over-budget behaviour (SPD-13).

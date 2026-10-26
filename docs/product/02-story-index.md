@@ -117,7 +117,7 @@ Journey steps: 1 Discover and join, 2 Verify, 3 Set up, 4 Fund, 5 Decide, 6 Spen
 | SPD-16 | Receipts, ledger entries and audit trail of a request | P1 | 2 | 7 | Member, Permission holder, Gereo operato | Wallet: view history (ledger and receipt); Wallet: export hi | ledger, audit, offline | CON-16, CON-18, SPD-10, SPD-11, SPD-13 |
 | VOT-01 | Ask the group a question with a vote | P0 | 0 | 5 | Permission holder | Vote: create | audit |  |
 | VOT-02 | Set the quorum and the majority, and read them in plain words | P0 | 0 | 5 | Permission holder | Vote: create | audit | VOT-01 |
-| VOT-03 | Send an expense request to its approvers when a vote passes | P0 | 0 | 5 | Permission holder | Vote: create, and the right to see the expense request | audit, ledger | VOT-01, VOT-02, VOT-08, VOT-13 |
+| VOT-03 | Start the payment of an expense when its vote passes | P0 | 0 | 5 | Permission holder | Vote: create, and the right to see the expense request | audit, ledger | VOT-01, VOT-02, VOT-08, VOT-13 |
 | VOT-04 | Cast my vote and change it until the vote closes | P0 | 0 | 5 | Member | Vote: vote | audit | VOT-01, VOT-18 |
 | VOT-05 | See where the vote stands: deadline, rule, quorum and participation | P0 | 0 | 5 | Member | Vote: view | offline | VOT-01, VOT-02, VOT-04 |
 | VOT-06 | Share a vote link so someone can vote without a full account | P0 | 0 | 5 | Guest voter | none for the guest; Vote: create (or Vote: view with share r | sms, audit | VOT-01, VOT-04 |

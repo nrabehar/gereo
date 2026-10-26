@@ -11,7 +11,7 @@ Evidence used in this file (cited per story as "file section"):
 
 ## Scope of the epic
 
-In MVP: vote types yes/no/abstain and single choice; quorum and majority per vote; one linked action (send an expense request to its approvers); guest voting through a shared link; reminders push then SMS; automatic close; result with outcome statement; no-quorum fallback; automatic and manual decision log entries; append-only amendments.
+In MVP: vote types yes/no/abstain and single choice; quorum and majority per vote; one linked action (a passed vote starts the payment of an expense request); guest voting through a shared link; reminders push then SMS; automatic close; result with outcome statement; no-quorum fallback; automatic and manual decision log entries; append-only amendments.
 
 Not in MVP: ranking, weighted votes, multiple-choice (select several), vote-triggered change of a split rule or wallet rule, secret-ballot cryptography, comments or discussion threads on a vote, voting by SMS reply (open question, see end of file).
 
@@ -106,7 +106,7 @@ UI strings: `vote.<area>.<name>`, `decision.<area>.<name>`. Notifications: `ntf.
 
 ---
 
-### VOT-03 Send an expense request to its approvers when a vote passes
+### VOT-03 Start the payment of an expense when its vote passes
 
 **Type:** User story
 **Priority:** P0
@@ -115,9 +115,9 @@ UI strings: `vote.<area>.<name>`, `decision.<area>.<name>`. Notifications: `ntf.
 **Permission needed:** Vote: create, and the right to see the expense request
 **Tags:** audit, ledger
 
-**Story:** As a member who proposes a spending, I want to link a vote to an expense request, so that when the group says yes the request goes to the people who approve spending.
+**Story:** As a member who proposes a spending, I want to link a vote to an expense request, so that when the group says yes the payment starts without a second round of approvals.
 
-**Conversation:** This is the one vote-triggered action in the MVP and Gereo's open design space: nothing found combines a vote, a wallet and an approval in one flow (raw/08 section 6.8 "Open opportunities"; competitive-analysis section 5). A passing vote does not move money. It moves the request to approvers, who still approve exactly what they see (raw/07 section 8.4 R-AP1 and R-AP3; the Bybit lesson in raw/04 section 9 is that people approve what the screen shows). Info.md says spending above a threshold needs several approvers or a vote; whether a passing vote may replace approvers is an open question and is not assumed here.
+**Conversation:** This is the one vote-triggered action in the MVP and Gereo's open design space: nothing found combines a vote, a wallet and an approval in one flow (raw/08 section 6.8 "Open opportunities"; competitive-analysis section 5). Decision D4 (founder): a passed vote is the authorisation, so the payment starts without approvers; approvers exist only for spending below the vote threshold. The vote page therefore must show exactly what will be paid (raw/07 section 8.4 R-AP1 and R-AP3; the Bybit lesson in raw/04 section 9 is that people approve what the screen shows). To keep the rule that no single person moves group money, a money vote counts only when at least two distinct people other than the requester voted.
 
 **Preconditions:** An expense request exists in a status that allows a vote (defined in SPD) and has no open vote. The creator holds Vote: create.
 **Trigger:** From the expense request, the person taps "Ask the group to vote first". Or, in VOT-01, the person picks "Link to an expense request".
@@ -125,7 +125,7 @@ UI strings: `vote.<area>.<name>`, `decision.<area>.<name>`. Notifications: `ntf.
 **Acceptance criteria:**
 1. When linked, the type is fixed to yes/no/abstain, and the vote page shows the exact amount, payee, source wallet, purpose and attachment of the request, taken live from the request. It does not show the wallet balance to guests (see VOT-06).
 2. Only one open vote can be linked to a given expense request. A second attempt is refused with `vote.link.already_open` and a link to the open vote.
-3. When the vote closes as Passed, the expense request moves to "Awaiting approval" and the approvers receive `ntf.vote.expense_passed.push`. The vote result is shown on the request. No ledger entry is written by the vote and no money moves.
+3. When the vote closes as Passed with at least two distinct voters other than the requester, the expense request starts its payout through the SPD-10 checks, and the requester receives `ntf.vote.expense_passed.push`. The vote result is shown on the request. The vote itself writes no ledger entry; the payout does.
 4. When the vote closes as Not passed, as No quorum or as Cancelled, the request is marked as not approved by vote (status wording owned by SPD) and the requester is notified with `ntf.vote.expense_failed.push`. It can be proposed again as a new request or a new vote.
 5. If the amount, payee, wallet or purpose of the request changes while the vote is open, the vote is cancelled automatically, all voters are told `ntf.vote.cancelled.push` with the reason `vote.cancel.request_changed`, and a new vote is required. Earlier ballots do not carry over.
 6. If the request is cancelled or withdrawn while the vote is open, the vote is cancelled in the same way.
@@ -136,7 +136,7 @@ UI strings: `vote.<area>.<name>`, `decision.<area>.<name>`. Notifications: `ntf.
 **Data:** Vote, Expense request, Approval, Decision, Ledger entry (read by link), Audit entry.
 **Depends on:** VOT-01, VOT-02, VOT-08, VOT-13, SPD (expense request and approval statuses), WAL (ledger entry reference).
 **Pages:** to be filled from the information architecture.
-**Open questions:** May a passing vote count as the approval above the spending threshold, or does it only open the approval stage? Is a vote mandatory above a threshold (business rule in product logic)? Which request statuses allow a vote (owned by SPD).
+**Open questions:** Is a vote mandatory above a threshold (business rule in product logic)? What is the default minimum number of voters for a money vote (proposed: two distinct people other than the requester)? Which request statuses allow a vote (owned by SPD).
 
 ---
 
@@ -656,7 +656,7 @@ UI strings: `vote.<area>.<name>`, `decision.<area>.<name>`. Notifications: `ntf.
 | --- | --- | --- | --- |
 | VOT-01 | Ask the group a question with a vote | P0 | GRP, NTF, XCT |
 | VOT-02 | Set the quorum and the majority, and read them in plain words | P0 | VOT-01, GRP |
-| VOT-03 | Send an expense request to its approvers when a vote passes | P0 | VOT-01, VOT-02, VOT-08, VOT-13, SPD, WAL |
+| VOT-03 | Start the payment of an expense when its vote passes | P0 | VOT-01, VOT-02, VOT-08, VOT-13, SPD, WAL |
 | VOT-04 | Cast my vote and change it until the vote closes | P0 | VOT-01, ACC, GRP |
 | VOT-05 | See where the vote stands: deadline, rule, quorum and participation | P0 | VOT-01, VOT-02, VOT-04, XCT |
 | VOT-06 | Share a vote link so someone can vote without a full account | P0 | VOT-01, VOT-04, ACC, GRP, NTF |
@@ -692,7 +692,7 @@ At the time of writing the other epic files do not exist. Names below are the bi
 
 ## Open questions
 
-1. Vote and approvers: may a passing vote replace the approvers above the spending threshold, or does it only open the approval stage? (VOT-03; competitive-analysis section 5 and info.md guard-rails disagree on wording.)
+1. Closed by decision D4: a passing vote is the authorisation and replaces approvers above the vote threshold. Default minimum of two distinct voters other than the requester, to confirm.
 2. Default quorum, default majority and default no-quorum fallback (VOT-02, VOT-10): to decide from field interviews with the founding group and two outside groups.
 3. Named versus anonymous ballots, and the default (VOT-17): the proposed default is Anonymous; money-linked votes may need Named.
 4. Does the system keep a permanent answer-to-person link in Anonymous mode, and who may see it (VOT-17)?

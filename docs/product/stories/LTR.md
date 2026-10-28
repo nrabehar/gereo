@@ -167,7 +167,7 @@ SOC-04 When I come across a public campaign, I want to see whether it is verifie
 **Job stories**
 
 DON-01 When I want to raise money for a cause beyond my group, I want to open a public campaign with a goal, deadline and description, so I can reach people who do not know me.
-1. The organiser must hold a verified identity at the required tier before the campaign goes public.
+1. The organiser must meet the tier requirement for this action, as defined in ACC-07 ("Tier requirements by action") with limits from OPS-11, before the campaign goes public.
 2. The campaign has a wallet pot; money is not mixed with the organiser's own wallet.
 3. The goal-not-reached rule (refund or keep) is set at creation and shown before every gift.
 

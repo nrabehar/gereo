@@ -60,7 +60,7 @@ This epic defines each parameter below once. Parameters owned by other epics are
 
 | Parameter | Meaning | Default |
 | --- | --- | --- |
-| PROJECT_ATTACHMENTS_PER_ITEM | Files per decision or per expense request (SPD-03 reads it) | 5 |
+| ATTACHMENTS_PER_ITEM | Files per decision, expense request or announcement report (SPD-03 and ANN-06 read it) | 5 |
 | PROJECT_ATTACHMENT_UNDO_MINUTES | Time during which the uploader can remove their own file from a decision | 15 |
 | PROJECT_CREATE_TARGET_SECONDS | Usability target for creating a project, measured from tapping "New project" to seeing the project page | 60, from the risk list (raw/04 section 14.6 risk 7); measured in prototype tests, not guaranteed |
 | PROJECT_NAME_MAX_CHARS | Longest project name | 60 |
@@ -71,14 +71,14 @@ This epic defines each parameter below once. Parameters owned by other epics are
 
 | Need | Parameter | Owner |
 | --- | --- | --- |
-| Largest file after compression | `attachment_max_size` (5 MB) | SPD-03 |
-| Accepted file types | `attachment_types` (JPEG, PNG, PDF) | SPD-03 |
+| Largest file after compression | `ATTACHMENT_MAX_MB` (5) | SPD-03 |
+| Accepted file types | `ATTACHMENT_TYPES` (JPEG, PNG, PDF) | SPD-03 |
 | Age after which a cached amount is flagged "may be outdated" | `STALE_BALANCE_HOURS` (24) | XCT-04 |
-| Retention of files and records | `RECORD_RETENTION_YEARS` | SPD-03, WAL |
+| Retention of files and records | `RECORD_RETENTION_YEARS` | WAL |
 | Overspend behaviour of a group wallet | `spend_cap_mode` and the cap rules | SPD-14, RUL-09 |
 | Whether project requests must link a decision | `project_spend_requires_decision` | SPD-13, GRP-12 |
 
-Message keys: UI `msg.prj.<area>.<name>`; notifications `msg.prj.<event>` with variants `.push` and `.inapp`, following the NTF registry (EV-PRJ-01 to EV-PRJ-07). Events this epic needs and the registry lacks, to be added by NTF: `msg.prj.team_added`, `msg.prj.owner_changed`, `msg.prj.access_changed`, `msg.prj.task_overdue`. No project event sends an SMS in the MVP. No text is written in this file.
+Message keys: UI strings use `prj.<area>.<name>` (the lowercase epic code, never the `msg.` prefix); notifications use `msg.prj.<event>` with variants `.push` and `.inapp`, following the NTF registry (EV-PRJ-01 to EV-PRJ-07). Notification events this epic needs and the registry lacks, to be added by NTF: `msg.prj.team_added`, `msg.prj.owner_changed`, `msg.prj.access_changed`, `msg.prj.task_overdue`. No project event sends an SMS in the MVP. No text is written in this file.
 
 ---
 
@@ -104,9 +104,9 @@ Message keys: UI `msg.prj.<area>.<name>`; notifications `msg.prj.<event>` with v
 3. The new project opens on its project page (PRJ-02) with all template sections visible and empty, each with an empty-state sentence and one action.
 4. The project is created with status Active, the creator and the owner on the team, and permissions inherited from the group (PRJ-06). The owner has no permission beyond those the group gave the person.
 5. Usability target: in the prototype test with at least 5 participants on a low-end phone, the median time from tapping "New project" to seeing the project page is at most PROJECT_CREATE_TARGET_SECONDS. If it is higher the form is cut back, never extended.
-6. States: the button is disabled while saving; on failure the form keeps its fields and shows `msg.prj.error.save_failed` with Retry. Creating a project is not on the offline queue registry (XCT-05): offline the button is disabled and the form shows `xct.offline.needs_connection`, and the typed fields stay on screen.
-7. Errors: name empty or longer than the limit, goal empty or longer than the limit, and a date in the past (allowed only after a confirmation `msg.prj.create.past_date`) each show an inline message.
-8. Notifications: the owner (if not the creator) and the team members added receive `msg.prj.team_added.push` and an in-app item; holders of Project: view receive the in-app item `msg.prj.created` (EV-PRJ-01, Low). No SMS (closed: project events never use SMS in the MVP).
+6. States: the button is disabled while saving; on failure the form keeps its fields and shows `prj.error.save_failed` with Retry. Creating a project is never queued (XCT-05 Table C): offline the button is disabled and the form shows `xct.offline.needs_connection`, and the typed fields stay on screen.
+7. Errors: name empty or longer than the limit, goal empty or longer than the limit, and a date in the past (allowed only after a confirmation `prj.create.past_date`) each show an inline message.
+8. Notifications: the owner (if not the creator) and the team members added receive `msg.prj.team_added.push` and an in-app item; holders of Project: view receive the in-app item `msg.prj.created` (EV-PRJ-01, Low). No SMS is sent in the MVP, and adding people to a project team never triggers NTF-11 (closed: project events never use SMS).
 9. Audit: creation, the owner and the team members added are written to the audit log with actor and time.
 
 **Data:** Project, Group, Membership, Audit entry, Notification.
@@ -135,11 +135,11 @@ Message keys: UI `msg.prj.<area>.<name>`; notifications `msg.prj.<event>` with v
 **Acceptance criteria:**
 1. The page header shows name, goal, owner (name and photo or initials), the deadline as an absolute date with a relative part following the rules of XCT-03 (for example `Fri 24 Oct (in 12 days)`), the status chip, and the team as a short list with a count and "See all".
 2. Status is one of Active, On hold, Closed (shared table), plus the computed marker `Late`. Each has a word and an icon, never colour alone.
-3. Below the header, the page shows the template sections in a fixed order with counts: Summary, Budget, Tasks, Expenses, Decisions, Events, Files.
+3. Below the header, the page shows the template sections in a fixed order with counts: Summary, Budget, Tasks, Expenses, Decisions, Events (the linked events come from EVT-09), Files.
 4. A person with Project: edit can change name, goal, owner, deadline and put the project On hold or Active again. Each change shows what changed and is saved on confirmation.
 5. Changing the owner notifies the old and new owner with `msg.prj.owner_changed.push` and records both.
 6. Offline: the page opens from cache with a `Last synced` time (XCT-04); edit actions are disabled with an explanation, not queued. Read sections still work.
-7. Errors: a project the person cannot see shows `msg.prj.error.not_visible` with who can grant access (never a bare "Not allowed"). A project that was closed shows its closing summary instead of edit actions.
+7. Errors: a project the person cannot see shows `prj.error.not_visible` with who can grant access (never a bare "Not allowed"). A project that was closed shows its closing summary instead of edit actions.
 8. States: loading shows a skeleton of the final layout; an On hold project shows a visible banner and the reason when one was entered (optional).
 9. Audit: every change to a field is stored with before value, after value, actor and time and is visible in the project history.
 
@@ -169,10 +169,10 @@ Message keys: UI `msg.prj.<area>.<name>`; notifications `msg.prj.<event>` with v
 **Acceptance criteria:**
 1. The person enters a planned total in whole ariary (integer, no decimals, shown as `1 000 000 Ar`) and picks exactly one wallet among the wallets of this group they can view. A project has at most one linked wallet; a wallet may be linked to several projects.
 2. The Budget section then shows planned, spent, pending and remaining in one sentence and one bar, for example `Spent 300 000 Ar of 1 000 000 Ar planned. 120 000 Ar waiting for approval. 580 000 Ar left.` The bar has a text equivalent.
-3. Spent is the sum of the Expense and Fee ledger lines of Paid requests linked to this project, minus any Reversal lines that correct them (WAL-18). Pending is the sum of the requests counted as pending in the shared definitions above, with the estimated fee when known. Rejected, Cancelled, Draft and Needs changes requests are never counted.
-4. When spent plus pending exceeds the plan, the page shows `msg.prj.budget.over` with the excess amount and keeps working. A new request that would exceed the plan shows the warning on the request (SPD-13) but is not blocked by the budget. When spent plus pending first reaches PROJECT_BUDGET_ALERT_PERCENT of the plan, holders of Project: manage budget receive `msg.prj.budget_near` (EV-PRJ-05) once per crossing.
+3. Spent is the sum of the Expense and Fee ledger lines of Paid requests linked to this project, minus the Reversal lines that carry the same project_id (WAL-18). Pending is the sum of the requests counted as pending in the shared definitions above, with the estimated fee when known. Rejected, Cancelled, Draft and Needs changes requests are never counted.
+4. When spent plus pending exceeds the plan, the page shows `prj.budget.over` with the excess amount and keeps working. A new request whose amount plus estimated fee would exceed the plan shows the warning on the request (SPD-13) but is not blocked by the budget. When spent plus pending first reaches PROJECT_BUDGET_ALERT_PERCENT of the plan, holders of Project: manage budget receive `msg.prj.budget_near` (EV-PRJ-05) once per crossing.
 5. The planned total can be changed by a holder of Project: manage budget; each change is kept in the budget history with who, when, old and new value. The wallet cannot be changed once one linked request is Paid; before that it can be changed with a confirmation, and requests that are already open keep following their own request (SPD-07 voids approvals when the wallet changes).
-6. If the linked wallet is closed or the person loses wallet access, the Budget section shows `msg.prj.budget.wallet_unavailable`, new expense requests are blocked until a new wallet is linked, and open requests go to Needs attention with a reason (SPD-13 criterion 7).
+6. If the linked wallet is closed or the person loses wallet access, the Budget section shows `prj.budget.wallet_unavailable`, new expense requests are blocked until a new wallet is linked, and open requests go to Needs attention with a reason (SPD-13 criterion 7).
 7. Figures update when the ledger confirms an entry. Offline they show from cache with `Last synced` and the outdated mark of XCT-04; changing the budget is not possible offline.
 8. Audit and ledger: the budget does not write ledger entries and moves no money; linking, unlinking and every change of the plan are audit entries. The wallet's own approval, cap and freeze rules are unchanged.
 9. Accessibility and language: amounts use space grouping, never wrap and are never clipped at 200% font size (XCT-02, XCT-08), identical in Malagasy, French and English.
@@ -205,14 +205,14 @@ Message keys: UI `msg.prj.<area>.<name>`; notifications `msg.prj.<event>` with v
 2. Tasks list with status chips (To do, Doing, Done), each with icon and text. Done tasks are collapsed by default and counted: `5 of 12 done`.
 3. Marking done records who and when. Un-doing is allowed and is logged. When a milestone is marked done, project members receive the in-app item `msg.prj.milestone_done` (EV-PRJ-04).
 4. A task with a date earlier than today and not Done shows `Overdue` with the number of days. When an owner is set, the owner receives `msg.prj.task_assigned` (EV-PRJ-02), `msg.prj.task_due.push` once before the due date (EV-PRJ-03) and `msg.prj.task_overdue.push` once after the date has passed. No SMS.
-5. The task owner must be a member of the team; assigning someone not on the team offers to add them (needs Project: manage team) or is refused with `msg.prj.task.owner_not_team`.
-6. Offline: creating, editing and changing the status of a task are on the queue registry (XCT-05) with the states `Saved on this phone`, `Waiting to send`, `Sent`. If two people changed the same field of the same task, the person sees both versions ("Your change versus Fanja's change") and chooses; nothing is silently overwritten (XCT-05 criterion 6).
-7. Empty state: `msg.prj.tasks.empty` with a button to add a first task or milestone. A closed project shows tasks read-only.
+5. The task owner must be a member of the team; assigning someone not on the team offers to add them (needs Project: manage team) or is refused with `prj.task.owner_not_team`.
+6. Offline: creating, editing and changing the status of a task are auto-send items in the XCT-05 Table A rows for task create, task update including status, and note (no other action of this epic is queued) with the states `Waiting to send`, `Sent`, `Confirmed` (`xct.queue.waiting`, `xct.queue.sent`, `xct.queue.confirmed`). If two people changed the same field of the same task, the person sees both versions ("Your change versus Fanja's change") and chooses; nothing is silently overwritten (XCT-05 criterion 6).
+7. Empty state: `prj.tasks.empty` with a button to add a first task or milestone. A closed project shows tasks read-only.
 8. Errors: empty title or an invalid date shows an inline message; a failed save keeps the task and shows Retry.
 9. Audit: creation, edits, owner changes, date changes and status changes are stored with actor and time.
 
 **Data:** Task, Project, Membership, Audit entry, Notification.
-**Depends on:** PRJ-02, GRP-08 (team and permissions), NTF-05, NTF-06, XCT-05. The task create and task update actions must appear in the XCT-05 registry (it lists "task update and note" only).
+**Depends on:** PRJ-02, GRP-08 (team and permissions), NTF-05, NTF-06, XCT-05. The task create, task update including status and note actions are rows of XCT-05 Table A.
 **Pages:** to be filled from the information architecture.
 **Open questions:** Closed: the task owner may change the status of their own task. Closed: milestones notify project members in-app only. Closed: no Blocked status. Closed: no SMS for task dates.
 
@@ -235,15 +235,16 @@ Message keys: UI `msg.prj.<area>.<name>`; notifications `msg.prj.<event>` with v
 **Trigger:** The person opens the Expenses or Decisions section of the project page.
 
 **Acceptance criteria:**
-1. The Expenses section lists the project's requests newest first (Drafts only to their requester) with requester, purpose, amount, the SPD status chip (word, icon, colour) and an authorisation line: `2 of 3 approved` while Awaiting approval, `Vote open, closes Fri 17:00` while Awaiting vote, `Vote passed` once a vote authorised it. Tapping opens the SPD request detail.
-2. Totals at the top reconcile with the Budget section (PRJ-03): the sum of Paid requests, with their fees, equals Spent, and the same wording is used.
-3. The Decisions section lists decisions of this project from the decision log (VOT-13, VOT-14) newest first with title, result chip, date and a `Money moved` marker where a ledger entry exists. Tapping opens the log entry.
+1. The Expenses section lists the project's requests newest first (Drafts only to their requester) with requester, purpose, amount, the SPD status chip (word, icon, colour) and an authorisation line: `2 of 3 approved` while Awaiting approval, `Vote open, closes Fri 17:00` while Awaiting vote, `Vote passed` once a vote authorised it. Tapping opens the SPD request detail. A project never authorises spending: the authorisation line only reports the approvals or the vote that the group wallet's rules required (GRP-13, SPD-13), and nothing on the project page can authorise a payment by itself.
+2. Totals at the top reconcile with the Budget section (PRJ-03): the sum of Paid requests, with their fees, equals Spent, and the same wording is used. The over-budget warning counts the amount plus the estimated fee (SPD-13).
+3. The Decisions section lists decisions of this project from the decision log (VOT-13, VOT-14) newest first with title, the VOT result chip (Passed, Not passed (majority not reached), Not passed (quorum not met), Tie), date and a `Money moved` marker where a ledger entry exists. Tapping opens the log entry.
 4. From each section the person can start the next action if they hold the permission: "New expense request" (Wallet: initiate spend, SPD-01), "Ask the group to vote" (Vote: create, VOT-01), "Record a decision" (Vote: create, VOT-14). Without the permission the button is hidden and a line names the missing permission and who can grant it.
 5. Visibility follows the decision above: a member without Wallet: view history sees no payee and no approver names in the list.
-6. Empty states: `msg.prj.expenses.empty` and `msg.prj.decisions.empty` each with one action or an explanation.
+6. Empty states: `prj.expenses.empty` and `prj.decisions.empty` each with one action or an explanation.
 7. Loading shows skeleton rows. Offline the lists come from cache with `Last synced` and a note that status may have changed.
 8. Filters: expenses by status; decisions by result. No other filters in the MVP.
 9. Accessibility and language: status is never colour alone, the lists work in a screen reader row by row and in a single column at 320 px. Audit: reading is not logged.
+10. No notification is sent by this story. See EV-PRJ-06 in VOT-14.
 
 **Data:** Project, Expense request, Approval, Decision, Vote, Ledger entry (reference).
 **Depends on:** PRJ-02, PRJ-03, SPD-01, SPD-13, SPD-16, VOT-01, VOT-13, VOT-14, XCT-04, XCT-09.
@@ -270,14 +271,14 @@ Message keys: UI `msg.prj.<area>.<name>`; notifications `msg.prj.<event>` with v
 
 **Acceptance criteria:**
 1. The page lists every group member who can see the project with an Effective access line in verbs (see, edit, manage budget, manage tasks, approve a purchase, manage the team, close), and for each the source: `Inherited from the group` or `Narrowed on this project`.
-2. A new project starts with everything inherited and the page says so (`msg.prj.access.inherited`).
-3. A holder of the permissions can narrow: remove a specific Project permission for a member on this project only, or switch "Only the project team can see this project". The sheet shows the effect in words before saving, for example "Rado will no longer be able to approve purchases on this project", and warns when nobody would remain able to give the project approval of SPD-13 (requests above the approval band would then need a vote).
+2. A new project starts with everything inherited and the page says so (`prj.access.inherited`).
+3. A holder of the permissions can narrow: remove a specific Project permission for a member on this project only, or switch "Only the project team can see this project". The sheet shows the effect in words before saving, for example "Rado will no longer be able to approve purchases on this project", and warns when the last holder of Project: approve purchase is narrowed or revoked: requests would wait; use the vote conversion after request_stuck_days (SPD-13).
 4. Narrowing never changes the member's group permissions. Removing it later restores the inherited access; the page shows `Narrowed on this project` with the date and who did it.
-5. A project must always have at least one person who can edit and one who can close it; a change that would leave none is refused with `msg.prj.access.no_owner`.
+5. A project must always have at least one person who can edit and one who can close it; a change that would leave none is refused with `prj.access.no_owner`.
 6. Narrowing cannot reduce the number of approvals needed for a spend, cannot touch a Wallet permission and cannot grant a member access they do not have on the group. A passed vote still authorises a project payout (D4), whatever was narrowed.
 7. A blocked action anywhere in the project names the missing permission and who can grant it (never a bare "Not allowed").
 8. Notifications: the affected member receives `msg.prj.access_changed.push` with the plain-words change; no SMS.
-9. Audit: every narrowing and restoration is an audit entry (actor, member, permission, time) visible to members who may view permissions (GRP-10, GRP-11).
+9. Audit: every narrowing and restoration is an audit entry (actor, member, permission, time) visible to members who hold Group: view audit log (GRP-10, GRP-11).
 
 **Data:** Project, Membership, Permission grant, Audit entry.
 **Depends on:** PRJ-02, GRP-08, GRP-09, GRP-10, GRP-11, NTF-04.
@@ -297,26 +298,26 @@ Message keys: UI `msg.prj.<area>.<name>`; notifications `msg.prj.<event>` with v
 
 **Story:** As a member, I want to attach a photo or a PDF to a decision or an expense request, so that the proof, the quote or the minutes stay with the record.
 
-**Conversation:** The MVP replaces a document library with attachments on decisions and expense requests, with no versions (raw/04 section 14.5; competitive-analysis section 7). The approval card shows attached evidence such as a receipt photo (raw/07 section 8.4 R-AP1). Data cost matters (about 5 Ar per MB in the research, design-foundations section 1), so the size is visible before upload. One owner per rule: SPD-03 owns everything about files on an expense request (permission, privacy, voiding of approvals, notices, file limits); this story owns files on decisions and the shared item limit PROJECT_ATTACHMENTS_PER_ITEM. Decision: attaching to a decision needs Vote: create, the permission that records and amends decisions, so that the people who write the decision can add the minutes; the Document permissions stay unused in the MVP. Decision: a file on a decision cannot be deleted, because the record must stay complete (VOT-15); the uploader can undo a mistaken upload for PROJECT_ATTACHMENT_UNDO_MINUTES and a mark stays. Decision: visibility of a file follows its parent, with no separate Document: view.
+**Conversation:** The MVP replaces a document library with attachments on decisions and expense requests, with no versions (raw/04 section 14.5; competitive-analysis section 7). The approval card shows attached evidence such as a receipt photo (raw/07 section 8.4 R-AP1). Data cost matters (about 5 Ar per MB in the research, design-foundations section 1), so the size is visible before upload. One owner per rule: SPD-03 owns everything about files on an expense request (permission, privacy, voiding of approvals, notices, file limits); this story owns files on decisions and the item limit ATTACHMENTS_PER_ITEM, together with the project, decision and report entry points (the announcement report included, ANN-06; ANN reuses ATTACHMENTS_PER_ITEM and the SPD-03 size and types). Decision: attaching to a decision needs Vote: create, the permission that records and amends decisions, so that the people who write the decision can add the minutes; the Document permissions stay unused in the MVP. Decision: a file on a decision cannot be deleted, because the record must stay complete (VOT-15); the uploader can undo a mistaken upload for PROJECT_ATTACHMENT_UNDO_MINUTES and a mark stays. Decision: visibility of a file follows its parent, with no separate Document: view.
 
 **Preconditions:** The person can view the decision or request and holds the permission for it.
-**Trigger:** The person taps "Add a file" on a decision entry, or on an expense request from the project (which opens SPD-03).
+**Trigger:** The person taps "Add a file" on a decision entry, or on an expense request from the project (which opens SPD-03), or on an announcement report (ANN-06).
 
 **Acceptance criteria:**
-1. The person picks a photo (camera or gallery) or a PDF. The app compresses photos on the phone and shows the final size before upload, with the maximum `attachment_max_size` and the allowed `attachment_types` (owned by SPD-03).
-2. Files that are too large or of a type not allowed are refused with `msg.prj.file.too_large` or `msg.prj.file.type_not_allowed` before upload, and nothing is sent.
+1. The person picks a photo (camera or gallery) or a PDF. The app compresses photos on the phone and shows the final size before upload, with the maximum `ATTACHMENT_MAX_MB` and the allowed `ATTACHMENT_TYPES` (owned by SPD-03).
+2. Files that are too large or of a type not allowed are refused with `prj.file.too_large` or `prj.file.type_not_allowed` before upload, and nothing is sent.
 3. The attachment shows name, type, size, uploader and time; images open in place and PDFs open or download on tap.
-4. Up to PROJECT_ATTACHMENTS_PER_ITEM files per decision or request. A further file is refused with a clear message.
-5. Expense request: the button opens SPD-03 and every rule there applies unchanged, including who may see the file, the notice to approvers (`msg.spd.approval.attachment_added`), the rule that adding does not void approvals and that removing or replacing counts as an edit (SPD-07).
+4. Up to ATTACHMENTS_PER_ITEM files per decision or request, and the same limit on an announcement report (ANN-06 owns the rest of that flow). A further file is refused with a clear message.
+5. Expense request: the button opens SPD-03 and every rule there applies unchanged, including who may see the file, the notice to approvers (`msg.spd.approval_attachment_added`), the rule that adding does not void approvals and that removing or replacing counts as an edit (SPD-07).
 6. Decision: attachments are appended, never overwritten (VOT-15). The uploader may remove their own file for PROJECT_ATTACHMENT_UNDO_MINUTES after upload; the record then shows `File removed by {name}` instead of vanishing. After that a file leaves the record only through an amendment (VOT-15).
-7. Offline: a file on a decision is kept on the phone with `Saved on this phone` then `Waiting to send`, sent when connected, resumable after an interruption (the action "decision attachment upload" must be added to the XCT-05 registry; the expense attachment is already there). Viewing a file offline works only for files already opened on this phone.
-8. Errors: upload failure shows Retry and keeps the file; a file that fails the safety check shows `msg.prj.file.rejected` and is not stored.
+7. Offline: a file on a decision is kept on the phone and shown as `Waiting to send` (`xct.queue.waiting`), sent when connected, resumable after an interruption (XCT-05 Table A row decision attachment upload; the proof attachment added to an already-sent request is also a Table A row). Viewing a file offline works only for files already opened on this phone.
+8. Errors: upload failure shows Retry and keeps the file; a file that fails the safety check shows `prj.file.rejected` and is not stored.
 9. Audit: add, remove and view-denied attempts are stored with actor and time.
 
 **Data:** Document, Decision, Expense request, Audit entry.
-**Depends on:** VOT-13, VOT-14, VOT-15, SPD-03, SPD-07, XCT-05.
+**Depends on:** VOT-13, VOT-14, VOT-15, SPD-03, SPD-07, ANN-06, XCT-05.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed: size and types are `attachment_max_size` and `attachment_types` (SPD-03). Closed: no separate Document: view. Open, needs a lawyer and owned by SPD-03: how long files are kept after a project or group closes; default used here: `RECORD_RETENTION_YEARS` (5), never deleted earlier.
+**Open questions:** Closed: size and types are `ATTACHMENT_MAX_MB` and `ATTACHMENT_TYPES` (SPD-03). Closed: no separate Document: view. Open, needs a lawyer, see ACC open question 1: how long attachments are kept after a project or group closes; this is not declared covered by `RECORD_RETENTION_YEARS` (WAL); the value cited meanwhile is `RECORD_RETENTION_YEARS` (5), never deleted earlier.
 
 ---
 
@@ -338,11 +339,11 @@ Message keys: UI `msg.prj.<area>.<name>`; notifications `msg.prj.<event>` with v
 
 **Acceptance criteria:**
 1. The summary opens with headline sentences built from message keys, for example the number of tasks done, the next milestone and date, the budget used.
-2. It shows four figures: budget used against planned (from PRJ-03), tasks done against total (from PRJ-04), next milestone or deadline with relative time, and waiting items. Waiting items are expense requests that are open (shared definitions) plus open votes that are not linked to a request; a request awaiting its vote counts once.
-3. Progress is tasks done divided by tasks total, and the page states how it is computed (`msg.prj.summary.progress_how`). With no tasks the page says so and shows no percent.
+2. It shows four figures: budget used against planned (from PRJ-03, where the over-budget warning counts the amount plus the estimated fee, SPD-13), tasks done against total (from PRJ-04), next milestone or deadline with relative time, and waiting items. Waiting items are expense requests that are open (shared definitions) plus open votes that are not linked to a request; a request awaiting its vote counts once.
+3. Progress is tasks done divided by tasks total, and the page states how it is computed (`prj.summary.progress_how`). With no tasks the page says so and shows no percent.
 4. Overdue milestones and tasks are counted with a link to each, and the project shows `Late` when the deadline has passed (PRJ-02).
 5. Each figure links to its section; waiting items link to the request or vote.
-6. Empty project: the summary shows `msg.prj.summary.empty` and the next suggested action (add a budget or a first task), not zeros.
+6. Empty project: the summary shows `prj.summary.empty` and the next suggested action (add a budget or a first task), not zeros.
 7. Offline: the summary opens from cache with `Last synced` and a note that numbers may be out of date; amounts older than `STALE_BALANCE_HOURS` carry the "may be outdated" mark (XCT-04).
 8. Loading uses a skeleton; the page reflows in one column at 320 px and amounts are never clipped at 200% font size.
 9. Audit: none for reading.
@@ -372,17 +373,17 @@ Message keys: UI `msg.prj.<area>.<name>`; notifications `msg.prj.<event>` with v
 
 **Acceptance criteria:**
 1. The close sheet checks and lists what is still open: expense requests that are open (shared definitions), open votes linked to the project, tasks not Done. Each item has a link.
-2. Open expense requests and open votes must be resolved or cancelled before closing; the sheet refuses with `msg.prj.close.blocked` and shows the list. A vote linked to a request cannot be closed early (VOT-03), so it is resolved at its deadline or cancelled with the request (SPD-12). Draft requests do not block: they are detached from the project and stay with their requester. Open tasks do not block: they stay marked not Done.
+2. Open expense requests and open votes must be resolved or cancelled before closing; the sheet refuses with `prj.close.blocked` and shows the list. A vote linked to a request cannot be closed early (VOT-03), so it is resolved at its deadline or cancelled with the request (SPD-12). Draft requests do not block; what happens to them follows SPD-13 criterion 7. Open tasks do not block: they stay marked not Done.
 3. The person writes an optional closing note (what was achieved, what remains) and sees the final figures (planned, spent, difference) before confirming with a button labelled `Close project`.
-4. On confirmation the status becomes Closed, a frozen closing summary is stored, and the project becomes read-only except for viewing, attachments on existing items and the closing note.
-5. Unspent money stays in the wallet; closing creates no ledger entry. The sheet says so in words (`msg.prj.close.no_money_moves`).
-6. A decision-log entry "Project closed by {name}" is appended automatically (a system entry of VOT-13, with the note and summary figures) and shows in the group log.
+4. On confirmation the status becomes Closed, a frozen closing summary is stored, and the project becomes read-only except for viewing, attachments on existing items and the closing note. A closed project accepts no new event link (EVT-09).
+5. Unspent money stays in the wallet; closing creates no ledger entry. The sheet says so in words (`prj.close.no_money_moves`).
+6. A decision-log entry "Project closed by {name}" is appended automatically by VOT-13 and not by this story (a system entry of VOT-13, with the note and summary figures) and shows in the group log.
 7. Team members receive `msg.prj.closed.push` (EV-PRJ-07) with the result in plain words; no SMS.
-8. A holder of Project: close can reopen a closed project; reopening sets the status back to Active, removes the frozen status, is an audit entry, and the earlier closing entry stays in the log.
+8. A holder of Project: close can reopen a closed project; reopening sets the status back to Active, removes the frozen status, is an audit entry, and the earlier closing entry stays in the log. Drafts detached at closing do not re-attach on reopening (SPD-13 criterion 7).
 9. Audit: the actor, time, note, final figures and any items left open are stored.
 
 **Data:** Project, Expense request, Vote, Task, Decision, Audit entry, Notification.
-**Depends on:** PRJ-02, PRJ-03, PRJ-04, PRJ-05, VOT-03, VOT-13, SPD-12, SPD-13, NTF-01.
+**Depends on:** PRJ-02, PRJ-03, PRJ-04, PRJ-05, VOT-03, VOT-13, SPD-12, SPD-13, EVT-09, NTF-01.
 **Pages:** to be filled from the information architecture.
 **Open questions:** Closed: no automatic release of unspent budget, because nothing is reserved. Closed: closing needs no vote. Closed: reopening has no limit and is logged.
 
@@ -408,7 +409,7 @@ Message keys: UI `msg.prj.<area>.<name>`; notifications `msg.prj.<event>` with v
 1. Each row shows name, owner, status chip, deadline in relative time, budget bar (spent of planned, when a budget exists) and the number of waiting items (as counted in PRJ-08).
 2. The default view is Active projects, sorted by deadline (nearest first, no date last). Tabs or a filter switch to On hold and Closed.
 3. A project the person cannot see is absent, with no placeholder row and no count.
-4. Empty state: `msg.prj.list.empty` with a "New project" button if the person holds Project: edit (PRJ-01), otherwise an explanation of who can create one.
+4. Empty state: `prj.list.empty` with a "New project" button if the person holds Project: edit (PRJ-01), otherwise an explanation of who can create one.
 5. The list shows the Late marker for projects past their deadline and not Closed.
 6. Offline: the list comes from cache with `Last synced`; opening a project follows PRJ-02 offline rules.
 7. Loading shows skeleton rows; the first PROJECT_LIST_PAGE_SIZE rows load first and more load on scroll with a visible count.
@@ -439,12 +440,12 @@ Message keys: UI `msg.prj.<area>.<name>`; notifications `msg.prj.<event>` with v
 **Trigger:** The person opens the Timeline view of the project.
 
 **Acceptance criteria:**
-1. The timeline lists, newest first, entries for: tasks created, done or overdue; milestones reached; expense requests submitted, approved, rejected and paid (SPD status changes); decisions and votes opened and closed; events linked to the project (EVT-09); files added.
+1. The timeline lists, newest first, entries for: tasks created, done or overdue; milestones reached; expense requests submitted, approved, rejected and paid (SPD status changes); decisions and votes opened and closed; events linked to the project (link rules of EVT-09); files added.
 2. Each entry shows date and time, an icon with text, who did it and a link to the item. Entries respect the visibility rule of PRJ-05.
 3. Entries of the same kind on the same day are grouped when there are more than PROJECT_TIMELINE_GROUP_MIN.
 4. Upcoming items (milestones, events, deadlines) are shown above the history in date order.
 5. The person can filter by type; the filter is remembered per project on that phone.
-6. Empty state: `msg.prj.timeline.empty`.
+6. Empty state: `prj.timeline.empty`.
 7. Offline: loaded from cache with `Last synced`; older history loads when connected, the first PROJECT_LIST_PAGE_SIZE entries first.
 8. The timeline is read-only and written from existing events; it creates no new record.
 9. Accessibility and language: the timeline is a list in reading order; dates are absolute with weekday; no information is only in an icon or colour.
@@ -467,14 +468,14 @@ Message keys: UI `msg.prj.<area>.<name>`; notifications `msg.prj.<event>` with v
 
 **Story:** As an individual, I want to start a project of my own, with a goal, a budget linked to one of my wallets and a few tasks, so that I can follow a personal plan like building a house or starting a business.
 
-**Conversation:** The object model lets a project belong to a user or a group (info.md, Projet). The personal path uses the same template and sections with a team of one. There is no vote and no approval, since there is no group; a decision is a manual entry. Research did not test the individual path, so it is the least certain story of the epic (raw/08 section 6.9 and raw/04 section 14.5 cover groups only). Decisions: the story stays in the MVP at P2, and is the first story cut if the release slips; a personal project cannot be moved to a group in the MVP, because its history, spending and permissions would have to be re-owned; the person starts a new group project instead. A personal wallet has no expense requests (WAL-09 sends money directly), so spent is computed from sends the person tags with the project when sending: WAL-09 must offer an optional "For project" choice on a send (the tag is a label on the ledger entry, not a rule).
+**Conversation:** The object model lets a project belong to a user or a group (info.md, Projet). The personal path uses the same template and sections with a team of one. There is no vote and no approval, since there is no group; a decision is a manual entry. Research did not test the individual path, so it is the least certain story of the epic (raw/08 section 6.9 and raw/04 section 14.5 cover groups only). Decisions: the story stays in the MVP at P2, and is the first story cut if the release slips; a personal project cannot be moved to a group in the MVP, because its history, spending and permissions would have to be re-owned; the person starts a new group project instead. A personal wallet has no expense requests (WAL-09 sends money directly), so spent is computed from sends the person tags with the project when sending: WAL-09 must offer an optional "For project" choice on a send (the tag is a label on the ledger entry, not a rule). The story depends on that tag being immutable after the send (WAL-09); if WAL-09 is refused, PRJ-12 moves to Later.
 
 **Preconditions:** The person has an account and at least one wallet for the budget link.
 **Trigger:** The person taps "New project" from their own home.
 
 **Acceptance criteria:**
 1. The same four-field creation (PRJ-01) is used; the owner is the person and cannot be changed to someone else (no team).
-2. The budget links to one of the person's own wallets and works as PRJ-03, with spent counted from the Confirmed sends and fees tagged with the project (and corrected by reversals); there is no group approval flow, and the wallet's own PIN and limits apply (WAL-10).
+2. The budget links to one of the person's own wallets and works as PRJ-03, with spent counted as the Expense and Fee lines of Confirmed sends carrying the immutable "For project" tag (WAL-09), minus the Reversal lines carrying the same project_id (WAL-18); there is no group approval flow, and the wallet's own PIN and limits apply (WAL-10).
 3. Tasks and milestones work as PRJ-04, with the person as the only owner.
 4. Decisions are manual entries only (VOT-14 without vote links); the Decisions section explains that no vote is available without a group.
 5. The project stays private to the person. There is no move to a group in the MVP and the screen does not offer one.
@@ -484,7 +485,7 @@ Message keys: UI `msg.prj.<area>.<name>`; notifications `msg.prj.<event>` with v
 9. Accessibility and language: identical to the group version.
 
 **Data:** Project (user-owned), Wallet, Task, Decision, Audit entry.
-**Depends on:** PRJ-01, PRJ-03, PRJ-04, PRJ-08, PRJ-09, WAL-09, WAL-10, ACC-02.
+**Depends on:** PRJ-01, PRJ-03, PRJ-04, PRJ-08, PRJ-09, WAL-09, WAL-10, WAL-18, ACC-02.
 **Pages:** to be filled from the information architecture.
 **Open questions:** Closed: no move from personal to group in the MVP. Closed: the personal path stays in the MVP at P2, first to be cut. Open, needs field interviews: whether individuals want projects at all; default used: build it last and measure use.
 
@@ -500,19 +501,19 @@ Message keys: UI `msg.prj.<area>.<name>`; notifications `msg.prj.<event>` with v
 | PRJ-04 | Keep a short list of tasks and milestones | P1 | PRJ-02, GRP-08, NTF-05, NTF-06, XCT-05 |
 | PRJ-05 | See every expense request and decision that belongs to the project | P0 | PRJ-02, PRJ-03, SPD-01, SPD-13, SPD-16, VOT-01, VOT-13, VOT-14, XCT-04, XCT-09 |
 | PRJ-06 | Let the project follow the group's permissions, and narrow them when needed | P1 | PRJ-02, GRP-08, GRP-09, GRP-10, GRP-11, NTF-04 |
-| PRJ-07 | Attach a file to a decision or an expense request | P1 | VOT-13, VOT-14, VOT-15, SPD-03, SPD-07, XCT-05 |
+| PRJ-07 | Attach a file to a decision or an expense request | P1 | VOT-13, VOT-14, VOT-15, SPD-03, SPD-07, ANN-06, XCT-05 |
 | PRJ-08 | Read a one-page summary of how the project is going | P1 | PRJ-03, PRJ-04, PRJ-05, VOT-05, XCT-04, XCT-08 |
-| PRJ-09 | Close a project and keep its record | P1 | PRJ-02 to PRJ-05, VOT-03, VOT-13, SPD-12, SPD-13, NTF-01 |
+| PRJ-09 | Close a project and keep its record | P1 | PRJ-02 to PRJ-05, VOT-03, VOT-13, SPD-12, SPD-13, EVT-09, NTF-01 |
 | PRJ-10 | List all the projects of a group | P1 | PRJ-01, PRJ-02, PRJ-03, PRJ-06, GRP-06, XCT-04, XCT-09 |
 | PRJ-11 | Follow the project as one timeline of tasks, requests and decisions | P2 | PRJ-04, PRJ-05, PRJ-07, EVT-09, VOT-13, SPD-13, XCT-03, XCT-04 |
-| PRJ-12 | Run a personal project on my own | P2 | PRJ-01, PRJ-03, PRJ-04, PRJ-08, PRJ-09, WAL-09, WAL-10, ACC-02 |
+| PRJ-12 | Run a personal project on my own | P2 | PRJ-01, PRJ-03, PRJ-04, PRJ-08, PRJ-09, WAL-09, WAL-10, WAL-18, ACC-02 |
 
 Count: 12 stories. P0: 4 (PRJ-01, PRJ-02, PRJ-03, PRJ-05). P1: 6 (PRJ-04, PRJ-06 to PRJ-10). P2: 2 (PRJ-11, PRJ-12).
 
 ## Cross-epic dependencies
 
 - ACC: signed-in session and individual account for PRJ-12 (ACC-02 is the sign-up that creates the individual account).
-- WAL: group wallet list for the budget link (WAL-02, WAL-03), closed wallet state (WAL-05), reversing entries (WAL-18), and an optional "For project" tag on a send (WAL-09) for PRJ-12.
+- WAL: group wallet list for the budget link (WAL-02, WAL-03), closed wallet state (WAL-05), reversing entries (WAL-18), and an optional immutable "For project" tag on a send (WAL-09) for PRJ-12; if WAL-09 refuses it, PRJ-12 moves to Later.
 - RUL: none. A project budget is not a wallet rule and no rule is created by a project.
 - GRP: Project: edit as the creation permission and its label (GRP-08), effective access panel (GRP-09), access change history (GRP-10), audit log (GRP-11), group home (GRP-06). Every MVP module is on for every group (GRP-18), so no module switch is used.
 - CON: none in the MVP. Linking a contribution plan or a campaign (ANN-04) to a project's funding is not in the MVP; income into the linked wallet is income of the wallet (D3), not project funding.
@@ -530,7 +531,7 @@ Count: 12 stories. P0: 4 (PRJ-01, PRJ-02, PRJ-03, PRJ-05). P1: 6 (PRJ-04, PRJ-06
 3. Closed: narrowing is an exclusion list checked in product logic, with no dependency on the permission engine (PRJ-06).
 4. Closed: one template in the MVP (PRJ-01). A second template for purchases or ceremonies is for field interviews after launch and does not block anything.
 5. Closed: a task owner may change the status of their own task without Project: manage tasks (PRJ-04).
-6. Closed: attachment size and types are those of SPD-03, the count per item is PROJECT_ATTACHMENTS_PER_ITEM (PRJ-07). Open, needs a lawyer and owned by SPD-03: retention of files after a project or group closes; default used: `RECORD_RETENTION_YEARS` (5).
+6. Closed: attachment size and types are those of SPD-03, the count per item is ATTACHMENTS_PER_ITEM, see PRJ-07. Open, needs a lawyer, see ACC open question 1: retention of attachments after a project or group closes; the value cited is `RECORD_RETENTION_YEARS` (WAL, 5).
 7. Closed: no move from personal to group in the MVP; the personal path stays at P2 and is the first cut (PRJ-12). Open, needs field interviews: demand for personal projects.
 8. Closed: the timeline sits beside the sections (PRJ-11).
 9. Closed: no SMS for task dates or any other project event in the MVP (PRJ-04, NTF-06).

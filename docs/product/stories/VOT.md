@@ -13,14 +13,15 @@ Evidence used in this file (cited per story as "file section"):
 
 In MVP: vote types yes/no/abstain and single choice; quorum and majority per vote; one automatic linked action (a passed vote starts the payment of an expense request); a proposal reference so other epics can gate their changes with a plain vote; guest voting through a shared link; reminders push then SMS; automatic close; result with outcome statement; no-quorum fallback; automatic and manual decision log entries; append-only amendments.
 
-Not in MVP: ranking, weighted votes, multiple-choice (select several), automatic execution of anything other than an expense payout, secret-ballot cryptography, comments or discussion threads on a vote, voting by SMS reply (open, see Open questions).
+Not in MVP: ranking, weighted votes, multiple-choice (select several), automatic execution of anything other than an expense payout, secret-ballot cryptography, comments or discussion threads on a vote, voting by SMS reply (recorded as Later, see Open questions).
 
 ### Kinds of vote
 
 | Kind | What it is | Extra rules |
 | --- | --- | --- |
 | Plain vote | A question to the group. Nothing happens automatically | Quorum and majority as set in VOT-02. Ballots may be Anonymous or Named (VOT-17) |
-| Authority vote | A vote linked to an expense request (VOT-03), or carrying a proposal reference from another epic (GRP-12 loosening of the spending policy, GRP-14 recovery of approvers, SPD-15 lifting a freeze, RUL-13 and CON-13 rule and plan changes) | It counts only if at least two distinct voters other than the requester (the proposer) voted (decision D4). That floor is a fixed product rule, not a parameter, and no setting can lower it. Quorum "no minimum" is not allowed. Ballots are always Named. Only the expense payout runs by itself; for every other proposal reference, a person who holds the needed permission applies the change and cites the decision ID |
+| Authority vote | Any vote linked to an expense request (VOT-03), or created from a proposal reference (GRP-12 loosening of the spending policy, GRP-14 recovery of approvers, SPD-15 lifting a freeze, RUL-13 and CON-13 rule and plan changes) | Every holder of Vote: vote is an eligible voter. Ballots are always Named. Quorum "no minimum" is refused. The floor below applies (decision D4). Only the expense payout runs by itself; for every other proposal reference, a person who holds the needed permission applies the change and cites the decision ID |
+| Floor of distinct counted voters other than the requester | Authority vote: 2, fixed, no setting can lower it. Plain vote: none | Counted voters exclude guests and everyone on the GRP-13 AC2 list. A money vote that ends below the floor is "Not passed (quorum not met)". GRP-13 is the owner of the full rule and of the list of who is ineligible; this file owns only the vote half and does not restate the list. Evaluation is at vote close only, using ballots received by the server |
 
 ### Vote statuses and results
 
@@ -41,16 +42,16 @@ Result of a Closed vote:
 | --- | --- |
 | Passed | Quorum met (and, for an authority vote, at least two distinct voters other than the requester), majority reached |
 | Not passed (majority not reached) | Quorum met, majority not reached. Includes yes equal to no on yes/no votes |
-| Not passed (quorum not met) | Quorum not met at close, or an authority vote with fewer than two voters other than the requester |
+| Not passed (quorum not met) | Quorum not met at close, or an authority vote that fails the D4 floor (VOT-03 criterion 3), including when it fails only because a voter left or was removed (reason `Not enough voters`, VOT-02 criterion 10) |
 | Tie | Single choice only: two or more top options equal, quorum met (VOT-11) |
 
-A cancelled vote has status Cancelled and no result.
+A cancelled vote has status Cancelled and no result. These four results and the Cancelled status are the only ones; VOT owns their names, and SPD maps them to its request rejection reasons (VOT-03 criterion 4).
 
-States of a ballot on the voter's phone (the XCT-05 queue states, with one vote-specific word): `Saved on this phone`, `Waiting to send`, `Sent`, `Confirmed` (shown to the voter as `Counted`), `Too late`, `Not sent` (retries used up, XCT-05), `Withdrawn` (the person cancelled it before it synced, VOT-18).
+States of a ballot on the voter's phone (the XCT-05 Table A queue states, with one vote-specific word): `Waiting to send`, `Sent`, `Confirmed` (shown to the voter as `Received`, `xct.queue.ballot_received`), `Too late`, `Not sent. Retry` (retries used up, XCT-05), `Withdrawn` (the person cancelled it before it synced, VOT-18). `Counted` appears only in results, and only for a ballot that counts toward quorum (D4).
 
 ## Parameters (configurable, never hard-coded in stories)
 
-No number below is a legal fact or a research finding. Starting values are decided here from the evidence (real turnout of 2 to 20 percent makes strict defaults block decisions, raw/04 section 14.1 and 14.6) and are validated in field interviews, which do not block the build. Parameters owned by other epics are not repeated here: SMS wait and SMS budget are NTF (`ntf.sms_window.<type or class>`, `ntf.sms_window_deadline_share`, `ntf.group_sms_allowance`), guest OTP rules are ACC (`OTP_LENGTH`, `OTP_EXPIRY_MINUTES`, `OTP_MAX_SENDS_PER_HOUR`, `OTP_MAX_WRONG_ATTEMPTS`, `OTP_LOCK_MINUTES`, `OTP_RESEND_COUNTDOWN_SECONDS`), quiet hours are NTF (`ntf.quiet_hours_default`), and offline cache depth is XCT (`CACHE_LEDGER_DAYS`).
+No number below is a legal fact or a research finding. Starting values are decided here from the evidence (real turnout of 2 to 20 percent makes strict defaults block decisions, raw/04 section 14.1 and 14.6) and are validated in field interviews, which do not block the build. Parameters owned by other epics are not repeated here: SMS wait and SMS budget are NTF (`ntf.sms_window.<type or class>`, `ntf.sms_window_deadline_share`, `ntf.group_sms_allowance`), guest OTP rules are ACC (`OTP_LENGTH`, `OTP_EXPIRY_MINUTES`, `OTP_MAX_SENDS_PER_HOUR`, `OTP_MAX_WRONG_ATTEMPTS`, `OTP_LOCK_MINUTES`, `OTP_RESEND_COUNTDOWN_SECONDS`), quiet hours and the reminder margin are NTF (`ntf.quiet_hours_default`, `ntf.reminder_margin_minutes`), offline cache depth is XCT (`CACHE_LEDGER_DAYS`) and the minimum margin before the deadline for queueing a ballot is XCT (`QUEUE_VOTE_MIN_MINUTES`).
 
 | Parameter | Meaning | Starting value |
 | --- | --- | --- |
@@ -72,7 +73,7 @@ No number below is a legal fact or a research finding. Starting values are decid
 
 ## Message key convention
 
-UI strings: `vote.<area>.<name>`, `decision.<area>.<name>`. Notifications use the NTF base key form `msg.vot.<event>` (variants `.push`, `.sms`, `.inapp`) and the event rows EV-VOT-01 to EV-VOT-10 of the NTF catalogue; events that VOT needs and the catalogue lacks (`msg.vot.expense_passed`, `msg.vot.expense_failed`, `msg.vot.cancelled`, `msg.vot.updated`, `msg.vot.review_due`, `msg.vot.closed_tie`, `msg.vot.decision_assigned`, `msg.vot.amended`) are to be added by NTF. SMS keys must stay GSM-7 and under 160 characters in every language (lint in CI, raw/07 section 4 rules R-SMS1 to R-SMS4, XCT-12). No text is written in this file; stories only name keys.
+UI strings: `vot.<area>.<name>` (the decision log uses the area `decision`, for example `vot.decision.manual_badge`). Notifications use only the NTF base key form `msg.vot.<event>` (variants `.push`, `.sms`, `.inapp`), and every key named here is a row of the NTF catalogue (EV-VOT-01 to EV-VOT-18); NTF owns the rows, the classes and the SMS fallbacks, and this file adds no key and no SMS fallback outside the catalogue. The failed-vote key is `msg.vot.expense_failed` and the passed key is `msg.vot.expense_passed`. SMS length and encoding follow the XCT-12 per-language lint (mg, fr, en, with segment count, variables measured at maximum length) and the NTF-07 template rules. No text is written in this file; stories only name keys.
 
 ---
 
@@ -94,18 +95,18 @@ UI strings: `vote.<area>.<name>`, `decision.<area>.<name>`. Notifications use th
 
 **Acceptance criteria:**
 1. The form asks, in this order: question (required), context (optional free text), type (yes/no/abstain or single choice), options, deadline, who can vote. Yes/no/abstain shows its three fixed options. Single choice needs 2 to VOTE_MAX_OPTIONS options, each a short sentence, no duplicates.
-2. The deadline is picked as a date and time. Below the field the form shows both forms: `Closes Fri 24 Oct, 17:00 (in 2 days 3 h)`. A deadline outside VOTE_MIN_DURATION and VOTE_MAX_DURATION is refused with `vote.error.deadline_range`.
-3. Eligible voters default to every Active member of the group (or project team) who holds Vote: vote, plus people with an Invited membership by phone number who were given the Member bundle at invite (GRP-03; they vote as guests, VOT-06). The creator may pick a subset on a plain vote; an authority vote always uses every holder of Vote: vote in the group that owns the wallet (VOT-03). Members without Vote: vote appear greyed out with the reason `vote.eligible.no_permission`. The eligible list is frozen when the vote opens. A non-member is never eligible.
+2. The deadline is picked as a date and time. Below the field the form shows both forms: `Closes Fri 24 Oct, 17:00 (in 2 days 3 h)`. A deadline outside VOTE_MIN_DURATION and VOTE_MAX_DURATION is refused with `vot.error.deadline_range`. For a money vote or an authority vote, a deadline inside quiet hours (NTF-09) is refused and snapped to the next slot inside 07:00-21:00, so that no payout starts before holders of Wallet: freeze can be informed. For every vote the creator sees the NTF-09 criterion 3 warning about the chosen deadline.
+3. Eligible voters default to every Active member of the group (or project team) who holds Vote: vote, plus people with an Invited membership by phone number who were given the Member bundle at invite (GRP-03; they vote as guests, VOT-06). The creator may pick a subset on a plain vote; an authority vote always uses every holder of Vote: vote in the group that owns the wallet (VOT-03). Members without Vote: vote appear greyed out with the reason `vot.eligible.no_permission`. The eligible list is frozen when the vote opens. A non-member is never eligible.
 4. A review step shows the whole vote as voters will see it, including the rule in plain words (from VOT-02), before the creator taps `Open the vote`. The button is labelled with the action, not "Next".
 5. On open, the vote gets status Open and a reference ID, and appears in the group's vote list. Eligible members receive `msg.vot.opened` (EV-VOT-01); members without the app or who do not open it get the SMS variant after the NTF-05 wait.
-6. States: while saving, the button shows a loading state and cannot be tapped twice (no duplicate vote). If the connection drops before opening, the vote is kept as a draft marked `Saved on this phone` and is never opened silently; the creator confirms again when back online. If the save fails, the form keeps every field and shows `vote.error.save_failed` with a Retry button.
+6. States: while saving, the button shows a loading state and cannot be tapped twice (no duplicate vote). If the connection drops before opening, the vote is kept as a local draft marked `Draft, not sent` (XCT-05 Table B, never sent without a tap) and is never opened silently; publishing needs a connection and the creator taps `Open the vote` again when back online (`xct.offline.needs_connection`). If the save fails, the form keeps every field and shows `vot.error.save_failed` with a Retry button.
 7. A draft (status Draft) can be left and resumed. A draft has no ballots, sends no notification and is visible only to its creator.
 8. Audit: an audit entry records who created the vote, when, with the eligible list size and the rule, and who opened it.
 9. Accessibility and language: every field has a visible label (no placeholder-only labels), touch targets are at least 48 by 48 dp, and the form works at 200% font size and 320 px width. The question and options keep the language the creator typed; fixed labels follow the viewer's language (Malagasy, French, English).
-10. Proposal reference: when the form is opened from another epic's proposal (GRP-12, GRP-14, SPD-15, RUL-13, CON-13), the question is prefilled, the type is fixed to yes/no/abstain, the vote becomes an authority vote (see Kinds of vote), and the proposal type and ID are shown on the vote page and written to the decision entry as a read-only reference. A passed vote does not execute the proposal: the holder of the needed permission applies it and cites the decision ID.
+10. Proposal reference: when the form is opened from another epic's proposal (GRP-12, GRP-14, SPD-15, RUL-13, CON-13), the question is prefilled, the type is fixed to yes/no/abstain, the vote becomes an authority vote (see Kinds of vote), and the proposal type and ID are shown on the vote page and written to the decision entry as a read-only reference. The proposal reference is the only way to create a non-expense authority vote; the form offers no other route to one. The floor for these votes is owned by GRP-13 and counted under VOT-03 criterion 3. A passed vote does not execute the proposal: the holder of the needed permission applies it and cites the decision ID. The form also accepts two optional prefill inputs from the CON decision gate: `question_text` (generated from the snapshot, read-only) and `snapshot_ref` (immutable once the vote starts), shown with a `Why this vote` line. If the person edits the question, the prefill is dropped and the vote carries no `snapshot_ref`, so it can no longer be applied. This is a form parameter, not a linked-action type.
 
 **Data:** Vote, Group or Project, Membership, Audit entry, Notification.
-**Depends on:** GRP (membership list and permissions), NTF (push and SMS), XCT (draft and offline behaviour).
+**Depends on:** GRP-03, GRP-08, NTF-05, NTF-09, XCT-05, VOT-03.
 **Pages:** to be filled from the information architecture.
 **Open questions:** Closed: the maximum number of options is VOTE_MAX_OPTIONS (starting value 6), because a long list on a basic phone is unreadable. Closed: for a project vote the creator chooses between the project team and the whole group, except an authority vote on a project expense, which always goes to the group that owns the wallet, because the group's money is being decided.
 
@@ -122,21 +123,22 @@ UI strings: `vote.<area>.<name>`, `decision.<area>.<name>`. Notifications use th
 
 **Story:** As a member who creates a vote, I want to set how many people must vote and how many must agree, and see the rule in plain words, so that nobody can argue about the result afterwards.
 
-**Conversation:** Loomio states the agreement rule up front, and quorum is the minimum share of eligible voters who must take part (raw/07 section 8.3 R-VT1 and R-VT3; raw/04 section 1). Loomio only shipped quorum and vote-share settings after 14 years, and real turnout is often 2 to 20%, so strict defaults will block decisions (raw/04 section 14.1 and 14.6). Defaults therefore come from parameters and the creator can change them per vote. Whether a vote linked to money needs a stricter rule is a business rule outside the permission system: the decision (D4) is the fixed floor of two other voters and no "no minimum"; the quorum percent and majority stay configurable. Automatic vote-triggered rule changes are not in the MVP.
+**Conversation:** Loomio states the agreement rule up front, and quorum is the minimum share of eligible voters who must take part (raw/07 section 8.3 R-VT1 and R-VT3; raw/04 section 1). Loomio only shipped quorum and vote-share settings after 14 years, and real turnout is often 2 to 20%, so strict defaults will block decisions (raw/04 section 14.1 and 14.6). Defaults therefore come from parameters and the creator can change them per vote. Whether a vote linked to money needs a stricter rule is a business rule outside the permission system: the floor is owned by GRP-13 and its vote half by VOT-03 criterion 3; the quorum percent and majority stay configurable. Automatic vote-triggered rule changes are not in the MVP.
 
 **Preconditions:** The create form (VOT-01) is open.
 **Trigger:** The creator opens the "Rule" section of the form.
 
 **Acceptance criteria:**
-1. The form shows two settings: quorum (percent of eligible voters, prefilled from VOTE_DEFAULT_QUORUM_PERCENT) and majority rule (prefilled from VOTE_DEFAULT_MAJORITY). Quorum may also be set to "no minimum" with a warning `vote.rule.no_quorum_warning`, on a plain vote only. On an authority vote "no minimum" is not offered, and the summary adds the fixed floor in plain words: at least two people other than the requester must vote (`vote.rule.authority_floor`). The floor is shown as a count and applies even when the quorum percent works out lower.
-2. Majority choices: for yes/no/abstain, "more than half of the yes and no votes" or "at least a percent set by the creator" (higher than half, up to all). For single choice, "the option with the most votes wins" (plurality, even when no option exceeds half; equal top options are a Tie, VOT-11). Abstain counts toward quorum and never toward yes or no. On an authority vote the requester's own yes counts toward the majority but never toward the floor of two other voters.
-3. A plain-words summary is built from the settings and the current number of eligible voters, for example key `vote.rule.summary.simple` with the numbers filled in: who must vote, how many agree, what abstain does. It updates live as the creator edits and is shown identically on the review step, the vote page and the decision log.
+1. The form shows two settings: quorum (percent of eligible voters, prefilled from VOTE_DEFAULT_QUORUM_PERCENT) and majority rule (prefilled from VOTE_DEFAULT_MAJORITY). Quorum may also be set to "no minimum" with a warning `vot.rule.no_quorum_warning`, on a plain vote only. On an authority vote "no minimum" is refused: the option is not offered, and a request that sends it (for example from an older app version) is rejected with `vot.error.no_quorum_refused` ("A vote that decides money or a rule needs a minimum number of voters"). Floor owned by GRP-13; the summary adds the floor in plain words (`vot.rule.authority_floor`, count rule in VOT-03 criterion 3). The floor is shown as a count and applies even when the quorum percent works out lower.
+2. Majority choices: for yes/no/abstain, "more than half of the yes and no votes" or "at least a percent set by the creator" (higher than half, up to all). For single choice, "the option with the most votes wins" (plurality, even when no option exceeds half; equal top options are a Tie, VOT-11). Abstain counts toward quorum and never toward yes or no. On an authority vote the requester's own yes counts toward the majority but never toward the D4 floor.
+3. A plain-words summary is built from the settings and the current number of eligible voters, for example key `vot.rule.summary.simple` with the numbers filled in: who must vote, how many agree, what abstain does. It updates live as the creator edits and is shown identically on the review step, the vote page and the decision log.
 4. Quorum is also shown as a count, rounded up to a whole person (for example "8 of 15"), never only as a percent.
 5. Invalid input is refused with a clear message: quorum above 100% or negative, majority threshold not above half, non-numeric input. The form never saves a rule the summary cannot express.
 6. The rule is locked when the first ballot is cast (see VOT-12). Group defaults can change later and never alter a vote already open.
-7. If the eligible list changes before the first ballot, the summary and the count are recalculated and the creator sees `vote.rule.recalculated`. After the first ballot the eligible list and the quorum denominator stay fixed, including when a member leaves or is removed (GRP-16, GRP-17).
+7. If the eligible list changes before the first ballot, the summary and the count are recalculated and the creator sees `vot.rule.recalculated`. After the first ballot the eligible list and the quorum denominator stay fixed, including when a member leaves or is removed (GRP-16, GRP-17).
 8. Audit: the rule values and the summary text that voters saw are stored with the vote and written to the audit entry at opening.
 9. Accessibility and language: the summary is plain text (screen readers read it), never inside an image. Numbers use space grouping and are identical in Malagasy, French and English. Short sentences, one term per concept: "quorum" always has a plain gloss ("minimum number of voters").
+10. Floor and departed voters: "distinct" is by account ID, which is stable after deletion (ACC-15 Former member). Only distinct voters other than the requester (for a gate vote, other than the `proposer_id` stored on the snapshot) who are still active members at close count toward the D4 floor. The tally and the denominator stay fixed, and the ballot of a departed or removed member stays counted (GRP-16, GRP-17). If the floor fails only because a voter left or was removed, the vote closes Not passed with the reason `Not enough voters` and says so. Test: an authority vote with the floor met at the deadline minus one hour, then one of those voters removed, closes Not passed with that reason and the departed ballot still appears in the totals.
 
 **Data:** Vote (rule fields), Group settings (defaults), Audit entry.
 **Depends on:** VOT-01, GRP (group defaults).
@@ -156,24 +158,24 @@ UI strings: `vote.<area>.<name>`, `decision.<area>.<name>`. Notifications use th
 
 **Story:** As a member who proposes a spending, I want to link a vote to an expense request, so that when the group says yes the payment starts without a second round of approvals.
 
-**Conversation:** This is the one vote-triggered action in the MVP and Gereo's open design space: nothing found combines a vote, a wallet and an approval in one flow (raw/08 section 6.8 "Open opportunities"; competitive-analysis section 5). Decision D4 (founder): a passed vote is the authorisation, so the payment starts without approvers; approvers exist only for spending below the vote threshold (`spend_vote_threshold`, owned by SPD). The vote page therefore must show exactly what will be paid (raw/07 section 8.4 R-AP1 and R-AP3; the Bybit lesson in raw/04 section 9 is that people approve what the screen shows). To keep the rule that no single person moves group money, an authority vote counts only when at least two distinct people other than the requester voted. Decision D1 stays intact: the requester can vote like any member, but never approves their own request. The requester's own yes counts toward the majority and never toward the floor. A money vote is always Named, because the ledger entry of the payout stores the vote and its voters (GRP-13) and SPD-09 shows who voted yes as the authorisation.
+**Conversation:** This is the one vote-triggered action in the MVP and Gereo's open design space: nothing found combines a vote, a wallet and an approval in one flow (raw/08 section 6.8 "Open opportunities"; competitive-analysis section 5). Decision D4 (founder): a passed vote is the authorisation, so the payment starts without approvers; approvers exist only for spending below the vote threshold (`spend_vote_threshold`, owned by SPD). The vote page therefore must show exactly what will be paid (raw/07 section 8.4 R-AP1 and R-AP3; the Bybit lesson in raw/04 section 9 is that people approve what the screen shows). The floor that keeps one person from moving group money is owned by GRP-13; this story owns its vote half (criterion 3). Decision D1 stays intact: the requester can vote like any member, but never approves their own request. A money vote is always Named, because the ledger entry of the payout stores the vote and its voters (GRP-13) and SPD-09 shows who voted yes as the authorisation.
 
-**Preconditions:** An expense request exists in status Draft, Awaiting approval, Needs changes or Awaiting vote (SPD status table) and has no open vote. At least three people hold Vote: vote in the group that owns the wallet (the requester and two others). Starting a vote on a request that is Awaiting approval moves it to Awaiting vote and sets its approvals aside; they are not reused.
+**Preconditions:** An expense request exists in status Draft, Awaiting approval, Needs changes or Awaiting vote (SPD status table) and has no open vote. At least two eligible voters other than the requester hold Vote: vote in the group that owns the wallet and are counted under criterion 3; with fewer, a money vote is unavailable and the approval band applies (conventions 10.7). Starting a vote on a request that is Awaiting approval moves it to Awaiting vote and sets its approvals aside; they are not reused.
 **Trigger:** The request is sent while the policy requires a vote (SPD-09), or from the expense request the person taps "Ask the group to vote first", or, in VOT-01, the person picks "Link to an expense request".
 
 **Acceptance criteria:**
 1. When linked, the type is fixed to yes/no/abstain, the eligible voters are every holder of Vote: vote in the group (no subset), the ballots are Named, and the vote page shows the exact amount, payee, source wallet, purpose and attachment of the request, taken live from the request. It does not show the wallet balance to guests (see VOT-06).
-2. Only one open vote can be linked to a given expense request. A second attempt is refused with `vote.link.already_open` and a link to the open vote. If fewer than two people other than the requester hold Vote: vote, the link is refused with `vote.link.too_few_voters` and the next step (grant Vote: vote to a second person, GRP-08).
-3. When the vote closes as Passed (quorum met, majority reached, and at least two distinct voters other than the requester voted), the request starts its payout through the SPD-10 checks (balance, freeze, spending cap, request unchanged) and the requester receives `msg.vot.expense_passed`. The vote result is shown on the request. The vote itself writes no ledger entry; the payout does. If an SPD-10 check stops the payout, the request shows the reason and the next step (SPD-10, SPD-11); the vote is not run again and the decision entry shows that status (VOT-13).
-4. When the vote closes as Not passed (either reason) the request becomes Rejected with the reason "The group did not approve" or "Quorum not reached" (SPD-09 owns the wording and keys), and the requester is notified with `msg.vot.expense_failed`. When the vote is Cancelled, the request follows SPD-09 and SPD-12. It can be proposed again as a new request.
-5. If the amount, payee, wallet or purpose of the request changes while the vote is open (SPD-07), the vote is cancelled automatically, all voters are told `msg.vot.cancelled` with the reason `vote.cancel.request_changed`, and earlier ballots do not carry over. When the policy requires a vote, the system opens a replacement vote for the changed request at once, with a new deadline and a link to the cancelled one (SPD-09 criterion 5); otherwise the requester may start a new vote.
-6. If the request is cancelled or withdrawn while the vote is open, the vote is cancelled in the same way with the reason `vote.cancel.request_withdrawn`. A vote linked to a request cannot be closed early (VOT-08); it can be extended or cancelled.
+2. Only one open vote can be linked to a given expense request. A second attempt is refused with `vot.link.already_open` and a link to the open vote. If eligible voters other than the requester number fewer than two, the link is refused with `vot.link.too_few_voters`, the approval band applies (conventions 10.7) and the next step is shown (grant Vote: vote to a second person, GRP-08).
+3. An authority vote counts only if at least two distinct counted voters other than the requester voted (decision D4). GRP-13 is the master statement of the floor and of who is ineligible (its AC2 is the only list); this story owns only the vote half and other files cite both. A counted voter is one Active member with a PIN account, so guests count toward majority and quorum but never toward the floor. The floor is counted at close only, on ballots received by the server: queued ballots never count and no client timestamp is trusted (VOT-18). Eligibility and hold status are evaluated at close, and a later hold or departure never voids a closed vote (SPD-10 still stops the payout on balance, freeze or cap). A manual decision entry (VOT-14) or an amendment (VOT-15) never counts. When an authority vote ends with fewer than two counted voters, the result is Not passed (quorum not met) and the vote never falls back to approvals. When the vote closes as Passed (quorum met, majority reached, floor met), the vote is the authorisation: the request starts its payout without approvers through the SPD-10 checks (balance, freeze, spending cap, request unchanged) and the requester receives `msg.vot.expense_passed` (EV-VOT-11, shown by SPD-09). A payout authorised by a passed vote is never dispatched during quiet hours: it is held until quiet hours end and the result notice is released at the same moment (NTF-09). The vote result is shown on the request. The vote itself writes no ledger entry; the payout does. Vote close and the decision-entry write are one atomic step (VOT-13). If an SPD-10 check stops the payout and SPD reports `payout_blocked`, the request shows the reason and the next step (SPD-10, SPD-11), the vote is not run again, and a linked follow-up entry is created in the decision log (VOT-13 criterion 3); the closed entry is never edited.
+4. When the vote closes as Not passed (majority not reached) the request becomes Rejected and the requester is notified with the single key `msg.vot.expense_failed` (EV-VOT-12, shown by SPD-09); SPD maps it to "The group did not approve". When the vote closes as Not passed (quorum not met), including `Not enough voters`, the request moves to Needs attention for 48 hours, not Rejected, and the requester receives the same key with the quorum reason, mapped by SPD to "Quorum not reached". During those 48 hours the requester may extend the vote once through the extension of criterion 6 and VOT-10, which reopens it with the same reference and a new deadline; only ballots received by the server count. If it is not extended within 48 hours, the request becomes Rejected. SPD owns the wording. When the vote is Cancelled, the request follows SPD-09 and SPD-12. It can be proposed again as a new request.
+5. If the amount, payee, wallet or purpose of the request changes while the vote is open (SPD-07), the vote is cancelled automatically, all voters are told `msg.vot.cancelled` with the reason `vot.cancel.request_changed`, and earlier ballots do not carry over. When the policy requires a vote, the system opens a replacement vote for the changed request at once, with a new deadline and a link to the cancelled one (SPD-09 criterion 5); otherwise the requester may start a new vote.
+6. If the request is cancelled or withdrawn while the vote is open, the vote is cancelled in the same way with the reason `vot.cancel.request_withdrawn`. A vote linked to a request cannot be closed early (VOT-08); it can be extended or cancelled.
 7. The decision-log entry (VOT-13) shows the request, and later shows "Money moved" with a link to the ledger entry once the payment is Confirmed.
 8. Audit: the link, the cancellation reason and the transition of the request are written to the audit log with actor and time. A person who cannot see the request cannot link it.
 9. Accessibility and language: the amount reads `12 500 Ar` with no wrap and no clipping at 200% font size, identically in all three languages. The button reads `Open the vote` plus the amount, never a bare "Confirm".
 
 **Data:** Vote, Expense request, Decision, Ledger entry (read by link), Audit entry.
-**Depends on:** VOT-01, VOT-02, VOT-08, VOT-13, SPD-02, SPD-07, SPD-09, SPD-10, SPD-12, GRP-08, WAL-14 (ledger entry reference).
+**Depends on:** VOT-01, VOT-02, VOT-08, VOT-13, SPD-02, SPD-07, SPD-09, SPD-10, SPD-12, GRP-08, WAL-14, NTF-09.
 **Pages:** to be filled from the information architecture.
 **Open questions:** Closed: a vote is mandatory above `spend_vote_threshold`, a setting owned by SPD-02 and GRP-12 (default: no vote required); VOT only reads it. Closed: the default minimum for a money vote is two distinct voters other than the requester, fixed (D4). Closed: the request statuses that allow a vote are listed in Preconditions.
 
@@ -196,12 +198,12 @@ UI strings: `vote.<area>.<name>`, `decision.<area>.<name>`. Notifications use th
 **Trigger:** The person opens the vote from a notification, the vote list or a link.
 
 **Acceptance criteria:**
-1. The ballot shows the question, the options with their full sentences, and the line `vote.ballot.can_change` ("You can change your answer until {deadline}"). Choosing an option and tapping `Send my vote` records the ballot in at most two taps.
-2. After voting the person sees a confirmation with their answer and the words `Counted`, and the button changes to `Change my vote`. Changing replaces the earlier ballot and keeps the history in the audit log.
+1. The ballot shows the question, the options with their full sentences, and the line `vot.ballot.can_change` ("You can change your answer until {deadline}"). Choosing an option and tapping `Send my vote` records the ballot in at most two taps.
+2. After voting the person sees a confirmation with their answer and the word `Received`, and the button changes to `Change my vote`. `Counted` appears only in results, and only for a ballot that counts toward quorum (D4). Changing replaces the earlier ballot and keeps the history in the audit log.
 3. A person can hold only one current ballot per vote. A second device or a repeated tap never creates a second ballot.
-4. If the vote has closed, the ballot is replaced by the result and `vote.ballot.closed`. A request arriving after the close is rejected and nothing is counted.
-5. A person not on the eligible list sees `vote.error.not_eligible` and who to ask; a person on the list without Vote: vote sees `vote.error.no_permission` naming the missing permission and who can grant it.
-6. States: sending shows `Sending` and disables the button; on failure the ballot is kept and shows `vote.error.send_failed` with Retry; the person can never be left unsure whether the vote counted.
+4. If the vote has closed, the ballot is replaced by the result and `vot.ballot.closed`. A request arriving after the close is rejected and nothing is counted.
+5. A person not on the eligible list sees `vot.error.not_eligible` and who to ask; a person on the list without Vote: vote sees `vot.error.no_permission` naming the missing permission and who can grant it.
+6. States: sending shows `Sending` and disables the button; on failure the ballot is kept and shows `vot.error.send_failed` with Retry; the person can never be left unsure whether the vote counted.
 7. Notifications: no notification to others when a person votes (see VOT-17 for visibility). The voter gets no push for their own vote.
 8. Audit: on a Named vote every ballot and every change is stored with voter, time, device and previous value. On an Anonymous vote the audit stores that a ballot or a change happened, with voter, time and device, and keeps the answers only as the rules of VOT-17 allow. The person can see their own ballot history while the vote is open.
 9. Accessibility and language: options are real radio buttons with 48 by 48 dp targets, selected state is shown by icon and text and not only colour, and the whole ballot is usable with a screen reader.
@@ -230,18 +232,18 @@ UI strings: `vote.<area>.<name>`, `decision.<area>.<name>`. Notifications use th
 **Trigger:** The person opens the vote page.
 
 **Acceptance criteria:**
-1. The top of the page shows the question, the status chip (word and icon), the deadline as `Closes Fri 24 Oct, 17:00 (in 2 days 3 h)`, and the rule in plain words from VOT-02.
-2. The quorum meter shows a bar with a marker at the threshold and text such as `vote.quorum.progress` ("8 of 15 needed. 5 have voted"). When met, it shows a check and `vote.quorum.met`. After close it explains why a vote did not count (quorum not met versus rejected).
+1. The top of the page shows the question, the status chip (word and icon), the deadline as `Closes Fri 24 Oct, 17:00 (in 2 days 3 h)` (format per XCT-03), and the rule in plain words from VOT-02. After close the chip shows one of the four results (Passed, Not passed (majority not reached), Not passed (quorum not met), Tie) or, for a vote stopped before a result, the status Cancelled.
+2. The quorum meter shows a bar with a marker at the threshold and text such as `vot.quorum.progress` ("8 of 15 needed. 5 have voted"; any percent is formatted per XCT-02). When met, it shows a check and `vot.quorum.met`. After close it explains why a vote did not count (quorum not met versus rejected).
 3. The relative time updates in days and hours, and in minutes only during the last hour. It does not tick every second.
 4. Participation is live while the page is open and the connection is fine: it refreshes every VOTE_REFRESH_SECONDS, on pull-to-refresh and on return to the page. The page shows `Updating...` while refreshing and never blocks the screen with a full-page loader.
 5. Option tallies (totals only, never names unless the vote is Named, VOT-17) are shown to a voter once they have cast a ballot, and to everyone with access after close. Before that the page shows participation only.
 6. Offline or slow connection: the page loads from cache with a `Last synced` time and the quorum numbers are marked as possibly out of date. Casting stays available under the VOT-18 rules.
-7. Loading shows a skeleton of the final layout. A vote the person cannot see returns `vote.error.not_visible` with who can grant access (never a bare "Not allowed").
+7. Loading shows a skeleton of the final layout. A vote the person cannot see returns `vot.error.not_visible` with who can grant access (never a bare "Not allowed").
 8. Audit: none for reading; no read is logged.
 9. Accessibility and language: the quorum is never conveyed by colour alone, the meter has a text equivalent that screen readers announce, and the layout reflows at 320 px without horizontal scroll.
 
 **Data:** Vote, Ballot (counts only), Membership.
-**Depends on:** VOT-01, VOT-02, VOT-04, XCT-04 (cache and last synced), XCT-09 (status without colour).
+**Depends on:** VOT-01, VOT-02, VOT-04, XCT-02, XCT-03, XCT-04, XCT-09.
 **Pages:** to be filled from the information architecture.
 **Open questions:** Closed: interim totals are visible only after you have voted. Showing them to everyone from the start adds social pressure on a small group (raw/04 section 2 and 14.1), and hiding them until close makes the quorum meter less useful; participation counts stay visible to all in every case.
 
@@ -264,20 +266,20 @@ UI strings: `vote.<area>.<name>`, `decision.<area>.<name>`. Notifications use th
 **Trigger:** A member taps "Share" on the vote, or Gereo sends the guest a link by SMS (VOT-01, VOT-07); the guest taps the link in WhatsApp, SMS or a browser.
 
 **Acceptance criteria:**
-1. "Share" opens the phone's share sheet with a ready message (key `vote.share.message`: question, deadline, link). It also offers "Copy link". The share link carries an unguessable vote token, can be forwarded freely because it is not a credential, and stops accepting ballots at close. The link Gereo sends by SMS to one person carries a signed single-use token (NTF-11) that opens the same verification page.
-2. Before verification the page shows only the group name, who asked and the closing time. The question and options appear only after the guest's number is verified as eligible, so a forwarded link never leaks what the group is deciding (this overrides the preview in ACC-16 criterion 2).
-3. Verification: the guest enters a phone number and a one-time code by SMS (the ACC-02 rules and parameters apply: single input, autofill and paste allowed, `OTP_EXPIRY_MINUTES`, `OTP_MAX_WRONG_ATTEMPTS`, `OTP_RESEND_COUNTDOWN_SECONDS`). No PIN, no profile, no identity check is asked. The code SMS is a security message paid by the platform (NTF-06).
-4. One vote per person: the ballot is tied to the verified phone number. Opening the link on a second phone or verifying again shows the existing ballot, never a second one. A number not on the list sees `vote.guest.not_on_list` with the creator's name to ask.
+1. "Share" opens the phone's share sheet with a ready message (key `vot.share.message`: question, deadline, link). It also offers "Copy link". This story defines the vote share link: reusable, with an unguessable vote token, it can be forwarded freely because it is not a credential, and it stops accepting ballots at close. The other two link kinds are defined where their tokens are issued and are only referenced here: the invite share link (GRP-03) and the per-person single-use SMS link (NTF-11), which opens the same verification page.
+2. Before verification the page shows only the group name, who asked and the closing time. The question and options appear only after the guest's number is verified as eligible, so a forwarded link never leaks what the group is deciding.
+3. Verification: the guest enters a phone number and a one-time code by SMS (the ACC-02 rules and parameters apply: single input, autofill and paste allowed, `OTP_EXPIRY_MINUTES`, `OTP_MAX_WRONG_ATTEMPTS`, `OTP_RESEND_COUNTDOWN_SECONDS`). The first open of a link always requires an OTP. A verified number is then remembered on the same device for that vote's lifetime, with no second OTP. No PIN, no profile, no identity check is asked. The code SMS is a security message paid by the platform (NTF-06).
+4. One number, one ballot: this is the only counting rule this story owns. The ballot is tied to the verified phone number. Guest ballots count toward majority and quorum but never toward the authority-vote floor (GRP-13, VOT-03 criterion 3), and the ballot screen tells a guest this with `vot.guest.floor_notice`. Opening the link on a second phone or verifying again shows the existing ballot, never a second one. A number not on the list sees `vot.guest.not_on_list` with the creator's name to ask.
 5. After verification the guest can: read the question, context and options; see the deadline, the rule and quorum progress; vote and change the vote until close; see the result and outcome statement after close. For a vote linked to an expense the guest sees purpose, amount, payee and source wallet name, and never a balance.
 6. The guest cannot see or do: the group ledger or any balance, the member list, other votes, the decision log, other projects, vote creation, comments. The guest session is ephemeral and limited to this vote (ACC-16 criterion 3): it creates no account and no profile. After voting the page offers an optional "Create an account" and never requires it. If the guest later registers with the same number, their ballots are attached to the new account.
-7. The page is light for slow connections and basic browsers (within the route weight budget in design-foundations section 4), with a visible language switch (Malagasy, French, English) and a clear error when the link has expired or the vote is closed (`vote.guest.closed` plus the result when public to eligible voters).
-8. Errors: wrong or expired code shows `vote.guest.otp_wrong` with Resend; too many attempts shows a lock message and when to retry; nothing counts until the ballot is confirmed on screen.
+7. The page is light for slow connections and basic browsers (within the route weight budget in design-foundations section 4), with a visible language switch (Malagasy, French, English) and a clear error when the link has expired or the vote is closed (`vot.guest.closed` plus the result when public to eligible voters).
+8. Errors: wrong or expired code shows `vot.guest.otp_wrong` with Resend; too many attempts shows a lock message and when to retry; nothing counts until the ballot is confirmed on screen.
 9. Audit and privacy: the audit entry records the masked phone number (not the full number in the UI), time, device and the share link token used. Rate limiting applies per number and per token.
 
 **Data:** Vote, Ballot, Phone verification, Membership (invited, not registered), Audit entry.
 **Depends on:** VOT-01, VOT-04, ACC-02 (phone and OTP), ACC-16 (open a vote link without an account), GRP-03 (invite by phone), NTF-11 (reach people without the app), XCT-01 (language), XCT-07 (low data), XCT-11 (route budget).
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed: a guest session is ephemeral, because a light account would need a profile and a PIN that the guest on a basic phone does not have. Closed: the question is not visible before verification, because group decisions and money amounts must not leak through a forwarded link. Closed: a non-member can never be eligible by phone. Voting by SMS reply for people with no data at all: see the Open questions at the end.
+**Open questions:** Closed: a guest session is ephemeral, because a light account would need a profile and a PIN that the guest on a basic phone does not have. Closed: the question is not visible before verification, because group decisions and money amounts must not leak through a forwarded link. Closed: a non-member can never be eligible by phone. Closed: voting by SMS reply for people with no data at all is recorded as Later, not in the MVP (see Open questions 7).
 
 ---
 
@@ -300,18 +302,18 @@ UI strings: `vote.<area>.<name>`, `decision.<area>.<name>`. Notifications use th
 **Acceptance criteria:**
 1. At each offset the system sends `msg.vot.closing_soon` (EV-VOT-02) to every eligible person without a ballot. Authority votes use the extra late offset and `msg.vot.closing_now` (EV-VOT-03).
 2. If a person has not opened the push within the NTF-05 window (`ntf.sms_window.<type or class>`, deadline-aware), or has no registered device, the system sends the SMS variant of the same key. A person who has already voted, or who opened the push and voted, gets nothing, because NTF-05 re-checks the need just before sending.
-3. Guests (VOT-06) who are on the eligible list receive the SMS with the link directly (NTF-11); they cannot receive push.
-4. The reminder never says who voted or how; it says the question, the closing time in absolute and relative form, and the link. SMS stays within one GSM-7 segment (160 characters) in each language and ends with the vote reference.
-5. Quiet hours (NTF-09) apply to push and SMS and are never overridden by a vote, including on authority votes. Reminders are planned outside quiet hours; if an offset falls inside them, the reminder is sent at the latest time before quiet hours start.
+3. Guests (VOT-06) who are on the eligible list receive the SMS with the link directly (NTF-11); they cannot receive push. For an unregistered number the only service SMS allowed are the link SMS, the OTP SMS and one reminder, with a per-number opt-out. A registered account follows its own ACC-13 consent.
+4. The reminder never says who voted or how; it says the question, the closing time in absolute and relative form, and the link. The SMS stays within the XCT-12 limit (one GSM-7 segment of 160 characters in each language) and ends with the vote reference.
+5. Quiet hours (NTF-09) apply to push and SMS and are never overridden by a vote, including on authority votes. A reminder whose send time falls inside quiet hours follows the NTF-09 reminder rule: it is sent at quiet hours end if at least `ntf.reminder_margin_minutes` remain before the deadline, otherwise at the latest slot before quiet hours begin the evening before.
 6. A cap of VOTE_REMINDER_MAX_PER_PERSON automatic reminders per person per vote applies. The creator or a holder of Vote: edit may trigger one extra manual reminder at most every VOTE_MANUAL_REMINDER_GAP, with the number of people it will reach shown before sending.
 7. States: if SMS delivery fails, the status of the attempt (sent, delivered, failed) is stored and visible to the vote creator as a count (for example `3 reminders not delivered`), without exposing names beyond what VOT-17 allows (NTF-02, NTF-13).
 8. Audit: every reminder, channel, time and delivery result is stored. SMS volume is counted against the group's SMS allowance (NTF-06).
-9. Language: each person gets the reminder in their preferred language. Message keys are linted for accents that would push an SMS to 70 characters per segment.
+9. Language: each person gets the reminder in their preferred language. Message keys are linted per language (mg, fr, en) under XCT-12, where one non-GSM character switches an SMS to 70 characters per segment.
 
 **Data:** Notification, Device, Ballot, Vote, Audit entry.
-**Depends on:** VOT-01, VOT-06, NTF-02, NTF-05, NTF-06, NTF-09, NTF-11, NTF-13, ACC-06 (language preference).
+**Depends on:** VOT-01, VOT-06, NTF-02, NTF-05, NTF-06, NTF-09, NTF-11, NTF-13, ACC-06, ACC-13, XCT-12.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed: the group pays for vote reminders and notices from its SMS allowance, and the platform pays for guest security codes (NTF-06 payer table). Closed: offsets start at 24 h and, for authority votes, 3 h (see Parameters), to validate in field interviews without blocking the build. Closed: a person can opt out of SMS for votes through NTF-10, after the warning about what they may miss.
+**Open questions:** Closed: the group pays for vote reminders and notices from its SMS allowance, and the platform pays for guest security codes (the Pl and Gr legend in NTF Shared definitions). Closed: offsets start at 24 h and, for authority votes, 3 h (see Parameters), to validate in field interviews without blocking the build. Closed: a person can opt out of SMS for votes through NTF-10, after the warning about what they may miss.
 
 ---
 
@@ -334,16 +336,16 @@ UI strings: `vote.<area>.<name>`, `decision.<area>.<name>`. Notifications use th
 **Acceptance criteria:**
 1. At the deadline the system closes the vote within VOTE_CLOSE_TOLERANCE. From that moment no new or changed ballot is accepted.
 2. "Close now" shows a confirmation sheet with current participation, whether quorum is met and what the result would be, and a button labelled `Close the vote now`. It is available only to holders of Vote: close, and never on a vote linked to an expense request (VOT-03), which can only end at its deadline, be extended or be cancelled, so nobody can cut off the other voters of a money decision.
-3. Closing early with quorum not reached closes the vote with the result Not passed (quorum not met) and warns first with `vote.close.early_no_quorum`. The no-quorum fallback of VOT-10 applies only at the deadline.
-4. On close, the system computes the result using the stored rule (VOT-09), changes the status to Closed with the result, and triggers the decision-log entry (VOT-13) and any linked action (VOT-03).
-5. A closed vote is read-only. A ballot received after the close is rejected with `vote.error.closed` and, for queued ballots, the message in VOT-18.
-6. Notifications: every eligible person receives the result in the app and by push: `msg.vot.result` (EV-VOT-04) for Passed and Not passed (majority not reached), `msg.vot.no_quorum` (EV-VOT-05, with the NTF-05 SMS fallback) for Not passed (quorum not met), `msg.vot.closed_tie` for Tie. A guest with a phone number gets the result by one direct SMS (NTF-11). Quiet hours hold an unplanned result until they end (NTF-09).
-7. States: while the system computes the close, the vote has status Closing. If the close job fails, the vote has status Needs attention for the creator and holders of Vote: close, the operator is alerted, and the vote still accepts no ballots after the deadline.
+3. Closing early with quorum not reached closes the vote with the result Not passed (quorum not met) and warns first with `vot.close.early_no_quorum`. The no-quorum fallback of VOT-10 applies only at the deadline.
+4. On close, the system computes the result using the stored rule (VOT-09), changes the status to Closed with the result, and writes the decision-log entry (VOT-13) in the same atomic step, then triggers any linked action (VOT-03). A money vote counts only with at least two distinct voters other than the requester (VOT-03 criterion 3); when eligible voters other than the requester number fewer than two, a money vote is unavailable and the approval band applies (conventions 10.7).
+5. A closed vote is read-only. A ballot received after the close is rejected with `vot.error.closed` and, for queued ballots, the message in VOT-18.
+6. Notifications: every eligible person receives the result in the app and by push: `msg.vot.result` (EV-VOT-04) for Passed and Not passed (majority not reached), `msg.vot.no_quorum` (EV-VOT-05, with the NTF-05 SMS fallback) for Not passed (quorum not met), `msg.vot.closed_tie` for Tie. A guest sees the result on their link and gets no result SMS. Quiet hours hold an unplanned result until they end (NTF-09); for a passed money vote the result notice and the payout are released together (VOT-03 criterion 3).
+7. States: while the system computes the close, the vote has status Closing. If the close job or the decision-log write fails, the vote has status Needs attention for the creator and holders of Vote: close, the operator is alerted (OPS-14 is the backstop), and the vote still accepts no ballots after the deadline.
 8. Audit: the closing mode (deadline or manual), the actor, the exact time and the final counts are written to the audit log. A manual close is attributable to a person.
 9. Accessibility and language: the time shown in confirmations is absolute and relative, and the confirm button is not the default focus.
 
 **Data:** Vote, Ballot, Decision, Audit entry, Notification.
-**Depends on:** VOT-03, VOT-04, VOT-09, VOT-10, VOT-13, NTF-05, NTF-09, NTF-11, OPS-10 (alert on a failed close job; to be added there).
+**Depends on:** VOT-03, VOT-04, VOT-09, VOT-10, VOT-13, NTF-05, NTF-09, OPS-14.
 **Pages:** to be filled from the information architecture.
 **Open questions:** Closed: no automatic close when everyone has voted. A fixed deadline is what makes the time predictable for people on poor connections, and the creator can still close early (except on a money vote).
 
@@ -366,18 +368,19 @@ UI strings: `vote.<area>.<name>`, `decision.<area>.<name>`. Notifications use th
 **Trigger:** The person opens the vote or the notification after close.
 
 **Acceptance criteria:**
-1. The result is computed from the stored rule and shown as one of the results of the shared table: Passed, Not passed (majority not reached), Not passed (quorum not met), Tie. A Cancelled vote shows the status Cancelled and no result. Each has a word, an icon and a colour, never colour alone.
-2. An automatic outcome sentence is generated from message keys (`vote.outcome.passed`, `vote.outcome.rejected`, `vote.outcome.noquorum`, `vote.outcome.tie`, and `vote.outcome.authority_floor` when an authority vote had fewer than two voters other than the requester) with the counts filled in, for example "5 yes, 1 no, quorum not reached: 5 of 8 needed". It shows facts, not blame.
-3. Counts and, where the ballot is named (VOT-17), names are shown as the setting stated before voting. Percentages never replace counts.
+1. The result is computed from the stored rule and shown as one of the four results of the shared table: Passed, Not passed (majority not reached), Not passed (quorum not met), Tie. A Cancelled vote shows the status Cancelled and no result. Each has a word, an icon and a colour, never colour alone.
+2. An automatic outcome sentence is generated from message keys (`vot.outcome.passed`, `vot.outcome.rejected`, `vot.outcome.noquorum`, `vot.outcome.tie`, and `vot.outcome.authority_floor` when an authority vote failed the D4 floor, with the reason `Not enough voters`) with the counts filled in, for example "5 yes, 1 no, quorum not reached: 5 of 8 needed". It shows facts, not blame.
+3. Counts and, where the ballot is named (VOT-17), names are shown as the setting stated before voting. Percentages never replace counts. The word `Counted` is shown against a ballot only when it counts toward quorum (D4).
 4. The vote creator or a holder of Vote: close can add, after the close, a written outcome with a next step: what, who is responsible and by when, and an optional review date. Added text is appended with author and time and is not an edit of the automatic sentence.
 5. If a review date is set, the system notifies the owner and the group on that date with `msg.vot.review_due` and links back to the decision.
 6. If the vote was linked to an expense, the result page shows what happened to the request and a link to it (VOT-03).
 7. States: while the result is computed the page shows a loading state; offline it shows the cached result with `Last synced`.
 8. Audit: the outcome text, its author and time are stored and shown in the decision log.
 9. Accessibility and language: the outcome sentence is plain text, translated per key, and fits at 200% font size.
+10. Result for the CON decision gate: a closed vote exposes to CON its id, close time, status and `snapshot_ref`. Only a vote with the result Passed allows an Apply; Not passed (either reason), Tie, Needs attention and Cancelled do not.
 
 **Data:** Vote, Decision, Audit entry, Notification.
-**Depends on:** VOT-03, VOT-08, VOT-13, VOT-17, NTF-01 (notification centre).
+**Depends on:** VOT-03, VOT-08, VOT-13, VOT-17, NTF-01, CON-13.
 **Pages:** to be filled from the information architecture.
 **Open questions:** Closed: the next step is prompted, never required, because a mandatory field would block the close on a basic phone and the automatic sentence already states the result.
 
@@ -400,14 +403,14 @@ UI strings: `vote.<area>.<name>`, `decision.<area>.<name>`. Notifications use th
 **Trigger:** The creator sets "If not enough people vote by the deadline", or the deadline arrives without quorum.
 
 **Acceptance criteria:**
-1. The form offers three choices, prefilled from VOTE_DEFAULT_NOQUORUM_FALLBACK: (a) extend once by a duration the creator picks, within VOTE_MAX_DURATION; (b) close as Not passed (quorum not met) and let the creator reopen within VOTE_REOPEN_WINDOW; (c) close as Not passed (quorum not met) with no reopen. The choice is explained in one plain sentence each (`vote.fallback.extend`, `vote.fallback.reopen`, `vote.fallback.close`). A vote linked to an expense request offers only (a) and (c), because its request becomes Rejected at close (VOT-03) and cannot be reopened; the default is the same as for other votes.
+1. The form offers three choices, prefilled from VOTE_DEFAULT_NOQUORUM_FALLBACK: (a) extend once by a duration the creator picks, within VOTE_MAX_DURATION; (b) close as Not passed (quorum not met) and let the creator reopen within VOTE_REOPEN_WINDOW; (c) close as Not passed (quorum not met) with no reopen. The choice is explained in one plain sentence each (`vot.fallback.extend`, `vot.fallback.reopen`, `vot.fallback.close`). A vote linked to an expense request offers only (a) and (c), because it has its own 48-hour extension below and no reopen window; the default is the same as for other votes. An authority vote with fewer than two counted voters at close is always Not passed (quorum not met) whatever the fallback, and never falls back to approvals (VOT-03 criterion 3). For a money vote the linked request moves to Needs attention for 48 hours; the requester may extend the vote once through the VOT-03 criterion 6 extension (counted in VOTE_MAX_EXTENSIONS), and if it is not extended the request becomes Rejected (VOT-03 criterion 4). Only ballots received by the server count.
 2. For (a), when the deadline arrives without quorum the system extends the deadline by the chosen duration (at most VOTE_MAX_EXTENSIONS), notifies every eligible person who has not voted with `msg.vot.extended` (EV-VOT-06, in-app and push), and shows the new deadline in absolute and relative form. The reminders of VOT-07 then run again against the new deadline, so SMS follows from them and not from the extension notice. If quorum is still not met after the last extension the vote closes as Not passed (quorum not met).
 3. For (b), the vote closes as Not passed (quorum not met), the creator and holders of Vote: close are notified, and a `Reopen` action is available until the window ends. Reopening keeps all ballots and the same vote reference, sets a new deadline within the duration limits and notifies eligible voters (`msg.vot.opened`). Every close still writes its own decision entry (VOT-13). After the window the vote stays closed.
 4. A vote that reaches quorum is never affected by the fallback.
-5. The setting is shown to voters before voting with the rest of the rule (`vote.rule.summary` includes it) and is locked at the first ballot.
+5. The setting is shown to voters before voting with the rest of the rule (`vot.rule.summary` includes it) and is locked at the first ballot.
 6. Each extension and reopening is a visible, logged action (who, when, from which deadline to which) and appears in the decision-log history.
 7. A closed-as-no-quorum vote always creates a decision-log entry (VOT-13) so the failed attempt is on the record, and a later reopened vote links to it.
-8. Errors: reopening after the window or beyond limits is refused with `vote.error.reopen_expired`.
+8. Errors: reopening after the window or beyond limits is refused with `vot.error.reopen_expired`.
 9. Accessibility and language: choices are radio buttons with visible descriptions, and the dialog states consequences in plain words.
 
 **Data:** Vote (fallback setting), Decision, Audit entry, Notification.
@@ -434,7 +437,7 @@ UI strings: `vote.<area>.<name>`, `decision.<area>.<name>`. Notifications use th
 **Trigger:** The vote closes.
 
 **Acceptance criteria:**
-1. The result is Tie and states which options tied and with how many votes each (`vote.outcome.tie`).
+1. The result is Tie and states which options tied and with how many votes each (`vot.outcome.tie`).
 2. No option is chosen automatically and no person has a casting vote.
 3. The result page offers the vote creator and holders of Vote: close a "Start a runoff vote" action which opens VOT-01 prefilled with only the tied options, the same eligible voters and rule, and a new deadline to be set.
 4. The runoff links back to the original vote and the decision-log entry shows both.
@@ -469,13 +472,13 @@ UI strings: `vote.<area>.<name>`, `decision.<area>.<name>`. Notifications use th
 
 **Acceptance criteria:**
 1. While there are zero ballots, the creator can edit question, context, options, deadline, eligible voters and rule. A saved edit updates the vote immediately and eligible voters are notified only if they had already been told (`msg.vot.updated`). A member added to the eligible list now is told with `msg.vot.opened`; adding after the first ballot is not allowed.
-2. From the first ballot on, question, context, options, eligible list and rule are locked and the Edit screen says why (`vote.edit.locked`).
-3. After the first ballot, the deadline may be extended (not shortened) with a mandatory reason, which notifies every eligible person who has not voted and appears in the vote history. Extensions count toward VOTE_MAX_EXTENSIONS.
+2. From the first ballot on, question, context, options, eligible list and rule are locked and the Edit screen says why (`vot.edit.locked`).
+3. After the first ballot, the deadline may be extended (not shortened) with a mandatory reason, which notifies every eligible person who has not voted and appears in the vote history. Extensions count toward VOTE_MAX_EXTENSIONS. For a money vote or an authority vote, an extended deadline inside quiet hours is snapped to the next slot inside 07:00-21:00 as in VOT-01 criterion 2.
 4. Cancelling with zero ballots needs a confirmation and removes the vote from the list with an audit entry; it creates no decision-log entry.
 5. Cancelling after ballots exist needs Vote: close, a mandatory reason chosen from presets plus free text, and sends `msg.vot.cancelled` with the reason. Ballots are kept in the audit log, the vote shows Cancelled, and a decision-log entry records the cancellation (VOT-13).
-6. If a vote linked to an expense is cancelled, VOT-03 applies to the request. Such a vote cannot be edited, because its text comes from the request (SPD-09).
-7. Errors: two people editing at once get the latest saved version and a message `vote.edit.conflict` showing what changed (no silent overwrite).
-8. Offline: edits are blocked with an explanation, not queued, because they change what voters see.
+6. If a vote linked to an expense is cancelled, VOT-03 applies to the request. Such a vote takes its amount, payee and wording from the request (SPD-09), so Vote: edit cannot change them once any ballot is cast. Test: with one ballot cast on a linked vote, an edit of amount, payee or wording by a holder of Vote: edit is refused and the vote and its ballots are unchanged.
+7. Errors: two people editing at once get the latest saved version and a message `vot.edit.conflict` showing what changed (no silent overwrite).
+8. Offline: edits are blocked with `xct.offline.needs_connection`, not queued, because they change what voters see.
 9. Audit: every edit stores before and after values, actor and time; cancellations store the reason.
 
 **Data:** Vote, Audit entry, Notification, Decision.
@@ -499,21 +502,22 @@ UI strings: `vote.<area>.<name>`, `decision.<area>.<name>`. Notifications use th
 **Conversation:** Decisions in meetings are almost always forgotten or vague (info.md problem 2). The decision trail is the single strongest value cited by Loomio users (raw/04 section 1 and section 14.1 "value is the trail, not the click"). No product found links the decision to the ledger entry it triggered (raw/08 section 6.8 "Open opportunities"; competitive-analysis section 5). The entry must hold the question, options, result, quorum status, proposer, date, outcome with next steps and links to the ledger entries the decision triggered (raw/07 R-VT6).
 
 **Preconditions:** A vote closes with any result, or is cancelled after at least one ballot.
-**Trigger:** VOT-08 closing, or VOT-12 cancellation after ballots.
+**Trigger:** VOT-08 closing, VOT-12 cancellation after ballots, or the closing of a project (PRJ-09).
 
 **Acceptance criteria:**
-1. At each close the system creates exactly one decision entry (a reopened vote has one per close, VOT-10) holding: question, context, options, result with counts, quorum status, the rule in words, proposer, close date, ballot visibility mode, and a link to the vote.
-2. Every result (Passed, Not passed for either reason, Tie) and a Cancelled vote that had at least one ballot are logged. A vote cancelled before the first ballot is not logged as a decision.
-3. If the vote was linked to an expense request, the entry links to the request. When the resulting payment reaches Confirmed in the ledger, the system appends a "Money moved" link with the ledger entry reference and amount to the decision entry; if the payment fails, is cancelled, or is stopped by an SPD-10 check, the system appends that status instead.
+1. At each close the system creates exactly one decision entry (a reopened vote has one per close, VOT-10) holding: question, context, options, result with counts, quorum status, the rule in words, proposer, close date, ballot visibility mode, and a link to the vote. When the vote carries a `snapshot_ref`, the entry stores it. Vote close and the entry write are one atomic step.
+2. Every one of the four results (Passed, Not passed (majority not reached), Not passed (quorum not met), Tie) and a Cancelled vote that had at least one ballot are logged. A vote cancelled before the first ballot is not logged as a decision.
+3. If the vote was linked to an expense request, the entry links to the request. When the resulting payment reaches Confirmed in the ledger, the system appends a "Money moved" link with the ledger entry reference and amount to the decision entry; if the payment fails, is cancelled, or is stopped by an SPD-10 check, the system appends that status instead. When SPD reports `payout_blocked`, the system creates a linked follow-up entry in the log; entries are immutable and the earlier entry is never edited.
 4. The entry belongs to the project when the vote belongs to a project, and to the group otherwise. A project decision also appears in the group log.
 5. The entry is append-only: the system never edits earlier fields. Later additions (outcome statement, review date, money links, reopen links, amendments) are appended with author, time and source.
 6. If a vote is reopened (VOT-10) or a runoff is started (VOT-11), the new entry links to the earlier one and both stay visible.
-7. States: if the log write fails, the vote remains closed, the creator and the operator are alerted, and the system retries until it succeeds; no closed vote is ever without an entry (a check that every closed vote has an entry is to be added to the OPS alerts, OPS-10).
-8. Notifications: members with access receive the result as in VOT-08. The decision entry itself adds only the in-app item `msg.vot.decision_logged` (EV-VOT-10, no push, no SMS), so there is no second push for the same event.
+7. States: close and entry write are one atomic step. If the write fails, the vote shows Needs attention instead of Closed, no linked action runs, the creator and the operator are alerted, and the system retries until it succeeds; no closed vote is ever without an entry (OPS-14 is the backstop and checks that every closed vote has an entry).
+8. Notifications: members with access receive the result as in VOT-08. An automatic entry sends no notification of its own, so there is no second push for the same event. The in-app item `msg.vot.decision_logged` is emitted only by VOT-14 (manual entries).
 9. Audit and ledger: each append is an audit entry; the money link is a read-only reference to a ledger entry, and the decision never writes to the ledger itself.
+10. System-written entry: when PRJ-09 closes a project, the system writes the entry `Project closed by {name}` to the project log and the group log. It has no vote counts, is append-only like every entry, and is marked as written by the system.
 
 **Data:** Decision, Vote, Expense request, Ledger entry (reference), Audit entry.
-**Depends on:** VOT-03, VOT-08, VOT-09, VOT-12, SPD-09, SPD-13, SPD-16, WAL-14 (ledger entry reference), OPS-10 (alert on a failed write, to be added), PRJ-05 (project decision views).
+**Depends on:** VOT-03, VOT-08, VOT-09, VOT-12, SPD-09, SPD-13, SPD-16, WAL-14, OPS-14, PRJ-05, PRJ-09.
 **Pages:** to be filled from the information architecture.
 **Open questions:** Closed: the anonymous ballot-to-voter link is not kept after close (VOT-17 criterion 8), so the log holds totals only for Anonymous votes. Closed: members who were not eligible can see the entry if they can view the group or project, because the log is the group's shared record.
 
@@ -537,17 +541,18 @@ UI strings: `vote.<area>.<name>`, `decision.<area>.<name>`. Notifications use th
 
 **Acceptance criteria:**
 1. The form asks: what was decided (required), context (optional), date taken (required, not in the future, not older than a parameter), where it was taken (list: meeting, phone call, chat, other), who took it (pick members, or free-text names for people not in the group), and the responsible person (required, a member).
-2. The entry is stored with the badge `decision.manual.badge` ("Recorded by {name}, not a vote") and never shows vote counts or a result chip.
-3. One file may be attached (photo of minutes) under the PRJ-07 attachment rules.
-4. A manual entry may be linked to a project and to an existing vote or expense request. If linked to a vote, the vote result stays separate and unchanged.
-5. Saving shows the entry to members who can view the log as the in-app item `msg.vot.decision_logged` (summary only: title and responsible person), and notifies the named responsible person with `msg.vot.decision_assigned` (push).
-6. Offline: the entry is saved on the phone with the state `Waiting to send`, sent when the connection returns, and the date taken remains as typed. A conflict never overwrites another entry.
+2. The entry is stored with the badge `vot.decision.manual_badge` ("Recorded by {name}, not a vote") and never shows vote counts or a result chip.
+3. The entry accepts up to `PROJECT_ATTACHMENTS_PER_ITEM` files (for example a photo of minutes), under the rules of PRJ-07 and SPD-03.
+4. A manual entry may be linked to a project and to an existing vote or expense request. The link is information only. If linked to a vote, the vote result stays separate and unchanged.
+5. Saving shows the entry to members who can view the log as the in-app item `msg.vot.decision_logged` (EV-PRJ-06, summary only: title and responsible person; this story is the only emitter of that key), and notifies the named responsible person with `msg.vot.decision_assigned` (push).
+6. Offline: the entry is an auto-send item in the XCT-05 Table A registry. It is saved on the phone with the state `Waiting to send`, sent when the connection returns, and the date taken remains as typed. A conflict never overwrites another entry.
 7. Errors: missing responsible person or invalid date shows an inline message and keeps all other fields.
 8. Audit: the author, time, device and all fields are stored. The author is shown to everyone who sees the entry.
 9. Accessibility and language: the person picker is searchable and keyboard-usable, and fixed labels follow the viewer's language while the typed text keeps its language.
+10. Authorisation guard: a manual entry moves no money. It can never be the authorising vote of a payout (D4, SPD-10), and it never counts toward quorum or approver counts. The entry shows both the date typed and the date it was entered.
 
 **Data:** Decision, Document, Membership, Audit entry.
-**Depends on:** VOT-13, PRJ-07, GRP-08, XCT-05 (offline queue; its registry must add this action).
+**Depends on:** VOT-03, VOT-13, PRJ-07, SPD-03, GRP-08, XCT-05.
 **Pages:** to be filled from the information architecture.
 **Open questions:** Closed: the permission is Vote: create. Closed: a manual decision can be dated before the author joined the group, within VOTE_DECISION_BACKDATE_DAYS, because the record describes the group, not the author; the author and the date of entry stay visible.
 
@@ -571,17 +576,17 @@ UI strings: `vote.<area>.<name>`, `decision.<area>.<name>`. Notifications use th
 
 **Acceptance criteria:**
 1. "Amend" adds an amendment that carries a mandatory reason, the new text and the author. The original text, counts and attachments remain visible in a history chain on the entry.
-2. The entry shows an `Amended` chip and the latest text first, with "Show original" one tap away.
-3. Vote counts, result, quorum status and the rule words are locked and cannot be amended; the Amend form does not offer them.
+2. The entry shows an `Amended` chip and the latest text first, with "Show original" one tap away. A manual entry keeps the badge `Recorded by {name}, not a vote` through every amendment, and the original text stays visible.
+3. Vote counts, result, quorum status and the rule words are locked and cannot be amended; the Amend form does not offer them. An amendment moves no money, can never serve as the authorising vote of a payout (D4, SPD-10) and never counts toward quorum or approver counts.
 4. "Replace this decision" creates a new decision (manual or from a new vote) that links back with `Supersedes {title}`; the old entry shows `Superseded by` with a link and stays readable.
 5. Notifications: members who voted or are the responsible person receive `msg.vot.amended`, summary only.
-6. A second amendment of the same entry within VOTE_AMEND_MIN_INTERVAL is refused to prevent accidental duplicates, and a duplicate amendment shows `decision.error.duplicate`.
-7. Offline: amendments queue as `Waiting to send` and sync in order of creation; a conflict shows both versions (`Your change` and `{name}'s change`, as in XCT-05).
+6. A second amendment of the same entry within VOTE_AMEND_MIN_INTERVAL is refused to prevent accidental duplicates, and a duplicate amendment shows `vot.decision.duplicate`.
+7. Offline: amendments are auto-send items in the XCT-05 Table A registry; they queue as `Waiting to send` and sync in order of creation; a conflict shows both versions (`Your change` and `{name}'s change`, as in XCT-05).
 8. Audit: the amendment, reason, author and time are written to the audit log, and no earlier record is modified or deleted. There is no delete action on a decision.
 9. Accessibility and language: history is a plain list readable by screen readers, with absolute dates.
 
 **Data:** Decision (append records), Audit entry, Notification.
-**Depends on:** VOT-13, VOT-14, XCT-05 (offline queue; its registry must add this action).
+**Depends on:** VOT-13, VOT-14, XCT-05.
 **Pages:** to be filled from the information architecture.
 **Open questions:** Whether a hidden-for-error status is needed for an entry created by mistake (default proposed: amend with reason, never hide).
 
@@ -606,10 +611,10 @@ UI strings: `vote.<area>.<name>`, `decision.<area>.<name>`. Notifications use th
 **Acceptance criteria:**
 1. The list is newest first. Each row shows: question or title, result chip (word, icon, colour), date, proposer or responsible person, and a "Money moved" or "Manual" marker.
 2. The person can filter by project, result (Passed, Not passed for either reason, Tie), kind (vote or manual entry), status (Cancelled, Amended), date range and group or project scope.
-3. Free-text search covers title, question, context, outcome statement and option text, and shows the matching words. Search with no match shows an empty state with a clear action (`decision.search.empty`).
+3. Free-text search covers title, question, context, outcome statement and option text, and shows the matching words. Search with no match shows an empty state with a clear action (`vot.decision.search_empty`).
 4. The group log includes project decisions and says which project each belongs to; a project log shows only its own.
 5. Opening a row shows the full entry, the history chain, the linked vote, expense request and ledger entry, and attachments the person is allowed to see.
-6. Empty state: a group with no decisions sees `decision.list.empty` and a button to open a vote or record a decision, depending on permissions.
+6. Empty state: a group with no decisions sees `vot.decision.list_empty` and a button to open a vote or record a decision, depending on permissions.
 7. Offline: entries from the last `CACHE_LEDGER_DAYS` (XCT-04) are available with a `Last synced` time, search works on cached entries, and the page says that older entries need a connection (without using the word "offline").
 8. Loading shows skeleton rows; a slow connection loads the first page quickly and the rest on scroll with a visible count.
 9. Accessibility and language: the list is readable by a screen reader row by row, filters have text labels, and searching Malagasy and French text handles accents (a search for "e" matches "ê" and "é").
@@ -638,7 +643,7 @@ UI strings: `vote.<area>.<name>`, `decision.<area>.<name>`. Notifications use th
 **Trigger:** The creator opens "Who can see how people voted".
 
 **Acceptance criteria:**
-1. The form offers two options: Anonymous (only totals are shown; nobody sees who voted what) and Named (members see each person's answer). The default is VOTE_DEFAULT_VISIBILITY (Anonymous), and the choice is explained in one sentence each (`vote.visibility.anonymous`, `vote.visibility.named`). On an authority vote the choice is not offered: the vote is always Named, and the form says why (`vote.visibility.authority_named`).
+1. The form offers two options: Anonymous (only totals are shown; nobody sees who voted what) and Named (members see each person's answer). The default is VOTE_DEFAULT_VISIBILITY (Anonymous), and the choice is explained in one sentence each (`vot.visibility.anonymous`, `vot.visibility.named`). On an authority vote the choice is not offered: the vote is always Named, and the form says why (`vot.visibility.authority_named`).
 2. The choice is shown on the ballot page before the person votes, and again on the result page. It is locked at the first ballot.
 3. In both modes, everyone sees participation counts. In Anonymous mode, only the creator and holders of Vote: close see the list of people who have not voted yet (to chase them privately), never any answers. In Named mode, every member with Vote: view sees names and answers.
 4. Guests (VOT-06) follow the same mode: their answer is shown with a display name from their membership in Named mode, or hidden in Anonymous mode.
@@ -666,26 +671,26 @@ UI strings: `vote.<area>.<name>`, `decision.<area>.<name>`. Notifications use th
 
 **Story:** When I have no data or a bad connection and a vote is about to close, I want to cast my vote on the phone and see clearly whether it was sent and counted, so I am never unsure about my vote.
 
-**Conversation:** Votes and drafts queue with a visible state while money-out stays online only (design-foundations section 4; conventions section 2). Per-item states `Saved on this phone`, `Waiting to send`, `Sent`, `Confirmed` (shown to the voter as `Counted`); queue size and age visible; the ledger is server-authoritative; a vote queued offline carries a client timestamp and device ID and the server records receipt time; a late ballot shows "Too late: voting closed 17:00, your answer arrived 17:04" (raw/07 section 4 R-O1 to R-O5). We decided the server's receipt time decides whether a ballot counts, with no grace window: a grace window would let the result change after the deadline and make the outcome statement and the payout of a money vote disputable. XCT-05 criterion 4 states the same rule.
+**Conversation:** Votes and drafts queue with a visible state while money-out stays online only (design-foundations section 4; conventions section 2). Per-item states `Waiting to send`, `Sent`, `Confirmed` (shown to the voter as `Received`); queue size and age visible; the ledger is server-authoritative; a vote queued offline carries a client timestamp and device ID and the server records receipt time; a late ballot shows "Too late: voting closed 17:00, your answer arrived 17:04" (raw/07 section 4 R-O1 to R-O5). We decided the server's receipt time decides whether a ballot counts, with no grace window: the device clock is forgeable, and a grace window would let the result change after the deadline and make the outcome statement and the payout of a money vote disputable. The authority-vote floor (GRP-13, VOT-03 criterion 3) is counted only on ballots received by the server at close; a queued ballot never counts and no client timestamp is trusted. XCT-05 criterion 4 states the same rule.
 
-**Preconditions:** The vote page was loaded at least once on this device and the vote is Open on the cached copy.
+**Preconditions:** The vote page was loaded at least once on this device, the vote is Open on the cached copy, and the deadline is more than `QUEUE_VOTE_MIN_MINUTES` away (XCT-05 Table A; there is no grace window).
 **Trigger:** The person taps `Send my vote` without a working connection.
 
 **Acceptance criteria:**
-1. The ballot is stored on the phone and shown as `Saved on this phone`, then `Waiting to send`. The screen says `vote.offline.not_counted` ("Not counted yet. Connect before {deadline}"), with the deadline in absolute and relative form.
-2. When the connection returns, the app sends the ballot automatically with exponential backoff and a retry cap, and the state moves to `Sent` and then `Confirmed`, shown as `Counted`, when the server confirms. A `Retry now` button is always available.
+1. The ballot is stored on the phone at once and shown as `Waiting to send` (`xct.queue.waiting`). The screen says `vot.offline.not_counted` ("Not counted yet. Connect before {deadline}"), with the deadline in absolute and relative form.
+2. When the app is open with a connection, it sends the ballot automatically with exponential backoff, and the state moves to `Sent` and then `Confirmed`, shown to the voter as `Received`, when the server confirms. `Counted` appears only in results and only when the ballot counts toward quorum (D4). A ballot still queued at the deadline counts toward nothing, the floor included. A queued ballot keeps retrying until the deadline and shows `Open Gereo when you have signal`. A `Retry now` button is always available. The ballot screen says that reminders may still arrive until the ballot is sent.
 3. A single header indicator shows the sync state (`Updated 14:05`, `Updating...`, or `Not updated since yesterday - Retry`), and a counter shows items waiting and their age (`1 item waiting since Mon`).
-4. If the server receives the ballot after the deadline it is rejected, and the person sees `vote.offline.too_late` with both times (voting closed, answer arrived). Nothing is counted and the ballot is shown as `Too late`.
-5. If the person changes the ballot again before sync, only the latest ballot is sent. If a ballot sent from another device has a later client time, the later one wins and the screen shows the final state, never two states.
+4. If the server receives the ballot after the deadline it is rejected, and the person sees `vot.offline.too_late` with both times (voting closed, answer arrived). Nothing is counted and the ballot is shown as `Too late`.
+5. One ballot per (voter, vote), decided by server receipt order and never by client time, and deduplicated on (voter, vote) across devices. A voter may change the ballot until the deadline and the last one received wins; if the person changes it again before sync, only the latest is sent. The screen shows the final state, never two states.
 6. The person can cancel a ballot that is still `Waiting to send` before it syncs, with the state changing to `Withdrawn`.
-7. The stored ballot carries client timestamp and device ID, and the server stores receipt time. Both are in the audit entry (client time is informational and is never what decides).
+7. The stored ballot carries client timestamp and device ID, and the server stores receipt time. Both are in the audit entry (client time is informational and is never what decides). At receipt the server re-checks Vote: vote and membership, and rejects the ballot of a removed or demoted voter with a reason shown to the voter. A guest voter on the light vote page (VOT-06) cannot queue a ballot and sees `xct.offline.needs_connection`.
 8. The vote page offline shows cached question, rule and last-known participation with a `Last synced` time; options and the rule come from the version the person saw.
 9. Accessibility and language: every state has text, an icon and a colour. The deadline warning is announced to screen readers.
 
 **Data:** Ballot (queued), Vote (cache), Device, Audit entry.
-**Depends on:** VOT-04, XCT-03 (deadline wording), XCT-04 (last synced), XCT-05 (offline queue, retry), ACC-11 (device ID).
+**Depends on:** VOT-04, XCT-03, XCT-04, XCT-05, ACC-11.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed: no grace window (see Conversation). Whether a vote-by-SMS fallback is added: see the Open questions at the end.
+**Open questions:** Closed: no grace window (see Conversation). Closed: vote by SMS is recorded as Later (see Open questions 7).
 
 ---
 
@@ -693,19 +698,19 @@ UI strings: `vote.<area>.<name>`, `decision.<area>.<name>`. Notifications use th
 
 | ID | Title | Priority | Depends on |
 | --- | --- | --- | --- |
-| VOT-01 | Ask the group a question with a vote | P0 | GRP-03, GRP-08, NTF-05, XCT-05 |
+| VOT-01 | Ask the group a question with a vote | P0 | GRP-03, GRP-08, NTF-05, NTF-09, XCT-05, VOT-03 |
 | VOT-02 | Set the quorum and the majority, and read them in plain words | P0 | VOT-01, GRP-16, GRP-17 |
 | VOT-03 | Start the payment of an expense when its vote passes | P0 | VOT-01, VOT-02, VOT-08, VOT-13, SPD-02, SPD-07, SPD-09, SPD-10, SPD-12, GRP-08, WAL-14 |
 | VOT-04 | Cast my vote and change it until the vote closes | P0 | VOT-01, VOT-18, ACC-02, GRP-08, XCT-05 |
-| VOT-05 | See where the vote stands: deadline, rule, quorum and participation | P0 | VOT-01, VOT-02, VOT-04, XCT-04, XCT-09 |
+| VOT-05 | See where the vote stands: deadline, rule, quorum and participation | P0 | VOT-01, VOT-02, VOT-04, XCT-02, XCT-03, XCT-04, XCT-09 |
 | VOT-06 | Share a vote link so someone can vote without a full account | P0 | VOT-01, VOT-04, ACC-02, ACC-16, GRP-03, NTF-11, XCT-01, XCT-07, XCT-11 |
 | VOT-07 | Remind people who have not voted: push, then SMS | P0 | VOT-01, VOT-06, NTF-02, NTF-05, NTF-06, NTF-09, NTF-11, NTF-13, ACC-06 |
-| VOT-08 | Close the vote at the deadline, or close it early | P0 | VOT-03, VOT-04, VOT-09, VOT-10, VOT-13, NTF-05, NTF-09, NTF-11, OPS-10 |
-| VOT-09 | Read the result with a clear outcome and a next step | P0 | VOT-03, VOT-08, VOT-13, VOT-17, NTF-01 |
+| VOT-08 | Close the vote at the deadline, or close it early | P0 | VOT-03, VOT-04, VOT-09, VOT-10, VOT-13, NTF-05, NTF-09, OPS-14 |
+| VOT-09 | Read the result with a clear outcome and a next step | P0 | VOT-03, VOT-08, VOT-13, VOT-17, NTF-01, CON-13 |
 | VOT-10 | Decide what happens when too few people vote | P0 | VOT-01, VOT-02, VOT-03, VOT-07, VOT-08, VOT-13, NTF-01 |
 | VOT-11 | Handle a tie with a clear rule | P1 | VOT-01, VOT-08, VOT-09, VOT-13 |
 | VOT-12 | Edit, extend or cancel a vote | P1 | VOT-01, VOT-03, VOT-10, VOT-13, NTF-01 |
-| VOT-13 | Record every closed vote in the decision log, linked to the money it moved | P0 | VOT-03, VOT-08, VOT-09, VOT-12, SPD-09, SPD-13, SPD-16, WAL-14, OPS-10, PRJ-05 |
+| VOT-13 | Record every closed vote in the decision log, linked to the money it moved | P0 | VOT-03, VOT-08, VOT-09, VOT-12, SPD-09, SPD-13, SPD-16, WAL-14, OPS-14, PRJ-05, PRJ-09 |
 | VOT-14 | Record a decision that was taken outside the app | P1 | VOT-13, PRJ-07, GRP-08, XCT-05 |
 | VOT-15 | Correct or replace a decision without erasing the original | P1 | VOT-13, VOT-14, XCT-05 |
 | VOT-16 | Find past decisions in the decision log | P0 | VOT-13, VOT-14, VOT-15, XCT-04, PRJ-05 |
@@ -716,27 +721,27 @@ Count: 18 stories. P0: 13 (VOT-01 to VOT-10, VOT-13, VOT-16, VOT-18). P1: 5 (VOT
 
 ## Cross-epic dependencies
 
-- ACC: ACC-02 phone and OTP and its parameters, reused for guests (VOT-06); ACC-16 opens the vote link (its criterion 2 preview is overridden by VOT-06 criterion 2); ACC-06 language preference (VOT-07); ACC-11 device ID (VOT-18).
+- ACC: ACC-02 phone and OTP and its parameters, reused for guests (VOT-06); ACC-16 opens the vote link; ACC-06 language preference (VOT-07); ACC-11 device ID (VOT-18).
 - GRP: GRP-03 invite by phone (guest eligibility, VOT-06); GRP-08 grant Vote permissions; GRP-12 and GRP-14, SPD-15, RUL-13 and CON-13 use a vote as the authority for a change and carry a proposal reference (VOT-01 criterion 10); GRP-13 stores the vote and its voters on the payout entry; GRP-16 and GRP-17 fix what happens to the ballot of someone who leaves (VOT-02 criterion 7).
 - SPD: SPD-09 creates the linked vote and owns the request statuses and the Rejected wording (VOT-03); SPD-10 safety checks after a passed vote; SPD-07 and SPD-12 trigger vote cancellation; SPD-13 links decisions; SPD-16 shows the vote on the request trail.
 - WAL: WAL-14 ledger entry reference that links back to the decision (VOT-13); WAL-16 export component for a future decision-log export.
 - RUL and CON: RUL-13 and CON-13 gate rule and plan changes with a plain vote that carries a proposal reference; VOT never changes a rule by itself.
-- NTF: every `msg.vot.*` event (EV-VOT-01 to EV-VOT-10 plus the new events listed under Message key convention), NTF-05 push-then-SMS, NTF-06 SMS payer and allowance, NTF-09 quiet hours, NTF-11 guests, GSM-7 lint.
-- XCT: XCT-04 cache and last synced, XCT-05 offline queue and its registry (must add manual decision entries and amendments), XCT-03 deadline wording, XCT-07 and XCT-11 low data, XCT-09 status without colour.
-- OPS: OPS-10 should receive the alerts for a failed close job and a failed decision-log write, and the check that every closed vote has a decision entry (VOT-08, VOT-13).
+- NTF: every `msg.vot.*` event (EV-VOT-01 to EV-VOT-10 plus the new events listed under Message key convention), NTF-05 push-then-SMS, NTF-06 SMS payer and allowance, NTF-09 quiet hours and reminder rule, NTF-11 guests, XCT-12 SMS lint.
+- XCT: XCT-04 cache and last synced, XCT-05 offline queue and its Table A registry (manual decision entries and amendments are auto-send items), XCT-03 deadline wording, XCT-07 and XCT-11 low data, XCT-09 status without colour.
+- OPS: OPS-14 is the backstop for a failed close job and a failed decision-log write, and checks that every closed vote has a decision entry (VOT-08, VOT-13).
 - PRJ: PRJ-05 lists decisions on the project page; PRJ-07 attachments are used by VOT-14.
 
 ## Open questions
 
 Closed questions are kept for the record, with the decision.
 
-1. Closed by decision D4: a passing vote is the authorisation and replaces approvers above the vote threshold. The floor of two distinct voters other than the requester is fixed, applies to every authority vote, and the requester's own yes counts toward the majority only.
+1. Closed by decision D4: a passing vote is the authorisation and replaces approvers above the vote threshold. The D4 floor is fixed, applies to every authority vote, is counted under VOT-03 criterion 3, and the requester's own yes counts toward the majority only.
 2. Closed: default quorum 30 percent, default majority "more than half of yes and no", default no-quorum fallback "extend once" (see Parameters and VOT-02, VOT-10). Field interviews validate these values without blocking the build.
 3. Closed: plain votes default to Anonymous (VOTE_DEFAULT_VISIBILITY); money-linked authority votes are always Named (VOT-17).
 4. Closed: no answer-to-person link is kept after close on an Anonymous vote and nobody sees one (VOT-17 criterion 8).
 5. Closed: interim totals are visible after you have voted (VOT-05).
 6. Closed: guest session is ephemeral; the question is not visible before verification; non-members are never eligible by phone (VOT-06).
-7. Open, needs an outside party (the SMS aggregator for inbound SMS, plus a security review and field research on feature-phone use): voting by SMS reply, for example "reply 1 for yes". Default used: not in the MVP; the reminder SMS carries the link to the light guest page (VOT-06). P2 if confirmed. Same question as the NTF and XCT open items.
+7. Later: voting by SMS reply, for example "reply 1 for yes", is recorded as Later and is not in the MVP; the reminder SMS carries the link to the light guest page (VOT-06). It would need an outside party first (the SMS aggregator for inbound SMS, plus a security review and field research on feature-phone use). Same question as the NTF and XCT open items.
 8. Closed: the group pays for vote reminders from its SMS allowance and the platform pays for guest security codes (NTF-06); the monthly cap per group is an NTF parameter.
 9. Closed: strictly the server's receipt time, no grace window (VOT-18).
 10. Closed: manual decision entries use Vote: create and amendments use Vote: edit (VOT-14, VOT-15).

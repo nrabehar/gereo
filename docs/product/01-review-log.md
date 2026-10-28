@@ -1,6 +1,6 @@
 # Story review log
 
-Review of the 195 MVP stories in `stories/`. The stories were first drafted by assistants working in parallel. This log records what has been checked, what has been fixed and what is still to do, so nobody mistakes a first draft for a reviewed one.
+Review of the 196 MVP stories in `stories/`. The stories were first drafted by assistants working in parallel. This log records what has been checked, what has been fixed and what is still to do, so nobody mistakes a first draft for a reviewed one.
 
 ## 1. Status by epic
 
@@ -9,7 +9,7 @@ Review of the 195 MVP stories in `stories/`. The stories were first drafted by a
 | SPD | 16 | Done | Yes |
 | ACC, ANN, CON, EVT, GRP, NTF, OPS, PRJ, RUL, VOT, WAL, XCT | 179 | Done | Not yet |
 
-Structural checks run by script over all 195 stories: every story has Priority, Actor, Story, Conversation, Depends on and Open questions; every story has between 6 and 10 acceptance criteria; every story ID cited in an MVP file exists. No failure.
+Structural checks run by script over the first 195 stories (OPS-14 was added later and is not covered): every story has Priority, Actor, Story, Conversation, Depends on and Open questions; every story has between 6 and 10 acceptance criteria; every story ID cited in an MVP file exists. No failure.
 
 ## 2. Fixes made
 

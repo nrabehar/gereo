@@ -21,7 +21,7 @@ The time zone is Madagascar time only (XCT-03). The Events module is on for ever
 
 ## Parameters
 
-Every value is a configuration parameter. No number is a research finding: raw/04 section 12 found no reliable published effect size for reminders, so no story promises a reduction in no-shows. This epic owns only the scheduling parameters below. Every SMS wait, SMS cap, quiet-hours and allowance value belongs to NTF (`ntf.*`): the push-then-SMS wait is `ntf.sms_window.<type or class>` (30 minutes for the 2-hour reminder, 240 for the 24-hour reminder), the per-person cap is `ntf.sms_daily_cap_per_person`, the group allowance is `ntf.group_sms_allowance` and the quiet window is `ntf.quiet_hours_default`. EVT never defines its own wait or cap.
+Every value is a configuration parameter. No number is a research finding: raw/04 section 12 found no reliable published effect size for reminders, so no story promises a reduction in no-shows. This epic owns only the scheduling parameters below. Every SMS wait, SMS cap, quiet-hours and allowance value belongs to NTF (`ntf.*`): the push-then-SMS wait is `ntf.sms_window.<type or class>` (30 minutes for the 2-hour reminder, 240 for the 24-hour reminder), the per-person cap is `ntf.sms_daily_cap`, the group allowance is `ntf.group_sms_allowance` and the quiet window is `ntf.quiet_hours_default`. EVT never defines its own wait or cap.
 
 | Parameter | Meaning | Starting value |
 | --- | --- | --- |
@@ -29,7 +29,6 @@ Every value is a configuration parameter. No number is a research finding: raw/0
 | EVENT_REMINDER_DEFAULTS | Offsets every new event starts with | 24 h and 2 h (raw/07 R-EV3, a hypothesis to test) |
 | EVENT_MAX_REMINDERS | Most reminders one event can carry | 3, because Karlan's studies show extra late reminders add nothing (raw/07 section 8.8) and NTF-05 allows one SMS per reminder |
 | EVENT_RSVP_NUDGE | How long before the RSVP deadline an unanswered invitee gets one private nudge (EV-EVT-04) | 24 h; no nudge when the deadline is less than 24 h after the invitation |
-| EVENT_LATE_REMINDER_MIN | Smallest gap between the end of quiet hours and the event start for a held reminder to be sent when quiet hours end | 60 minutes |
 | EVENT_RECURRENCE_HORIZON | How far ahead occurrences are generated | 90 days, extended daily; a series never shows more than 14 occurrences ahead |
 | EVENT_WEEK_START | First day of the week in calendar view | Monday in all three languages (Madagascar uses the Monday week; not user-editable in the MVP) |
 
@@ -46,7 +45,7 @@ Every value is a configuration parameter. No number is a research finding: raw/0
 | RSVP | To confirm | Marker added to a Going or Maybe answer after a material change (EVT-06); the answer stays Going or Maybe |
 | RSVP | Sent after start | Marker on an answer that reached the server after the event started (EVT-04) |
 
-Queue labels (`Saved on this phone`, `Waiting to send`) are the XCT-05 labels. Notification and SMS delivery states are the NTF delivery vocabulary. No other status name is used here.
+The queue label `Waiting to send` is the XCT-05 label. Notification and SMS delivery states are the NTF delivery vocabulary. No other status name is used here.
 
 Message keys: UI `evt.<area>.<name>`; notifications follow the NTF registry, base key `msg.evt.<event>` with variants `.push`, `.sms` and `.inapp` (EV-EVT-01 to EV-EVT-08). Keys this epic needs that the registry lacks, to be added by NTF: `msg.evt.uninvited`, `msg.evt.host_left`, `msg.evt.rsvp_summary`, `msg.evt.reminder_early` (push and in-app only, for the 1-week and 3-day offsets) and an SMS variant of `msg.evt.invited` for invitees with no registered device. SMS keys stay GSM-7 and under 160 characters in each language (NTF-07, XCT-12). No text is written in this file.
 
@@ -72,9 +71,9 @@ Message keys: UI `evt.<area>.<name>`; notifications follow the NTF registry, bas
 1. The form requires title, start date and time, and audience (default: the whole group, see EVT-03). Optional: end time, place as text, description, host (default the creator, changeable to any member), RSVP deadline, project link (EVT-09), reminder times (EVT-05).
 2. The date and time show weekday and the Madagascar time label next to the field (XCT-03), for example `Sat 25 Oct, 15:00`. A start in the past is refused with `evt.error.past_date`.
 3. On `Create event` by a holder of Event: invite, the event gets status Scheduled and appears in the group's list and calendar (EVT-08). Invitees receive `msg.evt.invited` (EVT-03, EV-EVT-01).
-4. A person who holds Event: create but not Event: invite can save the event, but its status is Draft, visible only to them, until someone with Event: invite sends the invitations; the draft says so (`evt.draft.needs_invite`). A Draft sends no notification and no reminder.
+4. A person who holds Event: create but not Event: invite can save the event, but its status is Draft, visible only to them, until someone with Event: invite sends the invitations; the draft says so (`evt.draft.needs_invite`). A Draft sends no notification and no reminder. Event: create and Event: invite stay separate permissions; the GRP-08 grant-time hint tells the person granting Event: create that the holder's events stay Draft unless they also hold Event: invite.
 5. The host is shown on the event card. If the host is removed from the group (GRP-17) or leaves it (GRP-16), the creator is notified with `msg.evt.host_left` and the event keeps the creator as fallback host; if the creator is also gone, the holder of Event: edit who changes it next must choose a host before saving.
-6. Creating an event is online only and is not on the XCT-05 queue registry. If the connection drops the form keeps every typed field on the phone and shows `Not sent. Retry`; the event is never created silently. Failure shows `evt.error.save_failed` with Retry and keeps every field.
+6. Creating, editing, cancelling and linking an event are online only and are on neither XCT-05 registry. Without a connection the action is blocked with `xct.offline.needs_connection`; the event is never created silently and nothing is saved on the phone as a draft. A server failure shows `evt.error.save_failed` with Retry and keeps every field in the open form.
 7. A title longer than the limit (80 characters) or an empty title shows an inline message; the form never saves a partial event.
 8. Audit: creation, host, audience size, reminders and project link are written to the audit log with actor and time.
 9. Accessibility and language: labels are always visible, touch targets are at least 48 by 48 dp, the date picker is usable by keyboard and screen reader, and the typed title keeps its language while labels follow the viewer's language.
@@ -136,9 +135,11 @@ Message keys: UI `evt.<area>.<name>`; notifications follow the NTF registry, bas
 **Preconditions:** The event exists and the person holds Event: invite.
 **Trigger:** The person chooses the audience in the event form, or taps "Invite" on an existing event.
 
+**Identity tier:** Staff actions here need Tier 1 only (ACC-07), because no money is involved.
+
 **Acceptance criteria:**
 1. The audience offers "The whole group" (default), "Pick members" with a searchable list and a count, and, when the event is linked to a project, "The project team" (EVT-09).
-2. On sending, each invitee receives `msg.evt.invited` by push and in-app (EV-EVT-01). An invitee who has no registered device receives the SMS variant instead, sent direct with no push step (NTF-11), GSM-7 safe, under 160 characters, with the event reference, charged to the group allowance (NTF-06).
+2. On sending, each invitee receives `msg.evt.invited` by push and in-app (EV-EVT-01). An invitee who has no registered device receives the SMS variant instead, sent direct with no push step (NTF-11), GSM-7 safe, under 160 characters, with the event reference, charged to the group allowance (NTF-06); its cost is included in the NTF-06 estimate shown to the inviter before sending and in the OPS-12 cost view. Invitation SMS are limited per member per day by `grp.invite_sms_per_day`, and the NTF phone-number suppression list is checked before each one.
 3. "The whole group" keeps up to date until the event starts: a member who joins the group later (GRP-04) is invited automatically, and a member who leaves (GRP-16) or is removed (GRP-17) is dropped from the invitee list and the counts.
 4. A holder of Event: invite can add people later; only the added people are notified. Removing an invitee removes them from counts and notifies them with `msg.evt.uninvited` only if they had answered Going or Maybe.
 5. Invitees see the event in their list with their RSVP state (EVT-04). Every member holding Event: view on the group sees every group event, invited or not, because group transparency is the default; a member who is not invited sees it read-only, without RSVP buttons and without being counted.
@@ -170,12 +171,14 @@ Message keys: UI `evt.<area>.<name>`; notifications follow the NTF registry, bas
 **Preconditions:** The person is invited and the event is Scheduled.
 **Trigger:** The person opens the event or a reminder.
 
+**Identity tier:** Answering needs Tier 1 only (ACC-07), because no money is involved. Guest RSVP by link stays Later (open question 5).
+
 **Acceptance criteria:**
 1. The event card shows three buttons: Going, Maybe, No. One tap records the answer and shows a state chip with icon and text (`evt.rsvp.going`, `evt.rsvp.maybe`, `evt.rsvp.no`).
 2. The person can change the answer until the event starts, or until the RSVP deadline if one was set; after the deadline buttons are locked with `evt.rsvp.closed`.
 3. Counts are shown to everyone who can see the event: Going, Maybe, No and No answer, as numbers. Names of who is Going and Maybe are visible to invitees; names of people who said No or have not answered are visible only to holders of Event: edit.
 4. The count updates when the page opens and on pull-to-refresh; it does not tick live.
-5. Offline: RSVP is on the XCT-05 queue registry. The tap is saved on the phone with `Saved on this phone` then `Waiting to send`, the chip shows the pending state, and sync follows. If the event started before sync, the answer is accepted but carries the marker `Sent after start`.
+5. Offline: RSVP is a row of the XCT-05 Table A auto-send registry (side-effect class none). The tap shows `Waiting to send` with the XCT-05 text, the chip shows the pending state, and it sends itself when the app is open with signal. If the event started before sync, the answer is accepted but carries the marker `Sent after start`.
 6. Errors: an answer to a cancelled event is refused with `evt.error.cancelled`; a failed send keeps the answer and shows Retry.
 7. Notifications: no notification to others for each answer. The responder gets an in-app item only (`msg.evt.rsvp_saved`, EV-EVT-07). An invitee with no answer receives one private nudge EVENT_RSVP_NUDGE before the RSVP deadline (`msg.evt.rsvp_deadline`, EV-EVT-04). Holders of Event: edit receive a summary of the counts when the deadline passes (`msg.evt.rsvp_summary`). A person is never named in any group-visible message for not answering.
 8. Audit: each change of answer is stored with time so that counts can be explained.
@@ -210,7 +213,7 @@ Message keys: UI `evt.<area>.<name>`; notifications follow the NTF registry, bas
 3. SMS follows NTF-05 and uses no value of its own: for the 24 h and 2 h reminders only, an SMS is sent once for that reminder when the push was not opened within `ntf.sms_window` for that offset. SMS goes only to invitees who answered Going or Maybe, and to invitees with no registered device who have not answered No; an invitee with a device who has not answered gets push and in-app only. A person who opened the push or the event gets no SMS. Answering Going does not cancel the reminder SMS, because the reminder is about the event itself and not about the answer (NTF-05 criterion 4 must not treat RSVP as the action that resolves a reminder). The per-person daily cap, the group allowance and the opt-out are those of NTF-05, NTF-06 and NTF-10.
 4. The reminder shows title, weekday, date, time, place and host, and for SMS fits one GSM-7 segment in each language and ends with the event reference (NTF-07, XCT-12). The reminder shows the person's own RSVP state and a link to change it.
 5. Reminders whose time has already passed when the event is created or edited are skipped, and the system does not send a late copy; invitees still receive the invitation or change notice. When the group is archived (GRP-19) or the event is Cancelled, all scheduled reminders stop.
-6. Quiet hours follow NTF-09: a planned reminder is never sent inside the quiet window. A reminder time that falls inside it is sent when quiet hours end if the event starts at least EVENT_LATE_REMINDER_MIN after that moment; otherwise it is moved to just before quiet hours begin the evening before.
+6. Quiet hours and the placement of a reminder or planned fallback SMS that falls inside them follow NTF-09 only; this story defines no margin of its own.
 7. Each person controls push and SMS for events in NTF-04 and NTF-10. A person who stopped SMS gets no event SMS, even after answering Going; the event page shows in words that SMS is off for this person (`evt.reminder.sms_off`).
 8. States: delivery results use the NTF delivery vocabulary, and the host sees counts, for example `3 SMS Unreachable`, never names of people who ignored it. Names appear only in the NTF-12 operator trace.
 9. Audit: each reminder, channel, time, result and the SMS count against the group allowance are stored by NTF (NTF-12).
@@ -379,7 +382,7 @@ Message keys: UI `evt.<area>.<name>`; notifications follow the NTF registry, bas
 2. The date appears in the person's calendar and list (EVT-08) marked as personal, visible only to them.
 3. The reminder is a push and in-app item at the chosen time (quiet hours follow NTF-09). No SMS is offered for personal dates in the MVP, because no payer class exists for them in NTF-06 (the group allowance is for group content and the platform pays only security and receipts).
 4. A note can exist alone (no date) and is listed under "Notes" with the first line shown; it is private and cannot be shared in the MVP.
-5. Offline: dates and notes are created and edited on the phone, shown as `Saved on this phone` then `Waiting to send` and synced, and are readable offline. This needs a personal date and note entry on the XCT-05 queue registry, which they do not have today (see cross-epic notes). A reminder set offline is scheduled on the phone and also registered on the server at sync.
+5. Offline: dates and notes are created and edited on the phone, shown as `Waiting to send` and sent by themselves when the app is open with signal, and are readable offline. They are the personal date and note rows of the XCT-05 Table A auto-send registry (side-effect class none). A reminder set offline is scheduled on the phone and also registered on the server at sync.
 6. Deleting a date or note removes it from the person's view after a confirmation; it does not affect any group data.
 7. Empty states: `evt.personal.empty` with one action.
 8. Errors: empty title or an invalid date shows an inline message; a failed sync keeps the item and shows Retry.
@@ -454,8 +457,8 @@ Story IDs are the binding reference.
 - GRP: GRP-02 (the founder holds every permission), GRP-08 (grant Event: view, create, edit, invite one by one), GRP-04, GRP-05, GRP-16, GRP-17 (join, list, leave and removal feed the whole-group audience), GRP-18 (no module switch), GRP-19 (an archived group sends no reminders), GRP-06 (next-event tile reads EVT-08). The two GRP bundles contain only Event: view, so every Event permission beyond viewing is granted individually through GRP-08 until a later bundle exists.
 - CON: none in the MVP. A contribution tied to an event's RSVP (raw/07 R-EV5) is Later; a contribution due date is shown by CON, not as an event.
 - SPD: none.
-- NTF: NTF-02, NTF-03, NTF-04, NTF-05, NTF-06, NTF-07, NTF-09, NTF-10, NTF-11, NTF-12 and the catalogue rows EV-EVT-01 to EV-EVT-08. Requests to NTF: (a) add an SMS variant of EV-EVT-01 for invitees with no registered device; (b) add `msg.evt.uninvited`, `msg.evt.host_left`, `msg.evt.rsvp_summary` and `msg.evt.reminder_early`; (c) add a change of host to the EV-EVT-05 trigger; (d) in NTF-05 criterion 4, an RSVP must not cancel an event reminder SMS; (e) the 2-hour reminder audience in EV-EVT-03 is Going and Maybe plus invitees with no device; (f) EV-EVT-08 (event payment due) belongs to Later, since EVT has no payment; (g) the quiet-hours rule of EVT-05 criterion 6.
-- XCT: XCT-01, XCT-03, XCT-04, XCT-05 (add personal date and note to the queue registry for EVT-10; keep event creation, edit and cancel off it), XCT-12, XCT-14.
+- NTF: NTF-02, NTF-03, NTF-04, NTF-05, NTF-06, NTF-07, NTF-09, NTF-10, NTF-11, NTF-12 and the catalogue rows EV-EVT-01 to EV-EVT-08. Requests to NTF: (a) add an SMS variant of EV-EVT-01 for invitees with no registered device; (b) add `msg.evt.uninvited`, `msg.evt.host_left`, `msg.evt.rsvp_summary` and `msg.evt.reminder_early`; (c) add a change of host to the EV-EVT-05 trigger; (d) in NTF-05 criterion 4, an RSVP must not cancel an event reminder SMS; (e) the 2-hour reminder audience in EV-EVT-03 is Going and Maybe plus invitees with no device; (f) EV-EVT-08 (event payment due) belongs to Later, since EVT has no payment; (g) the NTF-09 reminder placement rule used by EVT-05 criterion 6.
+- XCT: XCT-01, XCT-03, XCT-04, XCT-05 (Table A rows for RSVP and personal date and note; event creation, edit, cancel and link are on no registry and use `xct.offline.needs_connection`), XCT-12, XCT-14.
 - OPS: OPS-12 (SMS spend), NTF-12 trace for support.
 - PRJ: PRJ-02 (Events section), PRJ-11 (timeline reads events), PRJ-09 (closed project accepts no new link).
 - VOT: none directly; a vote and an event can be mentioned together in a project timeline.

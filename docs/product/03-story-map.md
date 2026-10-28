@@ -1,6 +1,6 @@
 # Story map and release slices
 
-Built from [02-story-index.md](02-story-index.md) (195 MVP stories). The horizontal axis is the eight journey steps of [00-conventions.md](00-conventions.md). The vertical axis is release slices, each anchored to an outcome it proves. Slices are proposals for the founder to accept or change; they are not written into the story files.
+Built from [02-story-index.md](02-story-index.md) (196 MVP stories). The horizontal axis is the eight journey steps of [00-conventions.md](00-conventions.md). The vertical axis is release slices, each anchored to an outcome it proves. Slices are proposals for the founder to accept or change; they are not written into the story files.
 
 ## 1. Why slices
 
@@ -73,7 +73,7 @@ The remaining P0 items that are not money-critical (for example RUL-01 to RUL-07
 | 5 Decide | VOT-07, VOT-10, VOT-11, VOT-12, VOT-14, VOT-15, VOT-17, VOT-18 |
 | 6 Spend | WAL-13, SPD-03, SPD-06, SPD-12, SPD-13, SPD-14, SPD-15 |
 | 7 Follow | WAL-17, RUL-01, RUL-12, CON-17, SPD-16, VOT-16, PRJ-02, PRJ-04, PRJ-05, PRJ-07, PRJ-08, PRJ-09, PRJ-10, EVT-04, EVT-05, EVT-06, EVT-07, EVT-08, EVT-09, ANN-01, ANN-02, ANN-06, ANN-07, ANN-08, NTF-02, NTF-08, NTF-09, XCT-07, XCT-08, XCT-09, XCT-10, XCT-11, XCT-13, XCT-14 |
-| 8 Report and support | ACC-12, ACC-14, ACC-15, GRP-11, WAL-16, WAL-18, WAL-20, CON-18, OPS-07, OPS-10, OPS-12 |
+| 8 Report and support | ACC-12, ACC-14, ACC-15, GRP-11, WAL-16, WAL-18, WAL-20, CON-18, OPS-07, OPS-10, OPS-12, OPS-14 |
 
 ## 5. Slice 3
 
@@ -92,6 +92,17 @@ The remaining P0 items that are not money-critical (for example RUL-01 to RUL-07
 ## 6. Critical dependency chain
 
 ACC-02 (sign up) leads to GRP-01 (group) and GRP-03 and GRP-04 (members), then GRP-08 and GRP-12 (an approver and a threshold). CON-01 and CON-04 (plan and payment) need WAL-01 and WAL-06 and WAL-07 (wallet and deposit). CON-11 and CON-14 (split rule and its execution) need CON-04. SPD-01, SPD-05 and SPD-10 need WAL-01 and GRP-08. VOT-03 and SPD-09 need both VOT and SPD. Real settlement (WAL-07 real, SPD-10 real) depends on the legal gate and on OPS-04 and OPS-05 for reconciliation.
+
+### Cross-reference convention and build order
+
+- Story headings (`### XXX-nn`) are the only authority for story IDs. Cite a story by ID, a criterion as "ID criterion N", a numbered open question as "ID open question N", and an event as EV-XXX-nn, never as a bare story ID. A closed question stays as one line, "Closed: <decision> (ID criterion N)", with its rationale kept.
+- NTF owns the EV- catalogue (class, payer, SMS fallback, message key). Other stories cite only the EV- ID and message key, and each message key is emitted by exactly one story.
+- WAL-07 owns and emits the "money posted to a wallet" event (D3). RUL-07 consumes it; cycle detection and the maximum chain depth are owned by RUL-06. WAL-12 and WAL-13 are entry points that depend on WAL-07 and on RUL-07 for the rule run.
+- VOT-03 owns the "two distinct voters other than the requester" count (D4). VOT-01 criterion 10 extends it to policy-change proposals, and GRP-12 and GRP-14 cite VOT-01. SPD-13 states the request outcome (accepted, held, refused) and cites PRJ-03 only for budget numbers. XCT-14 and XCT-12 stay as they are.
+- Build order for the money-posted chain: RUL-07, then WAL-12, then WAL-13. No story changes slice because of this order.
+- Known tension, not resolved here: WAL-12 is in slice 1 and depends on RUL-07, which is in slice 2. Until RUL-07 is built, WAL-12 posts money without running rules. Slice membership is unchanged; the founder or the build maintainer may move RUL-07 into slice 1.
+- Check, run as part of the story-map build by the product definition owner: every ID cited anywhere resolves to a `###` heading; every "Depends on" list is acyclic except the chain explicitly allowed above; every message key is emitted by one story; every EV- ID exists in NTF. The story files now follow the convention. The check was run by hand on 2026-10-28 with a throwaway script that is not stored in the repository; it found no missing story ID and no missing criterion or open-question target, and no message key outside the catalogue. Adding the script to the story-map build is still to do.
+- Dependency-cycle check result before these edits, from the "Depends on" lines of the 196 story headings: the graph contains cycles (for example ACC-01 and XCT-01 depend on each other, and WAL-07, RUL-07, WAL-12 and WAL-13 reference one another). The cycle check was not re-run after the later edits to the story files.
 
 Legal gate: every story tagged `legal-gate` is blocked from release until the legal opinion and the Vanilla Pay due diligence of [competitive-analysis.md](../research/competitive-analysis.md) section 10 are done. In slice 0 the same behaviour is built against a simulated adapter.
 

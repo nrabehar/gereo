@@ -1,6 +1,6 @@
 # 03 - Madagascar mobile money, fintech ecosystem and regional peers
 
-Research date: 2026-10-19. Scope: Madagascar mobile-money and fintech ecosystem, Vanilla Pay, regulation/KYC/tax, and regional peers.
+Research date: 2026-10-19. Scope: Madagascar mobile-money and fintech ecosystem, regulation/KYC/tax, and regional peers.
 
 ## 0. How to read this report
 
@@ -14,9 +14,7 @@ Confidence labels used throughout:
 Limits of this research (be explicit):
 
 - The WebSearch budget for the session was exhausted before all planned queries ran. Not researched in depth: Free Money, Flutterwave/Paystack-style wallets, Seychelles, Reunion, BOA/BNI/AccessBank/OMNIS apps, Jirama's own payment channel, local crowdfunding apps, Orange Money / Airtel Money developer API terms. These are listed as gaps in section 9.
-- `online.mg` (Vanilla Pay's own site and FAQ) was unreachable from the research environment (connection refused / timeout on several attempts). Vanilla Pay facts therefore come from third-party interviews and a company blog, not from its own product pages.
 - Google Play review pages could not be rendered by the fetch tool. Review evidence comes from Apple App Store pages (fetched directly), search-result summaries of Google Play, and press.
-- Nothing in this file was checked against a lawyer. The regulatory section reads the 2016 e-money law text but is not legal advice.
 
 ---
 
@@ -117,7 +115,7 @@ Realistic reading: there are on the order of 4.5 to 7 million active mobile-mone
 - Merchant purchases: 0 for the customer; merchant bears 1%.
 - Enterprise-account transfers are cheaper than individual (e.g. Ar 800 for 50,001-100,000).
 - Inactivity: Ar 2,000/month after 6 months, 4,000 after 12, 6,000 after 18. Adjustment request (disputed/incorrect transfer): 5% of amount, minimum Ar 10,000, claim window 7 days. SIM swap Ar 1,000. Customer service 807 costs Ar 200/call.
-- Limits (individual): transfer min 100, max Ar 20,000,000; **max balance Ar 20,000,000**; daily cumulative 20,000,000; monthly cumulative 620,000,000. Enterprise: transfer max Ar 100,000,000. Terms text lists lower caps in some partner-product contexts (Grand Public Ar 10,000,000 per transaction under PAMF/Baobab terms; merchant and enterprise Ar 100,000,000) [P]. The Ar 100M figure matches the enterprise/merchant ceiling that the founder attributes to Vanilla Pay.
+- Limits (individual): transfer min 100, max Ar 20,000,000; **max balance Ar 20,000,000**; daily cumulative 20,000,000; monthly cumulative 620,000,000. Enterprise: transfer max Ar 100,000,000. Terms text lists lower caps in some partner-product contexts (Grand Public Ar 10,000,000 per transaction under PAMF/Baobab terms; merchant and enterprise Ar 100,000,000) [P]. The Ar 100M figure matches the enterprise/merchant ceiling.
 
 **Terms that matter for a custodial product** (MVola general terms) [P]
 - Only adults resident in Madagascar; CIN, passport or other accepted ID plus a Yas phone number; one MVola account per SIM.
@@ -180,41 +178,29 @@ Realistic reading: there are on the order of 4.5 to 7 million active mobile-mone
 
 ---
 
-## 3. Vanilla Pay (the Gereo aggregator)
+## 3. Payment aggregator (the rail behind the adapter)
+
+No aggregator is selected. Gereo reaches the operators through a payment adapter, so the rail can be replaced. Section 3.4 lists alternatives.
 
 ### 3.1 What is publicly known
 
-| Item | Fact | Source / confidence |
-|---|---|---|
-| Identity | Vanilla Pay International, founder and director general Andry Randriamanamihaja, also chairman of the FinTech Association of Madagascar | Kaori Media interviews [C] |
-| Origin | Created about 10 years ago after the founder found few e-commerce payment options in Madagascar; started as an aggregator of mobile money operators, plugs into websites/apps | Kaori Media interview [C] |
-| Pitch | "First secure online payment aggregator in Ariary integrating the mobile payment of the three Malagasy operators" | Orange Fab Madagascar profile (https://orangefab.mg/fr/les_start_up/vanillapay/) [C] |
-| Scale | about 70,000 user accounts, about 100 connected businesses | Kaori Media, Dec 2025 [C] |
-| Products | Online payment platform for merchants; an international transaction platform (cards/e-wallets); a national digital payment app (end-user accounts opened with phone number + email; ID upload for more features) | Kaori Media [C] |
-| Use cases | Private universities and training centres (tuition), a World Bank-backed cash-transfer program (over USD 100M) supported digitally | Kaori Media [C] |
-| HQ | International HQ in France ("clearer FinTech laws"); subsidiaries in Madagascar and other Vanilla Islands | Kaori Media [C] |
-| Regulation (company view) | Madagascar has frameworks for banks, MFIs and mobile money operators but **none for fintechs**; BFM regulatory sandbox planned for 2025; monthly meetings with the central bank. No licence held by Vanilla Pay is mentioned | Kaori Media [C] |
-| Fees | Published fee only for the international product: 4% commission on card/e-wallet international payments, payout within 48 h, "no fee for merchant nor customer" mentioned for international payments only; blog about two years old. No published mobile money merchant tariff found | https://blog.vanilla-pay.net/recevez-les-paiements-internationaux/ and search summaries [C] |
-| Features | payment links, real-time payment notification | Vanilla Pay International blog [C] |
-| Older integration | PrestaShop module and a Symfony2 bundle (dated) | online.mg FAQ via search summary [U] |
-| Plans | QR/offline payments across the "Vanilla Islands", tourist QR app, expansion to other African countries in 1-2 years, seeking Gulf investors | Kaori Media [C] |
+Nothing in this file assumes a named aggregator.
 
-### 3.2 What is NOT publicly known (confirm directly with Vanilla Pay before design freeze)
+### 3.2 What is typically not public (confirm with the chosen aggregator before design freeze)
 
-I could not find, in any public source: REST API documentation, authentication method, sandbox, webhook/callback format and retry/signature rules, settlement schedule for mobile money (D+0 / D+1 / D+2), per-operator fee pass-through, payout (disbursement) API, refunds/reversals, per-transaction/daily limits per operator, uptime SLA, fraud/chargeback rules, merchant KYC requirements, exclusivity terms, or the legal basis of the 100,000,000 Ar ceiling. All of these must be asked in writing. The founder's statements to the team (regulation covered, all operators, 100M ceiling, no identity verification) are consistent with a tiered-KYC aggregator but were not verified publicly.
+Aggregators rarely publish: REST API documentation, authentication method, sandbox, webhook/callback format and retry/signature rules, settlement schedule for mobile money (D+0 / D+1 / D+2), per-operator fee pass-through, payout (disbursement) API, refunds/reversals, per-transaction/daily limits per operator, uptime SLA, fraud/chargeback rules, merchant KYC requirements, exclusivity terms, or the basis of the 100,000,000 Ar ceiling. All of these must be asked in writing of whichever aggregator is chosen.
 
 ### 3.3 Integration-constraint hypotheses to test (not facts)
 
 1. Inbound (collect) flows probably mirror the operators' merchant APIs: customer enters phone number, receives a USSD/app push to approve with PIN, aggregator gets an async callback. Direct operator APIs behave this way (MVola Merchant Pay: initiate, details, status; callback URL; GSMA-certified) [P/U]. Expect async states (pending, timeout) that Gereo must reconcile.
-2. Outbound (payout/withdrawal) APIs are often a separate, more restricted product and may need extra approval and a pre-funded float. Ask whether Vanilla Pay can disburse to arbitrary MVola/Orange/Airtel numbers programmatically and at what cost, since MVola charges the sender Ar 200-24,000 for cross-network P2P.
-3. Operator-side limits still apply under the aggregator: MVola individual max balance and per-transaction cap is Ar 20,000,000 while enterprise is Ar 100,000,000, so a payout above 20M Ar to a personal MVola wallet may fail even if Vanilla Pay's own ceiling is 100M.
-4. Aggregator sits in a regulatory grey zone (see section 5): its HQ is in France; the 2016 e-money law (Art. 25) requires an e-money institution to have its head office in Madagascar. Vanilla Pay is not itself described as an e-money issuer; it presumably acts as a technical aggregator/payment facilitator. Funds likely sit in operator wallets or a Vanilla Pay merchant account. Who holds the funds and where determines Gereo's own licensing exposure.
+2. Outbound (payout/withdrawal) APIs are often a separate, more restricted product and may need extra approval and a pre-funded float. Ask whether the aggregator can disburse to arbitrary MVola/Orange/Airtel numbers programmatically and at what cost, since MVola charges the sender Ar 200-24,000 for cross-network P2P.
+3. Operator-side limits still apply under the aggregator: MVola individual max balance and per-transaction cap is Ar 20,000,000 while enterprise is Ar 100,000,000, so a payout above 20M Ar to a personal MVola wallet may fail even if the aggregator's own ceiling is 100M.
+4. Aggregator sits in a regulatory grey zone (see section 5): where the funds sit (operator wallets or an aggregator merchant account) and who holds them determines Gereo's own exposure.
 
 ### 3.4 Partner risks
 
-- **Concentration/single point of failure**: a company with about 70,000 accounts and 100 merchants, whose DG says expansion capital is being sought. Ask for financials, insurance, bank partners, and contractual exit/data portability.
-- **Competitive overlap**: Vanilla Pay operates its own consumer wallet app with tiered KYC. A Gereo wallet for individuals and groups could compete with it; check non-compete/exclusivity and data-sharing terms.
-- **Regulatory dependence**: if Vanilla Pay lacks a specific licence (the founder says fintech framework is absent), Gereo cannot rely on "Vanilla Pay covers regulation" as a defence. Obtain it in writing, ideally the BFM/CSBF approval or the licensed partner it relies on.
+- **Concentration/single point of failure**: a small aggregator is a single point of failure. Ask for financials, insurance, bank partners, and contractual exit/data portability.
+- **Competitive overlap**: an aggregator with its own consumer wallet app could compete with a Gereo wallet; check non-compete/exclusivity and data-sharing terms.
 - **Operator risk passes through**: MVola outages (Nov 2025, May-June 2026) mean aggregator calls fail too. Design for retries, idempotency and manual reconciliation.
 - **Alternatives to benchmark**: Papi.mg (https://papi.mg/) markets one REST API/key for MVola, Orange Money, Airtel Money and Visa, HMAC-SHA256 signed notifications, idempotent link creation, sandbox, WordPress plugin; claims about 400 shops and about 6,000 transactions processed; fees not published [C]. Direct operator integrations (MVola Developer, Orange Developer "Orange Money Web Payment", Airtel developers portal) exist per community SDKs; Airtel production requires KYC docs [U]. A GitHub reference project (PaidMada) shows the callback/credential shape of all three [U].
 
@@ -244,12 +230,11 @@ Read directly from the law PDF (https://textes.lexxika.com/wp-content/uploads/20
 - Data/AML: AML/CFT programme and agent compliance (Art. 49), transactions subject to legal limits (Art. 50), identity and transaction records kept at least five years (Art. 53).
 - The implementing CSBF instructions (KYC tiers, caps, agent criteria) were not found; the law refers to them. These are the key documents to obtain.
 
-**Implication for Gereo's "client funds in wallets" model**: holding client balances and offering wallet functions to individuals and groups is the core of e-money "management". Gereo must (a) be or partner with a CSBF-licensed e-money institution/credit institution and operate as its mandated distribution agent, or (b) design the "wallet" as a non-custodial ledger of claims against the licensed partner's wallet (what exactly is allowed needs counsel), or (c) obtain its own e-money licence (Madagascar HQ, capital, compte global). Group "savings" with interest, lending among members, or pooled funds that look like deposits (Art. 17, 15) raise the highest risk. Treat as a legal workstream with a Malagasy lawyer and an early BFM/CSBF conversation (the BFM regulatory sandbox, announced for 2025, is worth checking).
+**Implication for Gereo's "client funds in wallets" model**: holding client balances and offering wallet functions to individuals and groups is the core of e-money "management". Gereo must (a) be or partner with a CSBF-licensed e-money institution/credit institution and operate as its mandated distribution agent, or (b) design the "wallet" as a non-custodial ledger of claims against the licensed partner's wallet, or (c) obtain its own e-money licence (Madagascar HQ, capital, compte global). Group "savings" with interest, lending among members, or pooled funds that look like deposits (Art. 17, 15) raise the highest risk.
 
 ### 5.2 KYC practice
 
 - Operators: ID required (CIN, passport or accepted ID), adult resident, one account per SIM (MVola); Airtel: ID, up to 5 accounts [P/U]. Orange: self-onboarding with ID photo and selfie, basic then full account after secondary checks [C].
-- Vanilla Pay: account with phone number and email, ID upload for more features [C]. Per the founder, Vanilla Pay provides no identity verification for Gereo.
 - SIM registration requirements exist; older sources describe suspension of unidentified lines; no current ARTEC text found [U].
 - Operator tiers/limits per KYC level are not published by official pages found; third-party mentions of lower caps for level-1 accounts are unconfirmed [U].
 - Comparator: Comoros' Holo uses simplified BCC-authorised KYC; at launch it had no requirements, which led to dormant, non-transacting accounts; it later required a minimum opening balance [P, BDC white paper].
@@ -315,7 +300,7 @@ Only basic facts found: Moov Money operates in Cote d'Ivoire, Togo (Flooz), Beni
 
 ### 7.1 Constraints (design around these)
 
-1. **Licensing/custody**: custody of client funds in wallets falls under the 2016 e-money law (CSBF agrement, mandated-agent rules, no deposit-taking, no interest on e-money, compte global). Decide the operating model before building: mandated agent of a licensed issuer, partnership, or own licence. Get written confirmation of Vanilla Pay's legal status.
+1. **Licensing/custody**: custody of client funds in wallets falls under the 2016 e-money law (CSBF agrement, mandated-agent rules, no deposit-taking, no interest on e-money, compte global). Decide the operating model before building: mandated agent of a licensed issuer, partnership, or own licence.
 2. **Interest and lending**: do not promise interest, yields, or intra-group lending in the wallet; route savings/credit through licensed banks/MFIs (as MVola does).
 3. **Wallet caps**: operator wallets cap individuals at Ar 20M balance and per transaction; enterprise Ar 100M. Group pots above Ar 20M cannot land in one personal MVola wallet.
 4. **Fees**: cross-network payouts cost 3x to 10x same-network. Show the exact fee before confirmation; prefer same-operator payout routing; collect contributions in a way that does not charge the sender extra.
@@ -338,21 +323,19 @@ Only basic facts found: Moov Money operates in Cote d'Ivoire, Togo (Flooz), Beni
 ### 7.3 Risks
 
 - **Regulatory**: operating as an unlicensed e-money service is an offence (Art. 16); aggregator HQ in France vs Art. 25 for issuers; unpublished CSBF instructions on caps; tax uncertainty.
-- **Partner**: Vanilla Pay concentration risk, product overlap with its own wallet, undisclosed API/settlement terms. Plan a second rail (Papi or direct operator APIs) behind an adapter interface.
+- **Partner**: aggregator concentration risk, product overlap with its own wallet, undisclosed API/settlement terms. Plan a second rail (Papi or direct operator APIs) behind an adapter interface.
 - **Fraud**: OTP phishing, SIM swap and social engineering are the dominant losses across markets; operator terms put liability on customers, and users will blame the app.
 - **Liquidity and float**: if Gereo promises instant payouts it must fund float or depend on aggregator settlement timing; unknown.
 - **Group-specific**: treasurer abuse and disputes over contributions; need role-based approvals and audit trail.
 - **Sustainability**: small-ticket fee economics (Ar 70-250 on small transfers); Wave/Chipper show low-margin wallets are hard to run profitably.
 
-### 7.4 Questions to put to Vanilla Pay and the regulator (checklist)
+### 7.4 Questions to put to the chosen aggregator (checklist)
 
-1. Which licence/approval covers your service? Which licensed entity holds user and merchant funds? Provide the contract chain with each operator.
-2. REST API docs, sandbox, auth, signed webhooks, retry policy, idempotency, status polling.
-3. Collection and disbursement flows per operator: limits per transaction/day/month/balance, settlement time, float requirements, fees, refund/reversal rules.
-4. Does the 100,000,000 Ar ceiling apply per transaction, per day, or per account? Does it hold for payouts to personal wallets?
-5. Sandbox test numbers and production onboarding time, merchant KYC requirements.
-6. SLA, incident communication, fraud rules, data ownership/portability, exclusivity.
-7. Regulator: CSBF instruction on e-money KYC tiers and distribution-agent criteria; whether a group "wallet" ledger needs an agrement; sandbox access; status of the TTM.
+1. REST API docs, sandbox, auth, signed webhooks, retry policy, idempotency, status polling.
+2. Collection and disbursement flows per operator: limits per transaction/day/month/balance, settlement time, float requirements, fees, refund/reversal rules.
+3. Does the 100,000,000 Ar ceiling apply per transaction, per day, or per account? Does it hold for payouts to personal wallets?
+4. Sandbox test numbers and production onboarding time, merchant KYC requirements.
+5. SLA, incident communication, fraud rules, data ownership/portability, exclusivity.
 
 ---
 
@@ -364,7 +347,6 @@ Only basic facts found: Moov Money operates in Cote d'Ivoire, Togo (Flooz), Beni
 
 ## 9. Gaps still open
 
-- Vanilla Pay own documentation (site unreachable here), contract terms and licence.
 - Orange Money and Airtel Money developer/API terms; official Orange/Airtel tariffs and KYC tier limits.
 - CSBF instructions (KYC tiers, caps, agent rules); CSBF list of licensed e-money institutions.
 - Google Play review text for MVola, Orange Max it, Airtel Money, Wave, M-Pesa.
@@ -402,16 +384,6 @@ Madagascar market and operators
 - Xsolla and Airtel Money Madagascar: https://thepaypers.com/payments/news/xsolla-brings-airtel-mobile-money-to-tanzania-and-madagascar
 - Fintech Times, Madagascar ecosystem 2026 (low authority): https://thefintechtimes.com/the-fintech-ecosystem-of-madagascar-in-2026/
 
-Vanilla Pay and integration
-- Kaori Media, Vanilla Pay International: https://www.kaori-media.com/posts/vanilla-pay-international-we-secure-the-way-people-pay
-- Kaori Media interview with the founder: https://www.kaori-media.com/posts/interview-with-mr-andry-randriamanamihaja-director-general-of-vanilla-pay-international-chairman-of-the-fintech-association-of-madagascar
-- Vanilla Pay blog (international payments): https://blog.vanilla-pay.net/recevez-les-paiements-internationaux/
-- Vanilla Pay site (unreachable during research): https://online.mg/
-- Orange Fab profile: https://orangefab.mg/fr/les_start_up/vanillapay/
-- Papi.mg: https://papi.mg/
-- PaidMada (third-party unified API, reference only): https://github.com/mandaniainarandriambinintsoa/paidmada-mobile-money
-- Shopify community thread on MVola integration (no answers): https://community.shopify.com/t/integration-of-external-payment-api-for-mvola-in-madagascar/371997
-- GSMA, MVola API case study (page returned 403 to the tool): https://www.gsma.com/solutions-and-impact/connectivity-for-good/mobile-for-development/uncategorized/mvola-madagascar-a-case-study-for-the-gsma-mobile-money-api-and-open-platforms/
 
 Regulation, tax, eAriary
 - Law 2016-056 on electronic money (promulgated 2 Feb 2017): https://textes.lexxika.com/wp-content/uploads/2024/05/Loi-2016-056-02-Fevrier-2016-Sur-la-Monnaie-Electronique-et-les-Etablissements-de-Monnaie-Electronique.pdf

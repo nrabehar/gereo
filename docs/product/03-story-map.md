@@ -4,7 +4,7 @@ Built from [02-story-index.md](02-story-index.md) (196 MVP stories). The horizon
 
 ## 1. Why slices
 
-The stories hold 120 P0 items, which is too much for one person working with an AI assistant. A P0 label says the product makes no sense without it; it does not say in what order to build. Slices answer the order question, and let money-free work proceed while the legal gate on holding funds stays open.
+The stories hold 120 P0 items, which is too much for one person working with an AI assistant. A P0 label says the product makes no sense without it; it does not say in what order to build. Slices answer the order question, and let money-free work proceed first.
 
 | Slice | Name | Stories | Outcome it proves |
 | --- | --- | --- | --- |
@@ -13,7 +13,7 @@ The stories hold 120 P0 items, which is too much for one person working with an 
 | 2 | MVP complete | 95 | The remaining P0 items plus all P1: rules, projects, events, announcements, richer groups, polish |
 | 3 | Later in the MVP | 10 | P2 items |
 
-Slice 0 can be built and tested with a simulated payment adapter, so it is not blocked by the legal opinion or by Vanilla Pay's terms. Slices 1 and above need both. Stories tagged `legal-gate` are all outside slice 0 except where slice 0 only shows a simulated balance.
+Slice 0 can be built and tested with a simulated payment adapter, and later slices put a real payment rail behind the adapter.
 
 ## 2. Slice 0, the walking skeleton
 
@@ -45,7 +45,7 @@ Stories left out of slice 0 on purpose: push and SMS delivery, KYC capture, real
 
 ## 3. Slice 1, real money safely
 
-Everything that touches client funds or protects them: real deposit and payout settlement, failure handling, identity capture and review, PIN recovery and device change, account lock, SMS and its cost, offline reading, blocked money-out offline, and the operator tools that reconcile, review identity, handle tickets and watch payouts. This slice needs the legal opinion, Vanilla Pay's terms and a second payment rail decision.
+Everything that touches client funds or protects them: real deposit and payout settlement, failure handling, identity capture and review, PIN recovery and device change, account lock, SMS and its cost, offline reading, blocked money-out offline, and the operator tools that reconcile, review identity, handle tickets and watch payouts. This slice needs a real payment rail behind the adapter.
 
 ### Slice 1 matrix
 | Journey step | Stories |
@@ -91,7 +91,7 @@ The remaining P0 items that are not money-critical (for example RUL-01 to RUL-07
 
 ## 6. Critical dependency chain
 
-ACC-02 (sign up) leads to GRP-01 (group) and GRP-03 and GRP-04 (members), then GRP-08 and GRP-12 (an approver and a threshold). CON-01 and CON-04 (plan and payment) need WAL-01 and WAL-06 and WAL-07 (wallet and deposit). CON-11 and CON-14 (split rule and its execution) need CON-04. SPD-01, SPD-05 and SPD-10 need WAL-01 and GRP-08. VOT-03 and SPD-09 need both VOT and SPD. Real settlement (WAL-07 real, SPD-10 real) depends on the legal gate and on OPS-04 and OPS-05 for reconciliation.
+ACC-02 (sign up) leads to GRP-01 (group) and GRP-03 and GRP-04 (members), then GRP-08 and GRP-12 (an approver and a threshold). CON-01 and CON-04 (plan and payment) need WAL-01 and WAL-06 and WAL-07 (wallet and deposit). CON-11 and CON-14 (split rule and its execution) need CON-04. SPD-01, SPD-05 and SPD-10 need WAL-01 and GRP-08. VOT-03 and SPD-09 need both VOT and SPD. Real settlement (WAL-07 real, SPD-10 real) depends on OPS-04 and OPS-05 for reconciliation.
 
 ### Cross-reference convention and build order
 
@@ -104,7 +104,6 @@ ACC-02 (sign up) leads to GRP-01 (group) and GRP-03 and GRP-04 (members), then G
 - Check, run as part of the story-map build by the product definition owner: every ID cited anywhere resolves to a `###` heading; every "Depends on" list is acyclic except the chain explicitly allowed above; every message key is emitted by one story; every EV- ID exists in NTF. The story files now follow the convention. The check was run by hand on 2026-10-28 with a throwaway script that is not stored in the repository; it found no missing story ID and no missing criterion or open-question target, and no message key outside the catalogue. Adding the script to the story-map build is still to do.
 - Dependency-cycle check result before these edits, from the "Depends on" lines of the 196 story headings: the graph contains cycles (for example ACC-01 and XCT-01 depend on each other, and WAL-07, RUL-07, WAL-12 and WAL-13 reference one another). The cycle check was not re-run after the later edits to the story files.
 
-Legal gate: every story tagged `legal-gate` is blocked from release until the legal opinion and the Vanilla Pay due diligence of [competitive-analysis.md](../research/competitive-analysis.md) section 10 are done. In slice 0 the same behaviour is built against a simulated adapter.
 
 ## 7. Scope risk
 

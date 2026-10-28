@@ -28,7 +28,7 @@ Caveats about the research itself:
 | 1 GB of mobile data averaged about USD 1.12 in 2023, cheapest plan USD 0.32 (Cable.co.uk via Statista); minimum wage cited as about USD 50/month in 2021 | [S] | [48] |
 | Android Go targets entry-level phones; minimum RAM is 512 MB up to Android 10, 1 GB for Android 11-12, 2 GB for Android 13 | [V] | [20] |
 | The existing web app is React 19, TanStack Router, Tailwind v4, Base UI, lucide-react, two variable fonts (Geist, Lexend); no i18n library is installed yet | [V] (local `web/package.json`) | local |
-| The founder's own group already exists and is the stated test group; regulation is described in `info.md` as "already settled" through Vanilla Pay | [V] (local `info.md`) | local |
+| The founder's own group already exists and is the stated test group | [V] | local |
 
 Process implications:
 1. Real users are scarce online, so field research (in person, on paper, on borrowed phones) outranks remote analytics.
@@ -55,7 +55,7 @@ Process implications:
 ### 1.3 Jobs-to-be-Done (JTBD)
 
 - Premise: people "hire" products to make progress; the classic illustration is Christensen's milkshake case (commuters hiring a milkshake for a long boring drive). Practice has diverged: Ulwick's Outcome-Driven Innovation versus the Moesta/Christensen interview approach, and Ulwick publicly disputes the milkshake framing [S][6]. I could not read the HBR article (paywalled summary only).
-- Fit for Gereo: use as an interview lens and a backlog format, not a full methodology. Gereo's pain table in `info.md` already reads like jobs (see the balance after contributions, run a vote without a meeting, remind everyone about an event). Write 8-12 job stories ("When ..., I want to ..., so I can ...") and use them to prioritise MVP scope. The repo has a `job-stories` skill available for this.
+- Fit for Gereo: use as an interview lens and a backlog format, not a full methodology. Gereo's pain table already reads like jobs (see the balance after contributions, run a vote without a meeting, remind everyone about an event). Write 8-12 job stories ("When ..., I want to ..., so I can ...") and use them to prioritise MVP scope. The repo has a `job-stories` skill available for this.
 - Caution: jobs framing finds motivations well but says nothing about comprehension or literacy barriers; it needs usability testing alongside.
 
 ### 1.4 Design Sprint (GV) and compressed versions
@@ -98,7 +98,7 @@ GSMA / MicroSave / Grameen / Bankable Frontier
 
 - Journey map: one actor, one scenario, phases, actions, mindsets, one emotion line, opportunities; one map per point of view [V][25].
 - Service blueprint: customer actions, frontstage, backstage, support processes, evidence; lines of interaction and visibility; suited to services with internal dependencies [V][26].
-- Fit for Gereo: a journey map for "monthly contribution cycle" (reminder, pay via mobile money, confirmation, ledger update) and one service blueprint for the same cycle, because the experience depends on things the UI cannot show: the mobile money operator, Vanilla Pay callbacks, SMS delivery, and the group treasurer's manual actions today. The blueprint is where the "pending/unknown payment" states come from.
+- Fit for Gereo: a journey map for "monthly contribution cycle" (reminder, pay via mobile money, confirmation, ledger update) and one service blueprint for the same cycle, because the experience depends on things the UI cannot show: the mobile money operator, provider callbacks, SMS delivery, and the group treasurer's manual actions today. The blueprint is where the "pending/unknown payment" states come from.
 
 ### 1.8 Which framework, when (summary)
 
@@ -244,13 +244,12 @@ Threat list to review for Gereo [U]:
 - Shared or lost phone; shoulder surfing; screenshots of balances; notification previews exposing amounts.
 - Privacy in a transparent ledger: what do members see about each other's contributions and personal wallets? Separate personal wallet visibility from group wallet visibility.
 - Coercion: social pressure when everyone sees who has not contributed.
-- Identity: `info.md` states no identity verification is provided; this needs a written decision, not an assumption.
 
 Evidence anchors: CGAP found distrust of banks, fear of new technology and a need for control, and recommends transparency, showing pricing up front and giving users a real-time window into their money [V][10].
 
 ### 4.2 Error-state inventory
 
-For every screen that moves or displays money, list: empty, loading (slow network), partial load, offline, error (validation), error (server), error (provider/operator), timeout, pending, success, success-but-delayed, reversed, expired, permission denied, quorum not reached, deadline passed, limit exceeded (the 100,000,000 Ar ceiling in `info.md`), duplicate, conflict (two people edit a rule). Capture in a FigJam table: state, trigger, what the user sees, what the user can do, what is logged, message text key, and which language variants exist. WCAG 3.3.1 requires errors to be identified and described in text; 3.3.4 requires financial submissions to be reversible, checked or confirmed [V][27]. CGAP's "Are you SURE you want to withdraw" example is the model for confirmation wording [V][11].
+For every screen that moves or displays money, list: empty, loading (slow network), partial load, offline, error (validation), error (server), error (provider/operator), timeout, pending, success, success-but-delayed, reversed, expired, permission denied, quorum not reached, deadline passed, limit exceeded (the 100,000,000 Ar ceiling), duplicate, conflict (two people edit a rule). Capture in a FigJam table: state, trigger, what the user sees, what the user can do, what is logged, message text key, and which language variants exist. WCAG 3.3.1 requires errors to be identified and described in text; 3.3.4 requires financial submissions to be reversible, checked or confirmed [V][27]. CGAP's "Are you SURE you want to withdraw" example is the model for confirmation wording [V][11].
 
 ### 4.3 Content design and microcopy process
 
@@ -263,9 +262,8 @@ For every screen that moves or displays money, list: empty, loading (slow networ
 
 ### 4.4 Legal and compliance checkpoints
 
-Not legal advice; checkpoints for a lawyer or the compliance owner [U unless noted]:
+Not legal advice; checkpoints for the compliance owner [U unless noted]:
 - E-money: Law 2016-056 on electronic money and e-money institutions is the base law; CSBF (attached to the central bank) supervises; instructions on agents, governance and special accounts exist (2017, 2018, 2020 per a list I could not cross-check) [S][42]. Banking Law 2020-011 also touches electronic financial services [S][42].
-- Vanilla Pay: its own pitch page, undated and self-reported, says it aggregates mobile money accounts and e-wallets, claims about 20,000 active e-wallets and 10,000 transactions per month, and says it is seeking e-money establishment status [S][43]. `info.md` says regulation is "already settled" through Vanilla Pay. This is the largest compliance assumption in the project; obtain written confirmation of the licence perimeter and of who holds the funds, because that determines the allowed copy ("balance", "deposit", "wallet", "your money").
 - Personal data: Law 2014-038; consent and purpose; data minimisation; retention; cross-border transfer limits [S][41]. Decide where data is stored and what the privacy screen says before building onboarding.
 - Group money collection: whether a group wallet that holds members' contributions is a regulated activity depends on the provider model; confirm [U].
 - Terms and consent screens must be in the user's language (Malagasy plus French) and written in plain language; checkpoint at the start of hi-fi (Week 5) and again before launch.
@@ -352,7 +350,7 @@ Discover and define
 
 Design
 - [ ] Information architecture and navigation map
-- [ ] User flows with error branches for 6 key journeys listed in `info.md`
+- [ ] User flows with error branches for 6 key journeys listed in the brief
 - [ ] Error-state inventory table
 - [ ] Wireframes for MVP screens (mobile first, 360 px baseline) with real strings
 - [ ] Low-fi clickable prototype (or paper kit) and test script
@@ -389,7 +387,7 @@ Assumptions: one person full time on design and product with an AI assistant; ac
 | Week | Focus | Deliverables | FigJam artifacts | Figma artifacts | AI assistant role |
 |---|---|---|---|---|---|
 | 1 | Discover: plan and field start | Research plan, consent script (oral, Malagasy and French), recruiting list (founder's group plus 2-3 outside groups), assumption list, glossary v0; 5-6 field conversations (home or place of work, including the group's current manual process) | Assumption map; research plan board; interview notes template | Audit page: list existing coded components and tokens | Draft interview guide, consent text, glossary seeds; transcribe only with consent; do not feed raw personal data without pseudonymisation |
-| 2 | Discover and define | 5-6 more conversations including one co-design session with an association; synthesis; journey map (contribution cycle) and service blueprint; job stories; MVP cut; design principles; design brief with performance and accessibility budgets; start the legal/compliance question list (Vanilla Pay perimeter) | Affinity board; journey map; service blueprint; job-story board; principles | Token inventory page (colors, type, spacing from code); start Figma variable collections (primitives) | Help cluster notes; draft job stories; propose budgets; flag contradictions across interviews |
+| 2 | Discover and define | 5-6 more conversations including one co-design session with an association; synthesis; journey map (contribution cycle) and service blueprint; job stories; MVP cut; design principles; design brief with performance and accessibility budgets | Affinity board; journey map; service blueprint; job-story board; principles | Token inventory page (colors, type, spacing from code); start Figma variable collections (primitives) | Help cluster notes; draft job stories; propose budgets; flag contradictions across interviews |
 | 3 | Flows and wireframes | Flows with error branches for contribute, vote, create group, split revenue; error-state inventory v1; IA; wireframes (grayscale, 360 px) for MVP screens with real strings in three languages | Flows; error inventory table; IA map | Wireframe pages; strings as Figma string variables with language modes for fit checks | Generate flow permutations and missing states; generate pseudo-localised and translated strings for fit checks |
 | 4 | Low-fi prototype and Round A test | Clickable low-fi prototype plus printed paper kit; test script with comprehension probes; Round A: 6 sessions (3 members, 3 permission-holders) in person on borrowed or own phones; synthesis; fix list | Test plan; observation grid; severity board | Low-fi prototype flows; v2 wireframes | Synthesis of notes; prioritise fixes; do not substitute for sessions |
 | 5 | Hi-fi core and design system | Hi-fi for the top 4 flows in light and dark; semantic tokens and Figma variables (theme and language modes); component library mirrored from code; missing components added; microcopy v1 reviewed by a native Malagasy speaker; compliance checkpoint 1 (terms, privacy, copy limits) | Content review board; compliance checklist | Hi-fi screens; library file with variables, modes, component sets | Build library through the Figma MCP; draft Malagasy and French copy for human review |
@@ -413,7 +411,7 @@ Notes on realism [U]:
 4. Testing: small rounds of 5-6 in person (NN/g), separate rounds per segment, on real low-end phones, using printed and clickable prototypes; remote WhatsApp voice sessions only as fallback with airtime support [22][24].
 5. Literacy: graphical cues plus text plus voice-ready content; term testing for every money word; no text-only critical step; oral consent; interpreter protocol [14][10][46][44].
 6. Trust-critical flows: threat table, error-state inventory (including pending and unknown), confirmation copy tested in sessions, explicit rule-change and quorum visibility in the ledger [10][11].
-7. Compliance: written confirmation of the Vanilla Pay licence perimeter and funds-holding, privacy decision, and copy limits before hi-fi; second review before launch [42][43][41].
+7. Compliance: privacy decision and copy limits before hi-fi; second review before launch [42][41].
 8. Accessibility: WCAG 2.2 AA items from Section 4.5 as acceptance criteria, with real-device TalkBack and large-font checks [27][28][29].
 9. Performance: budgets in the brief (170 KB JS, 5 s TTI on slow 3G as starting values), enforced in the build [21][19][20].
 10. Multilingual: English keys, human-reviewed Malagasy and French, glossary first, pseudo-localisation, ICU plurals, `lang` attributes [30][31][27].
@@ -421,9 +419,7 @@ Notes on realism [U]:
 12. Ethics: IDEO's five principles as the research ground rules; incentives in airtime or mobile money at about half a local day's wage; pseudonymised data [9][14].
 
 Open questions to resolve early:
-- True smartphone share and the phone and OS mix of the first target groups (the brief's 9% could not be verified; one source says 24%).
 - Whether WhatsApp or Messenger is the dominant channel for the target groups.
-- The status and perimeter of Vanilla Pay's licence and identity-verification expectations (`info.md` says no identity verification is provided yet also lists "verify identity" in the start journey; reconcile).
 - Which Malagasy register and glossary to use; whether the product needs audio guidance in the MVP or only in a later phase.
 - Figma plan and budget.
 
@@ -473,7 +469,6 @@ Open questions to resolve early:
 [40] FRED/World Bank adult literacy, Madagascar. https://fred.stlouisfed.org/data/SEADTLITRZSMDG (search snippet only)
 [41] Law 2014-038 on personal data protection. https://www.assemblee-nationale.mg/wp-content/uploads/2020/11/Loi-n°2014-038-sur-la-protection-des-données-à-Kre-personnel.pdf ; https://regulations.clym.io/law-no-2014-038-on-the-protection-of-personal-data-madagascar (search snippets only; text not read)
 [42] Law 2016-056 on electronic money. https://www.assemblee-nationale.mg/media/archives_textes/pl/2016-056/Loi-n-2016-056-monnaie-%C3%A9lectronique.pdf ; PIC Madagascar https://www.pic.commerce.mg/fr/services-financiers (search snippets only)
-[43] Vanilla Pay venture page (self-reported). https://vc4a.com/ventures/vanilla-pay/ (search snippet only)
 [44] Cross-language interviewing and interpreters: Temple and Edwards https://sites.ualberta.ca/~iiqm/backissues/1_2Final/html/temple.html ; https://iris.landsbokasafn.is/en/publications/methodological-and-ethical-challenges-in-cross-language-qualitati/ (search snippets only)
 [45] WhatsApp in low-resource usability and diary studies: https://link.springer.com/article/10.1186/s44247-026-00272-x ; https://formative.jmir.org/2026/1/e84032 (search snippets only)
 [46] Oral and short-form consent guidance: https://irb.ucsf.edu/enrolling-subjects-who-are-legally-blind-illiterate-or-cannot-talk-or-write (search snippet only; US clinical-research context)

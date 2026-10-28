@@ -1,6 +1,6 @@
 # Competitive Research 02: Personal Finance, Budgeting, Multi-Wallet / Pots / Rules Apps
 
-Prepared for Gereo (mobile + web, Madagascar, MGA, Vanilla Pay mobile money, individuals and groups).
+Prepared for Gereo (mobile + web, Madagascar, MGA, mobile money, individuals and groups).
 Research date: 2026-10-19. All figures are "as reported on the cited date"; conflicting figures are shown as conflicts.
 
 Labelling convention:
@@ -93,7 +93,7 @@ Method note: Trustpilot pages and the Apple iTunes Search API were fetched direc
 - Lesson: design polish wins loyalty but a platform gap (no Android) excludes most of Gereo's target market.
 
 ### Relevance to Gereo
-- Aggregators live and die by bank-connection quality. Madagascar has no open-banking aggregation layer for mobile money; Gereo's own ledger plus Vanilla Pay movement is structurally more reliable than screen-scraping.
+- Aggregators live and die by bank-connection quality. Madagascar has no open-banking aggregation layer for mobile money; Gereo's own ledger plus provider movement is structurally more reliable than screen-scraping.
 - Analysis dashboards (net worth, trends) are table-stakes in this segment.
 
 ---
@@ -288,7 +288,7 @@ Method note: Trustpilot pages and the Apple iTunes Search API were fetched direc
 - Francophone/Indian Ocean: no popular consumer budgeting app surfaced in search (neither Mauritius nor francophone West Africa); Wave (Senegal/CI) is payments-first without a notable envelope product in this research (not deeply researched; flagged as a follow-up).
 
 ### Relevance to Gereo
-- White space: mobile money apps are payment-first; none shows envelope/pots/rules. Inactivity fees, cash-out fees and transfer fees mean "moving money between wallets" must not itself incur per-hop fees; internal wallet-to-wallet moves should be free ledger entries, and only Vanilla Pay in/out should cost.
+- White space: mobile money apps are payment-first; none shows envelope/pots/rules. Inactivity fees, cash-out fees and transfer fees mean "moving money between wallets" must not itself incur per-hop fees; internal wallet-to-wallet moves should be free ledger entries, and only provider in/out should cost.
 
 ---
 
@@ -305,7 +305,7 @@ Method note: Trustpilot pages and the Apple iTunes Search API were fetched direc
 - YNAB: months to learn the method; Goodbudget: manual refill each month; Qapital: partner invites failing; Cowrywise: token delays on reactivation. Seamless onboarding is a reviewer-praised differentiator (Cowrywise "seamless").
 
 ### KYC friction (Nigeria benchmark)
-- BVN/NIN gated tiers with wallet caps; Post No Debit for non-compliant funded accounts; regulator-driven onboarding bans. [S] User-level KYC friction metrics were not found. For Madagascar, Vanilla Pay / operator KYC will gate deposits and withdrawals; design wallets so unverified users can still use budgeting and rules on small amounts.
+- BVN/NIN gated tiers with wallet caps; Post No Debit for non-compliant funded accounts; regulator-driven onboarding bans. [S] User-level KYC friction metrics were not found. For Madagascar, provider / operator KYC will gate deposits and withdrawals; design wallets so unverified users can still use budgeting and rules on small amounts.
 
 ### Performance on low-end phones / slow networks and offline
 - No fintech-specific evidence was found for OPay/PalmPay lite variants. Precedent exists from other sectors: Uber Lite under 5MB vs 100MB+ full app, Instagram Lite under 2MB, Facebook Lite about 252KB, Nedbank Money App Lite built for limited data and device memory. [S]
@@ -377,7 +377,7 @@ Method note: Trustpilot pages and the Apple iTunes Search API were fetched direc
 | Valuation/funding fragility of consumer fintech | Kippa failed after $8.4M; Chipper Cash multiple layoff rounds; Kuda missed user targets | Low-cost architecture; early revenue from business/group tiers or float, not ads |
 
 ### Suggested MVP positioning
-"Automatic envelopes for mobile money": every Vanilla Pay deposit splits itself by your rules, you always see exactly what is safe to spend, works on a cheap phone and shows your balances offline. Compete on exactness (ledger), automation (rules per wallet) and group use, not on bank aggregation or investment breadth.
+"Automatic envelopes for mobile money": every deposit splits itself by your rules, you always see exactly what is safe to spend, works on a cheap phone and shows your balances offline. Compete on exactness (ledger), automation (rules per wallet) and group use, not on bank aggregation or investment breadth.
 
 ### Open items not verified (follow up)
 - Actual Madagascar app-store ratings for MVola / Orange Money / Airtel Money apps and local complaint themes (French/Malagasy) were not retrieved.

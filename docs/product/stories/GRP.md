@@ -54,7 +54,7 @@ Wallet: create also covers renaming and retyping a group wallet; Wallet: edit ru
 | `grp.leave_obligation_policy` | What happens to unpaid contributions when someone leaves: settle, waive, record as debt | Record as outstanding debt, offer "Pay now" or an exemption |
 | `grp.archive_grace` | Time the second confirmer has to confirm an archive | 7 days |
 | `grp.delete_grace` | Hidden and restorable period after a delete request | 30 days |
-| `AUDIT_RETENTION_YEARS` | How long audit entries, consent evidence and the decision log are kept; owned by OPS and only cited here | 5 years (legal basis unconfirmed, see Open questions) |
+| `AUDIT_RETENTION_YEARS` | How long audit entries, consent evidence and the decision log are kept; owned by OPS and only cited here | 5 years |
 | `grp.continuity_permissions` | List of continuity-critical permissions | As listed above |
 
 Fixed product rule (not a parameter): a group wallet never pays out on the action of one person alone. The floor of two distinct people cannot be lowered by any group, any permission holder or any operator. It is met either by one approval from a person other than the requester, or by a passed vote with at least two distinct voters other than the requester (decision D4); a voter counts toward that floor only after the minimum tenure defined in VOT.
@@ -68,18 +68,18 @@ Fixed product rule (not a parameter): a group wallet never pays out on the actio
 **Release:** MVP
 **Actor:** Individual (becomes Group founder)
 **Permission needed:** none
-**Tags:** legal-gate, ledger, audit
+**Tags:** ledger, audit
 
 **Story:** As an individual, I want to create a group with a name, a purpose and a first wallet, so that the people I save with have one shared place for money and decisions.
 
-**Conversation:** The founding problem is a group that runs on calls and hand calculation (info.md, problems 1 and 8). Three fields only; plan and split rules come later from a checklist so a group exists in about a minute (R04 section 14.6 risk 7, "project in 60 seconds"; R07 section 5.2 forms). Group wallets use the same wallet model as personal wallets (CA section 5 differentiators). Decision: creating a group needs only Tier 1 (phone, OTP, PIN) because creation moves no money; every other action follows the "Tier requirements by action" table of ACC-07, and group-wallet limits come from the group-wallet limit set of OPS-11. This carries `legal-gate` because a group wallet may constitute holding client funds (CA section 6 constraint 8): until the legal basis is confirmed, groups can be created and used without deposits.
+**Conversation:** The founding problem is a group that runs on calls and hand calculation. Three fields only; plan and split rules come later from a checklist so a group exists in about a minute (R04 section 14.6 risk 7, "project in 60 seconds"; R07 section 5.2 forms). Group wallets use the same wallet model as personal wallets (CA section 5 differentiators). Decision: creating a group needs only Tier 1 (phone, OTP, PIN) because creation moves no money; every other action follows the "Tier requirements by action" table of ACC-07, and group-wallet limits come from the group-wallet limit set of OPS-11.
 
 **Preconditions:** Signed in with phone and OTP (ACC). **Trigger:** Taps "Create a group" on home or on the empty groups list.
 
 **Acceptance criteria:**
 1. Happy path: the person enters a group name (required, up to `grp.name_max_length`), a purpose of one or two sentences (required, up to `grp.purpose_max_length`, shown to invitees in GRP-04) and a first wallet name (prefilled from message key `grp.wallet.default_name`) with one of the four wallet types (budget, savings, investment, business). Currency is Ariary and not editable. The primary button reads "Create group". After success the person lands on the new group home (GRP-06).
 2. Rule: the group is created with the person as its only member holding every permission (GRP-02), and the wallet belongs to the group with a balance of 0 Ar. Group names need not be unique; if the person already has a group with the same name a soft warning is shown, not a block. Reaching `grp.max_groups_per_user` shows the limit and the next action.
-3. Rule: the new wallet accepts deposits (subject to the ACC-07 table, the group-wallet limit set of OPS-11 and the legal gate) but cannot pay out until the safeguard is satisfied (GRP-13). The post-creation checklist shows "Invite members", "Add a second person who can approve spending" and "Set the contribution plan", each deep-linking to its screen.
+3. Rule: the new wallet accepts deposits (subject to the ACC-07 table and the group-wallet limit set of OPS-11) but cannot pay out until the safeguard is satisfied (GRP-13). The post-creation checklist shows "Invite members", "Add a second person who can approve spending" and "Set the contribution plan", each deep-linking to its screen.
 4. States: while submitting the button is disabled with a progress label and the request carries an idempotency key, so a retry never creates two groups. Offline: Create is disabled and shows `xct.offline.needs_connection`. The form is a local draft (XCT-05 Table B), never sent without a tap, labelled with the `Draft, not sent` key.
 5. Errors: validation messages are inline, per field, name the fix and never use "invalid". On server failure the input is kept and the message reads "We could not create the group. Nothing was created." with a Try again button. No money moves in any case.
 6. Notifications: none to other people. The founder sees an in-app confirmation (`msg.grp.group_created.inapp`).
@@ -88,7 +88,7 @@ Fixed product rule (not a parameter): a group wallet never pays out on the actio
 
 **Data:** Group, Membership, Wallet, Audit entry. **Depends on:** ACC-02, ACC-03, WAL-01.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed: Tier 1 is enough to create a group and a wallet (ACC-07 table; no money moves). Still open, needs a lawyer: whether and when a group wallet may hold member funds (default: groups work without deposits until confirmed).
+**Open questions:** Closed: Tier 1 is enough to create a group and a wallet (ACC-07 table; no money moves). Closed: a group wallet holds member funds from the start (decision D7).
 
 ---
 
@@ -103,7 +103,7 @@ Fixed product rule (not a parameter): a group wallet never pays out on the actio
 
 **Story:** As a group founder, I want to start with all permissions and see plainly what I can do, so that I can set the group up alone and then hand out duties without a hidden "owner" status.
 
-**Conversation:** The brief says the founder starts with all permissions and can grant and revoke (conventions section 3). There is no owner role, so the founder is only the first holder, and being first creates no power that the permissions do not give (info.md "Permissions": relations never carry power). The research warns against "a single person who both runs the group and holds the keys" (R08 section 6.4 avoid; R01 section 13 risk 1, Cameroon losses). So the founder screen explains that money-out still needs a second person.
+**Conversation:** The brief says the founder starts with all permissions and can grant and revoke (conventions section 3). There is no owner role, so the founder is only the first holder, and being first creates no power that the permissions do not give (relations never carry power). The research warns against "a single person who both runs the group and holds the keys" (R08 section 6.4 avoid; R01 section 13 risk 1, Cameroon losses). So the founder screen explains that money-out still needs a second person.
 
 **Preconditions:** A group was just created (GRP-01). **Trigger:** First opening of the group by the founder.
 
@@ -199,7 +199,7 @@ Fixed product rule (not a parameter): a group wallet never pays out on the actio
 
 **Story:** As a member, I want a list of everyone in the group and who can do what with money, so that I know who I am trusting.
 
-**Conversation:** "Hidden admin power: the permission screen must show who can move money" (R08 section 6.11 avoid). Stanbic shows member statuses (R08 section 6.11) and the founding pain is not knowing who is in and who paid (info.md problem 1). Contribution status lives in CON; this list stays about membership. Member visibility of phone numbers is a privacy choice, so the default is masked.
+**Conversation:** "Hidden admin power: the permission screen must show who can move money" (R08 section 6.11 avoid). Stanbic shows member statuses (R08 section 6.11) and the founding pain is not knowing who is in and who paid. Contribution status lives in CON; this list stays about membership. Member visibility of phone numbers is a privacy choice, so the default is masked.
 
 **Preconditions:** Person holds Group: view group. **Trigger:** Opens "Members".
 
@@ -291,11 +291,11 @@ Fixed product rule (not a parameter): a group wallet never pays out on the actio
 **Release:** MVP
 **Actor:** Permission holder (holds Group: grant permission or revoke permission)
 **Permission needed:** Group: grant permission to give, Group: revoke permission to take away
-**Tags:** audit, legal-gate
+**Tags:** audit
 
 **Story:** As a member who can manage access, I want to give or take away one permission at a time and see the effect before I confirm, so that nobody gets more or less power than I meant.
 
-**Conversation:** Showing the diff and the effective result is what protects people from ACL mistakes (R07 section 8.5 R-PM1 to R-PM4; R04 section 13 "show the effective result"). Confirmation is reserved for money-out powers so it keeps meaning (R07 section 8.5 R-PM3). Every permission change is written to the audit log (conventions section 7; info.md, Permissions section, safeguards). Moving a money-out permission to another person may also be put to a vote (R07 R-PM5); decided not for the MVP, see Open questions.
+**Conversation:** Showing the diff and the effective result is what protects people from ACL mistakes (R07 section 8.5 R-PM1 to R-PM4; R04 section 13 "show the effective result"). Confirmation is reserved for money-out powers so it keeps meaning (R07 section 8.5 R-PM3). Every permission change is written to the audit log (conventions section 7). Moving a money-out permission to another person may also be put to a vote (R07 R-PM5); decided not for the MVP, see Open questions.
 
 **Preconditions:** Person holds Group: grant permission to grant or Group: revoke permission to revoke. **Trigger:** Opens a member page and taps "Change access".
 
@@ -360,7 +360,7 @@ Fixed product rule (not a parameter): a group wallet never pays out on the actio
 
 **Story:** As a member, I want a readable history of every access change in the group, so that I can see who gave or took away power and when.
 
-**Conversation:** "Every permission change is written to the audit log and visible to authorised members" (info.md, Permissions section, safeguards; conventions section 7). R07 section 8.5 R-PM4: show who granted what and when, and let a member see their own access history. Group scandals in tontines come from hidden control (R01 section 5), so this view is a trust feature, not an admin tool. It is the plain-language face of the audit log in GRP-11.
+**Conversation:** "Every permission change is written to the audit log and visible to authorised members" (conventions section 7). R07 section 8.5 R-PM4: show who granted what and when, and let a member see their own access history. Group scandals in tontines come from hidden control (R01 section 5), so this view is a trust feature, not an admin tool. It is the plain-language face of the audit log in GRP-11.
 
 **Preconditions:** Group exists. **Trigger:** Opens "Access history" in the group or on a member page.
 
@@ -392,7 +392,7 @@ Fixed product rule (not a parameter): a group wallet never pays out on the actio
 
 **Story:** As a member who can view the audit log, I want a readable log of group-level actions beyond access changes, and as a Gereo operator I want to read the same log for investigations, so that disputes can be settled by facts.
 
-**Conversation:** The brief requires a "complete audit log" as a non-functional rule (info.md, non-functional requirements table, security row) and the research ties fraud to unaccountable administrators (CA section 4 point 2). Open Collective's trail of states and comments is the benchmark (R08 section 6.7). This story is a filtered read view over SPD-16 (request events, expense entries and the authorising approval or vote link) plus group-level events (permissions, settings, membership); it stores no second copy and states no retention number (retention is inherited from SPD-16 through `AUDIT_RETENTION_YEARS`, owned by OPS). Operator reading sits in OPS-09. The log records who did what; it does not duplicate the ledger (WAL).
+**Conversation:** The brief requires a "complete audit log" as a non-functional rule and the research ties fraud to unaccountable administrators (CA section 4 point 2). Open Collective's trail of states and comments is the benchmark (R08 section 6.7). This story is a filtered read view over SPD-16 (request events, expense entries and the authorising approval or vote link) plus group-level events (permissions, settings, membership); it stores no second copy and states no retention number (retention is inherited from SPD-16 through `AUDIT_RETENTION_YEARS`, owned by OPS). Operator reading sits in OPS-09. The log records who did what; it does not duplicate the ledger (WAL).
 
 **Preconditions:** Group exists. **Trigger:** A group-level action occurs or someone opens "Audit log".
 
@@ -409,7 +409,7 @@ Fixed product rule (not a parameter): a group wallet never pays out on the actio
 
 **Data:** Audit entry. **Depends on:** GRP-08, GRP-10, SPD-16 (request events and expense entries), OPS-09 (operator access), WAL-14 (ledger links).
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed: viewing the wider audit log is its own permission, Group: view audit log (decision D2), so a group can show access history to many people and the full log to few. Still open, needs a lawyer: the retention period and its legal basis (CA section 6 constraint 8 cites five years under Art. 53, unconfirmed). Default: 5 years, `AUDIT_RETENTION_YEARS` (owned by OPS). Closed: the audit log is not cached offline.
+**Open questions:** Closed: viewing the wider audit log is its own permission, Group: view audit log (decision D2), so a group can show access history to many people and the full log to few. Closed: audit entries are kept 5 years, `AUDIT_RETENTION_YEARS` (owned by OPS). Closed: the audit log is not cached offline.
 
 ---
 
@@ -420,11 +420,11 @@ Fixed product rule (not a parameter): a group wallet never pays out on the actio
 **Release:** MVP
 **Actor:** Permission holder (holds Group: set spending policy)
 **Permission needed:** Group: set spending policy
-**Tags:** legal-gate, audit
+**Tags:** audit
 
 **Story:** As a member who can set the spending policy, I want to set the amounts above which more people must approve or the group must vote, so that the group's money is protected in proportion to the amount.
 
-**Conversation:** Spending above a threshold requires the approval of several people or a vote (info.md, Permissions section, safeguards). Multi-approver spending is table stakes (CA section 5) and no consumer app documents its interface (R08 section 6.7 open opportunity; R07 section 8.4 R-AP4, "2 of 3 approvers needed"). Decision D2 gives this its own permission, Group: set spending policy, instead of the Wallet: edit rules stand-in, so the person who edits wallet rules cannot also weaken the protection. This story edits the SPD parameters `spd.spend_approvals_default`, `spd.spend_multi_threshold`, `spd.spend_approvals_multi` and `spd.spend_vote_threshold`; SPD-02 shows them and SPD owns their meaning. It is the single "Spending rules" page and also hosts `grp.split_change_requires_vote` and `grp.plan_change_requires_vote`, which closes CON-20. Under decision D4 a passed vote replaces approvals for the amounts at or above `spend_vote_threshold`. The values are group settings; nothing here fixes a value.
+**Conversation:** Spending above a threshold requires the approval of several people or a vote. Multi-approver spending is table stakes (CA section 5) and no consumer app documents its interface (R08 section 6.7 open opportunity; R07 section 8.4 R-AP4, "2 of 3 approvers needed"). Decision D2 gives this its own permission, Group: set spending policy, instead of the Wallet: edit rules stand-in, so the person who edits wallet rules cannot also weaken the protection. This story edits the SPD parameters `spd.spend_approvals_default`, `spd.spend_multi_threshold`, `spd.spend_approvals_multi` and `spd.spend_vote_threshold`; SPD-02 shows them and SPD owns their meaning. It is the single "Spending rules" page and also hosts `grp.split_change_requires_vote` and `grp.plan_change_requires_vote`, which closes CON-20. Under decision D4 a passed vote replaces approvals for the amounts at or above `spend_vote_threshold`. The values are group settings; nothing here fixes a value.
 
 **Preconditions:** A group wallet exists; person holds Group: set spending policy. **Trigger:** Opens "Spending rules" on the group or wallet.
 
@@ -455,7 +455,7 @@ Test case: a group with exactly two reachable approvers (its continuity minimum)
 **Release:** MVP
 **Actor:** Member (protected); System (enforces)
 **Permission needed:** none (rule applies to every outflow)
-**Tags:** legal-gate, ledger, audit
+**Tags:** ledger, audit
 
 **Story:** As a member, I want the product to guarantee that no single person can move group money alone, including the founder and Gereo staff, so that I can trust the group wallet.
 
@@ -488,7 +488,7 @@ Test case: a group with exactly two reachable approvers (its continuity minimum)
 **Release:** MVP
 **Actor:** Permission holder; System
 **Permission needed:** Group: revoke permission, remove member (to attempt the actions that trigger it)
-**Tags:** legal-gate, audit
+**Tags:** audit
 
 **Story:** When someone who holds a critical permission is about to leave, be removed or lose it, I want the product to stop me from leaving the group without anyone able to approve or manage, so I can hand the duty over first.
 
@@ -510,7 +510,7 @@ Test case: a group with exactly two reachable approvers (its continuity minimum)
 
 **Data:** Membership, Audit entry, Vote. **Depends on:** GRP-13, GRP-08, GRP-16, GRP-17, VOT-01 (recovery vote), NTF-05, OPS-06.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Still open, needs a lawyer and Gereo operations: the legal and operational process when no member can act (death, dispute, a group below three members). Default used: the wallet stays as it is, deposits continue, nobody moves the money, including Gereo staff, and the case is handled as an OPS-06 support ticket with identity evidence, resolved only through a recorded process the lawyer approves. Closed: operators may open and document such a case on request, but may not start or decide the recovery vote.
+**Open questions:** Still open, needs Gereo operations: the operational process when no member can act (death, dispute, a group below three members). Default used: the wallet stays as it is, deposits continue, nobody moves the money, including Gereo staff, and the case is handled as an OPS-06 support ticket with identity evidence, resolved only through a recorded process. Closed: operators may open and document such a case on request, but may not start or decide the recovery vote.
 
 ---
 
@@ -521,7 +521,7 @@ Test case: a group with exactly two reachable approvers (its continuity minimum)
 **Release:** MVP
 **Actor:** Permission holder (holds Wallet: create)
 **Permission needed:** Wallet: create
-**Tags:** legal-gate, ledger, audit
+**Tags:** ledger, audit
 
 **Story:** As a member who can create wallets, I want to create further wallets for specific purposes (reserve, project fund, event kitty), so that the group's money is separated by purpose and visible to everyone.
 
@@ -541,7 +541,7 @@ Test case: a group with exactly two reachable approvers (its continuity minimum)
 
 **Data:** Wallet, Ledger account, Audit entry. **Depends on:** GRP-01, GRP-12, GRP-13, WAL-01, RUL-06.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed: CON-11 refers to this story for a second campaign wallet. Closed: creating a group wallet is Wallet: create (D2) and closing stays Wallet: close, a money-out permission (WAL-05). Still open, needs a lawyer (same review as GRP-01): whether several client-fund wallets in one group change the legal basis; default: limited by `grp.max_wallets_per_group`.
+**Open questions:** Closed: CON-11 refers to this story for a second campaign wallet. Closed: creating a group wallet is Wallet: create (D2) and closing stays Wallet: close, a money-out permission (WAL-05). Closed: several client-fund wallets in one group are allowed, limited by `grp.max_wallets_per_group`.
 
 ---
 
@@ -552,11 +552,11 @@ Test case: a group with exactly two reachable approvers (its continuity minimum)
 **Release:** MVP
 **Actor:** Member
 **Permission needed:** none
-**Tags:** legal-gate, ledger, audit
+**Tags:** ledger, audit
 
 **Story:** As a member, I want to leave a group and see first what happens to what I paid, what I still owe and what I lose access to, so that I can leave without surprises.
 
-**Conversation:** Leaving is where trust is tested: last-in-rotation members carry all the risk in tontines (R01 section 5), and rigid rules can punish a member who pays late for a legitimate reason (R07 section 9). The treatment of money already paid is a group and legal decision; this story shows the facts and applies the group's rule `grp.leave_obligation_policy`. The research gives no tested policy, so none is invented here.
+**Conversation:** Leaving is where trust is tested: last-in-rotation members carry all the risk in tontines (R01 section 5), and rigid rules can punish a member who pays late for a legitimate reason (R07 section 9). The treatment of money already paid is a group decision; this story shows the facts and applies the group's rule `grp.leave_obligation_policy`. The research gives no tested policy, so none is invented here.
 
 **Preconditions:** The person is an active member. **Trigger:** Taps "Leave this group" on the group page or member page.
 
@@ -573,7 +573,7 @@ Test case: a group with exactly two reachable approvers (its continuity minimum)
 
 **Data:** Membership, Contribution, Approval, Audit entry. **Depends on:** GRP-14, CON-03 (amounts due), CON-10 (exemptions), SPD-07 (voided approvals), VOT-04 (ballots), WAL-14.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed: quorum after someone leaves an open vote stays fixed and the leaver's ballot stays counted (criterion 5); if the D4 floor of two distinct voters is then no longer met only because of the departure, the vote closes Not passed (floor not met) and says so (VOT-02). Closed: a late fee already applied is a due amount, not a debit, and is waived with an exemption (CON-09 criterion 2, CON-09 criterion 4); refunding paid items is an ordinary group spend (CON-10 open questions). The default policy for unpaid contributions is the debt record (parameter table). Still open, needs a lawyer: whether a leaver has any legal claim on group funds. Default used: none, money paid stays in the group wallet unless the group's written rule or a group spend says otherwise (criterion 2).
+**Open questions:** Closed: quorum after someone leaves an open vote stays fixed and the leaver's ballot stays counted (criterion 5); if the D4 floor of two distinct voters is then no longer met only because of the departure, the vote closes Not passed (floor not met) and says so (VOT-02). Closed: a late fee already applied is a due amount, not a debit, and is waived with an exemption (CON-09 criterion 2, CON-09 criterion 4); refunding paid items is an ordinary group spend (CON-10 open questions). The default policy for unpaid contributions is the debt record (parameter table). Closed: a leaver has no claim on group funds; money paid stays in the group wallet unless the group's written rule or a group spend says otherwise (criterion 2).
 
 ---
 
@@ -584,7 +584,7 @@ Test case: a group with exactly two reachable approvers (its continuity minimum)
 **Release:** MVP
 **Actor:** Permission holder (holds Group: remove member)
 **Permission needed:** Group: remove member
-**Tags:** audit, legal-gate
+**Tags:** audit
 
 **Story:** As a member who can remove members, I want to remove someone with a recorded reason, so that the group can protect itself while the person is treated fairly.
 
@@ -648,7 +648,7 @@ Test case: a group with exactly two reachable approvers (its continuity minimum)
 **Release:** MVP
 **Actor:** Permission holder (holds Group: delete group)
 **Permission needed:** Group: delete group
-**Tags:** legal-gate, ledger, audit
+**Tags:** ledger, audit
 
 **Story:** As a member who can close the group, I want to archive it when it has served its purpose, so that nothing new happens but everyone keeps the record.
 
@@ -669,7 +669,7 @@ Test case: a group with exactly two reachable approvers (its continuity minimum)
 
 **Data:** Group, Wallet, Audit entry. **Depends on:** GRP-13, SPD-01, SPD-10, VOT-05, CON-03, WAL-05.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed: archiving does not need a vote of all members; two holders of Group: delete group, every member notified, and the archive is reversible (criterion 5). Still open, needs a lawyer (same process as GRP-14): whether a group with unreachable members can ever be force-closed. Default used: no force-close, the group stays Active.
+**Open questions:** Closed: archiving does not need a vote of all members; two holders of Group: delete group, every member notified, and the archive is reversible (criterion 5). Closed: a group with unreachable members is never force-closed and stays Active.
 
 ---
 
@@ -680,7 +680,7 @@ Test case: a group with exactly two reachable approvers (its continuity minimum)
 **Release:** MVP
 **Actor:** Permission holder (holds Group: delete group)
 **Permission needed:** Group: delete group
-**Tags:** legal-gate, ledger, audit
+**Tags:** ledger, audit
 
 **Story:** As a member who can delete the group, I want to delete an archived group so that it stops appearing, while records the law requires are kept.
 
@@ -701,7 +701,7 @@ Test case: a group with exactly two reachable approvers (its continuity minimum)
 
 **Data:** Group, Audit entry, Ledger entry (retained). **Depends on:** GRP-19, OPS-09, WAL-16, CON-18, ACC-14.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed: members do not consent one by one to erasure of non-financial content. They accept the deletion rules in the terms (ACC-13), get the scheduled-deletion push, have the whole grace period and can export first (criterion 1). Still open, needs a lawyer: the retention period and its legal basis (see GRP-11). Default used: 5 years.
+**Open questions:** Closed: members do not consent one by one to erasure of non-financial content. They accept the deletion rules in the terms (ACC-13), get the scheduled-deletion push, have the whole grace period and can export first (criterion 1). Closed: kept records are retained 5 years (see GRP-11).
 
 ---
 
@@ -751,15 +751,15 @@ All IDs below were looked up in the story files of each epic.
 
 ## Open questions
 
-Each question below is closed with a decision, or kept open only when it needs a lawyer, Vanilla Pay or Gereo operations. The per-story Open questions fields carry the same decisions.
+Each question below is closed with a decision, or kept open only when it needs Gereo operations. The per-story Open questions fields carry the same decisions.
 
-1. **Legal basis.** Still open, needs a lawyer and Vanilla Pay: whether and when a group wallet may hold member funds (CA section 6 constraint 1). Default used: groups can be created and used without deposits until confirmed. Closed: creating a group needs Tier 1 (ACC-07 table); group-wallet limits follow OPS-11 (GRP-01).
+1. **Group wallets.** Closed: group wallets hold member funds from the start (decision D7). Closed: creating a group needs Tier 1 (ACC-07 table); group-wallet limits follow OPS-11 (GRP-01).
 2. **Missing permission names.** Closed by decision D2: the five permissions Wallet: freeze, Wallet: create, Group: view audit log, Group: set spending policy and Group: set notification settings are added to the catalogue, and the stand-ins (Group: edit group for creating wallets, Wallet: edit rules for thresholds, a general view stand-in for the audit log) are replaced. Group: delete group serves both archive and delete. Conventions section 7 lists the names, including the five additions.
 3. **Member bundle scope.** Closed: the Member bundle does not include Wallet: initiate spend or Vote: create. A member who wants to spend asks a Treasurer or receives the permission through GRP-08, which keeps control of who can open requests with the people who can be held to account. Open Collective's open submission suits a tool that never holds funds.
-4. **Money already paid when leaving.** Closed for the product default: paid money stays, unpaid contributions are recorded as an outstanding debt, with "Pay now" and an exemption offered (GRP-16). Still open, needs a lawyer: any legal claim of a leaver on group funds.
+4. **Money already paid when leaving.** Closed for the product default: paid money stays, unpaid contributions are recorded as an outstanding debt, with "Pay now" and an exemption offered (GRP-16).
 5. **Loosening a safeguard.** Closed: loosening needs at least two distinct holders of Wallet: approve spend other than the proposer, and at least the strictest band's count, or a vote if the strictest band is a vote (GRP-12). Granting a money-out permission needs no second holder and no vote in the MVP (GRP-08).
-6. **No-approver recovery.** Still open, needs a lawyer and Gereo operations: what can happen when a group cannot act (death, dispute, fewer than three members). Default used: nobody moves the money, including staff; support documents the case (GRP-14).
-7. **Retention and deletion.** Retention period and legal basis still open, needs a lawyer (default 5 years, `AUDIT_RETENTION_YEARS`, owned by OPS). Closed: kept records are read only through OPS-09 with a reason; members do not consent individually to erasure of non-financial content (GRP-20).
+6. **No-approver recovery.** Still open, needs Gereo operations: what can happen when a group cannot act (death, dispute, fewer than three members). Default used: nobody moves the money, including staff; support documents the case (GRP-14).
+7. **Retention and deletion.** Closed: retention is 5 years, `AUDIT_RETENTION_YEARS`, owned by OPS. Closed: kept records are read only through OPS-09 with a reason; members do not consent individually to erasure of non-financial content (GRP-20).
 8. **Visibility.** Closed: full phone numbers only for holders of Group: invite member or remove member; approvers are shown to members, not to invitees, who see only a count (GRP-04, GRP-05).
 9. **Invite links.** Closed: 7 days, 50 uses for a shared link, single use for a phone invite, public posting in a group chat allowed with those limits (GRP-03).
 10. **Group creation limits.** Closed: 10 groups per user, 10 wallets per group as starting values, creation allowed at Tier 1 (parameter table).

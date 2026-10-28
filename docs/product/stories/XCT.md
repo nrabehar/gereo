@@ -102,7 +102,7 @@ Owners: XCT-04 owns the four `CACHE_*` and `STALE_*` parameters; XCT-05 owns eve
 
 **Story:** As a member, I want every amount to be written as whole ariary with a space between thousands (for example `12 500 Ar`) in the same way in Malagasy, French and English, so that I never misread a number or a fee.
 
-**Conversation:** Money is integer ariary, never floats (00-conventions section 2). Rounding a float changed 1250000.5 into 1250001 in a verified run (07 UI/UX 2.1 R-M1). The CLDR defaults conflict: `1,250` is one thousand two hundred fifty in Malagasy and English but 1.25 in French, so one shared space-grouped format removes the ambiguity (07 UI/UX 2.1 R-M3). ISO 4217 lists minor units for MGA while CLDR says none, which is an integration trap with Vanilla Pay (07 UI/UX 2.1; design foundations section 4). The Malagasy locale in standard libraries is thin, so we ship our own formatting (07 UI/UX 2.1). Large numbers with many zeros are hard to read; CGAP suggested showing large amounts visually (R-M5), which we do as a spelled-out line.
+**Conversation:** Money is integer ariary, never floats (00-conventions section 2). Rounding a float changed 1250000.5 into 1250001 in a verified run (07 UI/UX 2.1 R-M1). The CLDR defaults conflict: `1,250` is one thousand two hundred fifty in Malagasy and English but 1.25 in French, so one shared space-grouped format removes the ambiguity (07 UI/UX 2.1 R-M3). ISO 4217 lists minor units for MGA while CLDR says none, which is an integration trap with any payment provider (07 UI/UX 2.1; design foundations section 4). The Malagasy locale in standard libraries is thin, so we ship our own formatting (07 UI/UX 2.1). Large numbers with many zeros are hard to read; CGAP suggested showing large amounts visually (R-M5), which we do as a spelled-out line.
 
 **Preconditions:** Any screen, message or export that shows an amount.
 **Trigger:** An amount is displayed, typed, exported or sent in a message.
@@ -110,7 +110,7 @@ Owners: XCT-04 owns the four `CACHE_*` and `STALE_*` parameters; XCT-05 owns eve
 **Acceptance criteria:**
 1. Happy path, display. The same function formats every amount shown in the interface. Required results (test table): 0 gives `0 Ar`, 999 gives `999 Ar`, 1000 gives `1 000 Ar`, 12500 gives `12 500 Ar`, 1250000 gives `1 250 000 Ar`, 100000000 gives `100 000 000 Ar`. No decimals, no symbol before the number, one space before `Ar`, and results are identical for the three languages. XCT-02 owns the amount format; other epics cite it and never restate it.
 2. Business rule, no wrap. The grouping spaces and the space before `Ar` are non-breaking, so an amount never splits across two lines, at any font size (XCT-08). Right-aligned amounts in lists use equal-width digits so columns scan.
-3. Business rule, integers. Amounts are stored, computed and transmitted as integers in ariary. The server rejects any amount with a fraction or exponent form (`12500.5`, `1e4`) with `err.xct.amount_not_whole` and never rounds it. A unit test pins that 1250000.5 is rejected, not changed to 1250001. How Vanilla Pay encodes amounts (minor units or whole) is confirmed before the first money flow (open question) and the adapter test covers it.
+3. Business rule, integers. Amounts are stored, computed and transmitted as integers in ariary. The server rejects any amount with a fraction or exponent form (`12500.5`, `1e4`) with `err.xct.amount_not_whole` and never rounds it. A unit test pins that 1250000.5 is rejected, not changed to 1250001. How the provider encodes amounts (minor units or whole) is covered by the adapter test before the first money flow.
 4. Business rule, input. Amount fields open a numeric keypad, regroup digits live as the person types, and echo the formatted amount in large type. A single `.`, `,` or space followed by exactly three digits is read as a thousands separator, so pasted `12 500`, `12500`, `12.500` and `12,500` are all accepted as 12 500. Any other separator use (`12.5`, `12.50`, `1.250.5`), an exponent form or letters is rejected with the same error, and the field keeps what the person typed.
 5. Business rule, direction and sign. Money in and out use words plus icon plus colour (`Received +5 000 Ar`, `Sent -5 000 Ar`), never colour or sign alone (XCT-09). A fee is always its own labelled line, including `Fee: 0 Ar` when free (07 UI/UX 2.5 R-F3). The rounding amount of a split that is credited to Gereo (decision D5, RUL-07, conventions section 10) is its own labelled receipt row (`ledger.rounding_line`) and is never merged into a destination's amount. In the app there is one aggregated Rounding row per original income; per-hop lines appear only in exports; no row appears when the amount is 0; the amount is always under 1 ariary per destination, so under N Ar for N destinations (RUL-07 holds the test vector). SMS receipts omit the row and their total includes it (criterion 8).
 6. Business rule, review. For amounts at or above `SPELLED_AMOUNT_FROM_AR`, the review screen adds a line that spells the amount in words in the person's language (the Malagasy wording is reviewed by the native reviewer of XCT-01). The total on review equals the amount debited, to the ariary (07 UI/UX 2.5 R-F4).
@@ -122,7 +122,7 @@ Owners: XCT-04 owns the four `CACHE_*` and `STALE_*` parameters; XCT-05 owns eve
 **Data:** Ledger entry, Transaction (amount fields), message catalogue.
 **Depends on:** WAL-14 (transaction receipt), WAL-16 (export), WAL-18 (reversing entries), RUL-07 (Rounding), XCT-01, XCT-08, XCT-12.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Open, needs Vanilla Pay: amount encoding (ISO 4217 minor units against CLDR zero decimals). Default used: the adapter converts at one place, whole ariary inside Gereo, and an adapter test pins the conversion with a sandbox payment before any money flow. Closed: no franc hint in the MVP (1 Ar equals 5 fmg), because adding a second unit to a money screen risks confusion more than it helps; field interviews can reopen it (07 UI/UX 2.1 R-M6). Closed: percent style is `25%` (criterion 9). Closed: `SPELLED_AMOUNT_FROM_AR` is 100 000.
+**Open questions:** Closed: the adapter converts at one place, whole ariary inside Gereo, and an adapter test pins the conversion with a sandbox payment before any money flow. Closed: no franc hint in the MVP (1 Ar equals 5 fmg), because adding a second unit to a money screen risks confusion more than it helps; field interviews can reopen it (07 UI/UX 2.1 R-M6). Closed: percent style is `25%` (criterion 9). Closed: `SPELLED_AMOUNT_FROM_AR` is 100 000.
 
 ---
 
@@ -287,11 +287,11 @@ Table C: Never queued (index only; the owner story decides, and this table is no
 **Release:** MVP
 **Actor:** Member
 **Permission needed:** the permission the action needs online, for example Wallet: initiate spend, Wallet: approve spend, Wallet: close, Wallet: freeze or Group: remove member
-**Tags:** offline, ledger, legal-gate
+**Tags:** offline, ledger
 
 **Story:** As a member, I want money-out to be blocked when I have no connection, with a clear reason and a useful alternative, and to be sure that a connection lost mid-payment cannot send twice or lose money, so that I can trust every payment I make.
 
-**Conversation:** Money-out is online only (00-conventions section 2; design foundations section 4). Queuing money silently is a documented risk with no source testing it (08 competitor UX 6.13). Provider callbacks can time out or double-notify, so idempotency keys, pending states and reconciliation are mandatory (competitive analysis section 6, point 6). Mobile money confirmations can stall, and an unexplained spinner reads as lost money (07 UI/UX 2.3 R-T2). Failed must say whether money moved (R-T3). Tag legal-gate and ledger because it governs when money leaves the ledger.
+**Conversation:** Money-out is online only (00-conventions section 2; design foundations section 4). Queuing money silently is a documented risk with no source testing it (08 competitor UX 6.13). Provider callbacks can time out or double-notify, so idempotency keys, pending states and reconciliation are mandatory (competitive analysis section 6, point 6). Mobile money confirmations can stall, and an unexplained spinner reads as lost money (07 UI/UX 2.3 R-T2). Failed must say whether money moved (R-T3). Tag ledger because it governs when money leaves the ledger.
 
 **Preconditions:** A money-out action is available to the person.
 **Trigger:** Person starts or confirms an action in the online-only list while the connection is absent or lost.
@@ -311,7 +311,7 @@ Table C: Never queued (index only; the owner story decides, and this table is no
 **Data:** Transaction, Ledger entry, Notification, Audit entry, Queue item (local, reminders only).
 **Depends on:** WAL-09, WAL-10, WAL-11 (transaction states, hold and reversing entries), WAL-18, SPD-10, SPD-11 (payout), XCT-04, XCT-05, OPS-13, NTF-05.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Open, needs Vanilla Pay: whether it supports status polling, idempotency keys and signed callbacks on payouts (03 mobile money 7.4, question 2). Default used: Gereo's own idempotency key per attempt, no automatic resubmission of an attempt of unknown outcome, status asked of the provider before any retry, and the daily reconciliation of OPS-04 as the safety net. Closed: the Pending-to-Needs-attention time is the single parameter `PAYOUT_PENDING_ALERT_MINUTES`, owned by OPS-13, which sets its value; this epic states no number.
+**Open questions:** Closed: a payout attempt carries Gereo's own idempotency key, no automatic resubmission of an attempt of unknown outcome, status asked of the provider before any retry, and the daily reconciliation of OPS-04 as the safety net. Closed: the Pending-to-Needs-attention time is the single parameter `PAYOUT_PENDING_ALERT_MINUTES`, owned by OPS-13, which sets its value; this epic states no number.
 
 ---
 
@@ -620,11 +620,11 @@ Note on build order: XCT-14 is a P1 label but is the technical base for XCT-01, 
 
 ## Open questions
 
-1. **Amount encoding.** Open, needs Vanilla Pay: how it encodes ariary (ISO 4217 minor units against CLDR zero decimals). Blocks the ledger adapter and XCT-02 criterion 3. Default used: whole ariary inside Gereo, one conversion point in the adapter, pinned by a sandbox test.
+1. **Amount encoding.** Closed: ISO 4217 lists minor units for MGA while CLDR says none, so whole ariary inside Gereo, one conversion point in the adapter, pinned by a sandbox test.
 2. **Malagasy quality and ownership.** Open, needs a native speaker and field interviews: the named native reviewer, the register and the glossary. Default used: official Malagasy in plain words, reviewed before the P0 gate. Closed: no regional variants in the MVP. Open, needs measurement: the real expansion ratio (default 1.6 times, XCT-13).
 3. **Platform choice.** Closed: PWA only in the MVP; a native Android build is added only if the browser evicts the cache or cannot autofill the OTP in field tests (XCT-04).
 4. **Cache limits.** Closed: 60 days, 50 transactions per wallet, 10 MB (which no epic may raise), and no extra encryption layer in the MVP (XCT-04). The queue has its own budget `QUEUE_MAX_MB` (XCT-05 criterion 12).
-5. **Payout idempotency and status.** Open, needs Vanilla Pay: idempotency keys, status polling and signed callbacks on payouts (03 mobile money 7.4). Default used in XCT-06. Closed: the Pending-to-Needs-attention time is `PAYOUT_PENDING_ALERT_MINUTES`, owned by OPS-13.
+5. **Payout idempotency and status.** Closed: Gereo uses its own idempotency key per attempt and assumes neither status polling nor signed callbacks on payouts (XCT-06). Closed: the Pending-to-Needs-attention time is `PAYOUT_PENDING_ALERT_MINUTES`, owned by OPS-13.
 6. **SMS channel.** Open, needs the SMS aggregator: sender name, delivery receipts, segment counting and real prices. Default used in XCT-12. Closed: no UCS-2 message in the MVP.
 7. **Byte budgets.** Closed: the starting budgets stand until the first measured build and change only by a recorded decision; the vote link page is 150 KB (XCT-11).
 8. **Accessibility scope.** Closed: no audio read-out in the MVP; contrast target 7:1 for amounts and primary buttons; TalkBack tested on the Android Go phone and the mid-range phone (XCT-09, XCT-10).

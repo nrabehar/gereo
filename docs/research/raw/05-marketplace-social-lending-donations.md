@@ -218,10 +218,10 @@ Regulator: CSBF; framework Law 2017-026 on microfinance [S]. IMF Financial Acces
 - Law 2020-011 (banking reform): only licensed credit institutions/MFIs may carry on credit activity professionally. Habitual unlicensed lending can be prosecuted as illegal exercise of banking activity; habitual excessive-rate lending can be usury. Penalties cited: 3 months-2 years imprisonment or fine of 10-40 M Ar (arts. 228-229).
 - Law 2017-026 art. 9: no one other than an MFI may offer microfinance services.
 - Occasional loans between individuals are treated differently; "habitual" is not defined in the source; tontines/family loans not addressed.
-- Implication for Gereo: group-internal lending of members' pooled money to members could be argued as outside "professional" credit, but a platform that systematises it, with schedules, automated reminders, scoring and interest, risks being characterised as habitual credit activity or as offering microfinance services. Get a written opinion from a Malagasy banking/microfinance lawyer and, ideally, CSBF/BCM engagement before building. Never lend platform funds; never take interest as platform revenue; keep rules owned by the group.
+- Implication for Gereo: group-internal lending of members' pooled money to members could be argued as outside "professional" credit, but a platform that systematises it, with schedules, automated reminders, scoring and interest, risks being characterised as habitual credit activity or as offering microfinance services. Never lend platform funds; never take interest as platform revenue; keep rules owned by the group.
 
 ### 3.10 Lending: Takeaways for Gereo
-- Defer entirely until (a) contribution/ledger/votes are stable, (b) legal opinion obtained. This is the highest-risk module.
+- Defer entirely until contribution/ledger/votes are stable. This is the highest-risk module.
 - If built, first version = "group loan ledger": request, group vote approval (reuse vote module), disbursement from group wallet, repayment schedule, SMS/in-app reminders, zero or group-set fixed fee, per-member exposure cap (e.g. share of own contributions), cap on simultaneous loans.
 - Design out the documented harms: no contact-list access, no public shaming, no external collection agents, upfront total-cost display, borrower-set due dates (Tala result), cooling-off for rollovers, caps on concurrent debts.
 - Do not use alternative-data scoring, SMS/contacts permissions, or external credit bureau pulls.
@@ -260,7 +260,7 @@ See 3.6. Relevant for fundraising: strong repayment/relend narrative, 4.8 Trustp
 | KissKissBankBank | ~8% (5% + 3% payment), 12% "all-inclusive" since 2024 per Senegal-focused article [U] | not fetched |
 
 Que Choisir (Mar 2020) advice for donors: use platforms with anti-fraud teams, check Orias registration, ensure beneficiary and creator clearly identified, beware poor spelling, check fees; Leetchi said it uses automated checks, requests documents when suspicious, relies on user reports [V]. https://www.quechoisir.org/actualite-cagnottes-coronavirus-comment-eviter-les-arnaques-n77459/
-**Regulation.** France: law 91-772 covers public appeals incl. crowdfunding platforms, prior declaration threshold EUR 153,000 [S]. Morocco: law 18.18 on public appeals (individual urgent collections need authorization) [S]. Madagascar: no equivalent text found [V negative]; treat as unknown legal risk and ask counsel.
+**Regulation.** France: law 91-772 covers public appeals incl. crowdfunding platforms, prior declaration threshold EUR 153,000 [S]. Morocco: law 18.18 on public appeals (individual urgent collections need authorization) [S]. Madagascar: no equivalent text found [V negative].
 
 ### 4.6 Donations: Takeaways for Gereo
 - Cheapest, safest first step: "special contribution campaign" inside a group = goal + deadline + wallet pot + ledger + receipts + final use-of-funds report. It reuses the contribution and vote primitives and carries low legal risk because donors are members.
@@ -301,7 +301,7 @@ Que Choisir (Mar 2020) advice for donors: use platforms with anti-fraud teams, c
 5. Last / possibly never: boosts, audience analytics, task-for-reward add-ons, creator payouts.
 
 ### 5.3 Top risks (ordered)
-1. Illegal credit activity in Madagascar (Law 2020-011 art. 228-229; Law 2017-026 art. 9) if lending is systematised; needs legal opinion.
+1. Illegal credit activity in Madagascar (Law 2020-011 art. 228-229; Law 2017-026 art. 9) if lending is systematised.
 2. Unregulated or unknown fundraising law in Madagascar; AML/e-money rules on holding funds for third parties (BCM/CSBF) not researched here [gap].
 3. Moderation and scam load from any open social or public marketplace (ProPublica, Jiji, FSCA findings).
 4. Trust erosion through defaults and opacity (Kiva auto-lend, GoFundMe tips, Kiva rate disclosure).
@@ -313,7 +313,7 @@ Que Choisir (Mar 2020) advice for donors: use platforms with anti-fraud teams, c
 - Reddit and app-store review text for Tala, Branch, Fuliza, M-Changa, Binance Square, WhatsApp/Facebook in Madagascar: not retrievable here.
 - Jumia/Jiji seller-side fee and payout complaints: not found.
 - Kopo Kopo, Selar, Expat-Dakar, Kilimall current status: no usable data.
-- Malagasy legal texts on public fundraising, e-money custody, AML for non-bank wallets, and the definition of "habitual" credit activity: not read; lawyer review required.
+- Malagasy legal texts on public fundraising, e-money custody, AML for non-bank wallets, and the definition of "habitual" credit activity: not read.
 - Verify whether Jumia, Jejoo, Tsena, Zandrony or similar services operate in Madagascar (search could not confirm any of them; confirmed existing but small classifieds: E-tady, Tonga-Soa, ZaraoO, Trouvetout.mg, Banabaana, MadaPage; scale unknown [S]).
 
 ---

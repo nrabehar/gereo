@@ -82,8 +82,8 @@ Every status below is a name in this table; stories use no other name. The user-
 | `KYC_LATE_ALERT_COUNT` | 5 (proposed) | number of Late cases that raises `ops.kyc.late_alert` |
 | `KYC_MAX_ATTEMPTS` | owned by ACC (3) | not redefined here |
 | `KYC_MIN_AGE` | owned by ACC (18, unverified) | not redefined here |
-| `RECON_RUN_TIME` | daily, 06:00 Madagascar time (proposed) | owned by OPS-04; "rapprochement quotidien" in info.md section on money flows; run after the provider closes the previous day |
-| `RECON_SETTLEMENT_LAG_DAYS` | 1 (proposed) | owned by OPS-04; a provider record not yet due for settlement is shown as Not yet due, not as a difference; TBD with Vanilla Pay |
+| `RECON_RUN_TIME` | daily, 06:00 Madagascar time (proposed) | owned by OPS-04; run after the provider closes the previous day |
+| `RECON_SETTLEMENT_LAG_DAYS` | 1 (proposed) | owned by OPS-04; a provider record not yet due for settlement is shown as Not yet due, not as a difference |
 | `RECON_TOLERANCE_AR` | 0 | owned by OPS-04; amounts are integers, so no rounding tolerance is needed |
 | `DISCREPANCY_ESCALATE_HOURS` | 8 (proposed) | one working day; shorter than `NEEDS_ATTENTION_ESCALATE_HOURS` (WAL) because a ledger difference is a control failure |
 | `CORRECTION_PROPOSAL_EXPIRY_HOURS` | 48 (proposed) | an unapproved correction expires |
@@ -97,7 +97,7 @@ Every status below is a name in this table; stories use no other name. The user-
 | `BANNER_PROPAGATION_SECONDS` | 60 (proposed) | time for a published banner to reach the apps online |
 | `INCIDENT_NO_NEWS_MINUTES` | 60 (proposed) | a banner with no update for this long shows "No news yet" |
 | `INCIDENT_SMS_AFTER_MINUTES` | 60 (proposed) | an incident lasting longer than this sends the SMS fallback to people with a pending request |
-| `FEE_CHANGE_NOTICE_DAYS` | 30 (proposed) | minimum notice before a fee increase starts; the legal minimum is TBD (needs counsel) |
+| `FEE_CHANGE_NOTICE_DAYS` | 30 (proposed) | minimum notice before a fee increase starts; a fee change never starts sooner |
 | `FEE_LARGE_CHANGE_PERCENT` | 20 (proposed) | a fee change larger than this share of the active value needs a third approval |
 | `SMS_COST_PER_SEGMENT` | TBD | competitive analysis section 2 quotes about USD 0.59 per segment on a global list price; local aggregator rates are not checked |
 | `SMS_BUDGET_DAILY_AR` | TBD | set from the aggregator quote and the group allowance of NTF-06 |
@@ -106,7 +106,7 @@ Every status below is a name in this table; stories use no other name. The user-
 | `FLAG_SECOND_PERSON_SEVERITY` | High (proposed) | account holds at or above this severity need a second person; a wallet hold always needs one, whatever its severity |
 | `AUDIT_SEARCH_TARGET_SECONDS` | 5 (proposed) | first page of a 7-day search |
 | `AUDIT_EXPORT_MAX_ROWS` | 10 000 (proposed) | larger exports must be narrowed |
-| `AUDIT_RETENTION_YEARS` | 5 (proposed) | owned here. Covers audit log entries, consent evidence and the decision log. It must be at least `RECORD_RETENTION_YEARS` (WAL), because the authorisation trail of a payment must outlive no less than the payment record. Applicability and duration are a lawyer question: see ACC open question 1. Cited by GRP, CON, ANN, NTF and SPD, which do not redefine it. Retention of ID images is `RECORD_RETENTION_YEARS` (WAL) |
+| `AUDIT_RETENTION_YEARS` | 5 (proposed) | owned here. Covers audit log entries, consent evidence and the decision log. It must be at least `RECORD_RETENTION_YEARS` (WAL), because the authorisation trail of a payment must outlive no less than the payment record. Duration is described in ACC open question 1. Cited by GRP, CON, ANN, NTF and SPD, which do not redefine it. Retention of ID images is `RECORD_RETENTION_YEARS` (WAL) |
 | `RECORD_RETENTION_YEARS` | owned by WAL | not redefined here; covers identity images, transaction records and the ledger |
 
 ---
@@ -124,7 +124,7 @@ Every status below is a name in this table; stories use no other name. The user-
 
 **Story:** As a Gereo operator, I want to sign in strongly and see only the screens my permissions allow, with personal data masked until I have a reason to open it, so that one stolen password or one curious operator cannot expose users or move money.
 
-**Conversation:** The operators hold the most sensitive data (ID photos, phone numbers, balances) and the most dangerous actions (approve verification, correct the ledger). The product has no roles and the same principle applies here: permissions only, individually granted, changes audited (info.md, permissions guard-rails; 00-conventions section 2). The research warns that fraud by administrators is the dominant failure of group money (competitive analysis section 1), and an operator is an administrator at platform scale. Separation of funds and a complete audit log are non-functional requirements (info.md). Decision on the sign-in method: a password plus a one-time code from an authenticator app on a device the operator owns (second factor that does not depend on the phone network, so a SIM swap on an operator's number cannot open the back office). Operators of money permissions use a device approved by the person with `manage operator access`. This story owns the single operator permission table at the top of this file: the existing names plus `view notification log`, `reveal message text`, `search audit log`, `view reconciliation`, `review identity checks`, `handle tickets`, `resolve discrepancy` and `approve ledger correction`. It is a separate catalogue from member permissions (decision D2), and other epics cite only its names.
+**Conversation:** The operators hold the most sensitive data (ID photos, phone numbers, balances) and the most dangerous actions (approve verification, correct the ledger). The product has no roles and the same principle applies here: permissions only, individually granted, changes audited (00-conventions section 2). The research warns that fraud by administrators is the dominant failure of group money (competitive analysis section 1), and an operator is an administrator at platform scale. Separation of funds and a complete audit log are non-functional requirements. Decision on the sign-in method: a password plus a one-time code from an authenticator app on a device the operator owns (second factor that does not depend on the phone network, so a SIM swap on an operator's number cannot open the back office). Operators of money permissions use a device approved by the person with `manage operator access`. This story owns the single operator permission table at the top of this file: the existing names plus `view notification log`, `reveal message text`, `search audit log`, `view reconciliation`, `review identity checks`, `handle tickets`, `resolve discrepancy` and `approve ledger correction`. It is a separate catalogue from member permissions (decision D2), and other epics cite only its names.
 
 **Preconditions:** The operator has an account created by another operator who holds `manage operator access`.
 **Trigger:** Operator opens the back office.
@@ -143,7 +143,7 @@ Every status below is a name in this table; stories use no other name. The user-
 **Data:** Operator (a User with back-office permissions), Audit entry.
 **Depends on:** XCT-12 (fixed templates). Used by every other OPS story.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed: sign-in method and device policy as in criterion 1. Closed: operator permissions are held in the same permission service as member permissions (info.md says access control is OpenFGA with no roles), in a separate operator namespace, so no operator permission can be inherited from a group, project or document and no member permission opens the back office. Open, needs Vanilla Pay and the SMS aggregator: whether they require a named list of operators who may act on their portals. Default used: the back office can export the list of holders of each permission, with grant dates, from the Audit log.
+**Open questions:** Closed: sign-in method and device policy as in criterion 1. Closed: operator permissions are held in the same permission service as member permissions (access control is OpenFGA with no roles), in a separate operator namespace, so no operator permission can be inherited from a group, project or document and no member permission opens the back office. Open, needs the SMS aggregator: whether they require a named list of operators who may act on their portals. Default used: the back office can export the list of holders of each permission, with grant dates, from the Audit log.
 
 ---
 
@@ -154,11 +154,11 @@ Every status below is a name in this table; stories use no other name. The user-
 **Release:** MVP
 **Actor:** Gereo operator
 **Permission needed:** `review identity checks`
-**Tags:** legal-gate, audit
+**Tags:** audit
 
 **Story:** As a Gereo operator, I want a queue of identity checks waiting for me, oldest and most urgent first, so that no one waits longer than we promised them.
 
-**Conversation:** Verification is Gereo's job because Vanilla Pay provides none (info.md; 03 mobile money 5.2). The promise made to the user in ACC-09 must be one the queue can keep. Money Fellows reviewers complain of requests that stay open with no wait time and unexplained rejections (08 competitor UX 6.1). Verification friction is the top complaint class there (competitive analysis section 4). Tag legal-gate: records and tiers come from the money rules.
+**Conversation:** Verification is Gereo's job and is done by hand by an operator. The promise made to the user in ACC-09 must be one the queue can keep. Money Fellows reviewers complain of requests that stay open with no wait time and unexplained rejections (08 competitor UX 6.1). Verification friction is the top complaint class there (competitive analysis section 4).
 
 **Preconditions:** Users have submitted identity checks (ACC-08) or PIN-reset selfie checks (ACC-04), or an operator opened a number change or OTP help case from a ticket (OPS-06).
 **Trigger:** Operator opens `ops.kyc.queue`.
@@ -189,7 +189,7 @@ Every status below is a name in this table; stories use no other name. The user-
 **Release:** MVP
 **Actor:** Gereo operator
 **Permission needed:** `review identity checks`
-**Tags:** legal-gate, sms, audit
+**Tags:** sms, audit
 
 **Story:** As a Gereo operator, I want to compare the ID and the selfie against what the person typed, then approve, reject with a fixed reason or ask for one specific retake, so that each person gets a fair, specific answer and our records are complete.
 
@@ -213,22 +213,22 @@ Every status below is a name in this table; stories use no other name. The user-
 **Data:** Identity check, User, Device, Notification, Audit entry.
 **Depends on:** OPS-01, OPS-02, ACC-04, ACC-05, ACC-08, ACC-09, OPS-11, NTF-05, XCT-12.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed: the list of rejection reasons is the one in criterion 3, shared with ACC-09. Closed: a second person is required for Tier 3 and for duplicate ID numbers, not for people who can approve spending (reason in OPS-02). Open, needs translators and field testing: the Malagasy wording of each reason; default used: translators draft the three languages together and no language ships with unreviewed reasons. Open, needs counsel and the hosting choice: where images are stored (retention duration: ACC open question 1); default used: encrypted, kept `RECORD_RETENTION_YEARS` after the account closes, never shown outside this case page.
+**Open questions:** Closed: the list of rejection reasons is the one in criterion 3, shared with ACC-09. Closed: a second person is required for Tier 3 and for duplicate ID numbers, not for people who can approve spending (reason in OPS-02). Open, needs translators and field testing: the Malagasy wording of each reason; default used: translators draft the three languages together and no language ships with unreviewed reasons. Open, needs the hosting choice: where images are stored (retention duration: ACC open question 1); default used: encrypted, kept `RECORD_RETENTION_YEARS` after the account closes, never shown outside this case page.
 
 ---
 
-### OPS-04 Check the ledger against Vanilla Pay every day and see the result
+### OPS-04 Check the ledger against the provider's records every day and see the result
 
 **Type:** User story
 **Priority:** P0
 **Release:** MVP
 **Actor:** Gereo operator
 **Permission needed:** `view reconciliation`
-**Tags:** ledger, legal-gate, audit
+**Tags:** ledger, audit
 
-**Story:** As a Gereo operator, I want a daily match of every Gereo transaction against Vanilla Pay's records and a clear view of what matched and what did not, so that I can prove the money held matches the money owed.
+**Story:** As a Gereo operator, I want a daily match of every Gereo transaction against the provider's records and a clear view of what matched and what did not, so that I can prove the money held matches the money owed.
 
-**Conversation:** Daily reconciliation with Vanilla Pay is a stated control (info.md, money flows) and mandatory because provider callbacks can time out or double-notify (competitive analysis section 6, point 6). A visible reconciliation of the ledger against the provider balance is part of Gereo's open design space and highest design risk (design foundations section 1, point 4). Client funds must be kept separate from Gereo's own (info.md). Vanilla Pay's API, settlement and reporting formats are not public and must be confirmed (03 mobile money 3.2 and 7.4), so the story states the result and not the file format. Tag legal-gate.
+**Conversation:** Daily reconciliation with the provider is a control and mandatory because provider callbacks can time out or double-notify (competitive analysis section 6, point 6). A visible reconciliation of the ledger against the provider balance is part of Gereo's open design space and highest design risk (design foundations section 1, point 4). Client funds must be kept separate from Gereo's own. The provider's statement or export format is not fixed, so the story states the result and not the file format.
 
 **Preconditions:** A provider statement or report for the period is available from the payment adapter.
 **Trigger:** The System runs reconciliation at `RECON_RUN_TIME`; an operator may also start a run for a date.
@@ -236,7 +236,7 @@ Every status below is a name in this table; stories use no other name. The user-
 **Acceptance criteria:**
 1. Happy path, run list. `ops.recon.runs` lists runs by date with: period covered, provider, status (Running, Completed, Failed, Report not received), number of provider records, number of Gereo transactions, matched, unmatched on the provider side, unmatched on the Gereo side, amount mismatches, total difference in ariary, completed at. The last completed run is shown at the top with its time.
 2. Business rule, matching. A match requires the same provider reference, the same amount in integer ariary and a consistent status. Fee and tax lines are matched as their own categories against the active version of OPS-11. A provider record not yet due under `RECON_SETTLEMENT_LAG_DAYS` is shown as `Not yet due`, never as a difference. Dispatched payouts in Pending beyond `PAYOUT_PENDING_ALERT_MINUTES`, and deposits beyond the deposit timeout `PENDING_TIMEOUT` (WAL-07), are listed as `stuck`; a payout still waiting for the provider before dispatch is never `stuck` (it waits up to `PAYOUT_PROVIDER_WAIT_MAX`, WAL). Duplicate provider callbacks are matched to one transaction and counted as duplicates, never as two.
-3. Business rule, balance check and invariant. Until Vanilla Pay confirms that a balance report for the client funds account exists, reconciliation is item-level (criterion 2) and the balance line shows `Not available from the provider`, never zero. Once the report exists, the run compares the sum of client wallet balances in the ledger with the reported client funds balance and shows both numbers and the difference (`RECON_TOLERANCE_AR`, starting at 0). The run tests one invariant: the provider client-funds balance is at least the sum of the client wallet balances; a breach raises the alert of OPS-05 as High severity. Gereo's own money is held outside that sum and is shown in its own section, never mixed in: Gereo income (Fee, the Gereo part; Rounding, decision D5; Platform: SMS allowance) and, separately, Tax as a liability collected for the state, not income. Money leaves the income account only by a finance process outside the app, run by two people; the ledger has no sweep rule.
+3. Business rule, balance check and invariant. Without a balance report for the client funds account, reconciliation is item-level (criterion 2) and the balance line shows `Not available from the provider`, never zero. Once the report exists, the run compares the sum of client wallet balances in the ledger with the reported client funds balance and shows both numbers and the difference (`RECON_TOLERANCE_AR`, starting at 0). The run tests one invariant: the provider client-funds balance is at least the sum of the client wallet balances; a breach raises the alert of OPS-05 as High severity. Gereo's own money is held outside that sum and is shown in its own section, never mixed in: Gereo income (Fee, the Gereo part; Rounding, decision D5; Platform: SMS allowance) and, separately, Tax as a liability collected for the state, not income. Money leaves the income account only by a finance process outside the app, run by two people; the ledger has no sweep rule.
 4. Business rule, drill down. An operator can open a run and filter by category (unmatched provider, unmatched Gereo, amount mismatch, duplicates, stuck). Each row shows the transaction reference, provider reference, amounts on both sides, statuses, wallet (masked user) and time, and links to the ticket or flag if one exists.
 5. Business rule, immutability and reruns. A completed run is stored as it was and never edited. A rerun for the same date is allowed and creates a new run linked to the first; the earlier result stays visible. A rerun is idempotent: it never creates ledger entries by itself.
 6. State, empty and failed. A day with no transactions shows `Completed, nothing to match`. A run that failed or is missing the provider report is shown in the list with the reason and raises an alert (OPS-05), never a blank row.
@@ -248,7 +248,7 @@ Every status below is a name in this table; stories use no other name. The user-
 **Data:** Reconciliation run, Transaction, Ledger entry, Audit entry.
 **Depends on:** OPS-01, WAL-07, WAL-11, WAL-20, SPD-10, payment adapter (technical). The alert raised by criteria 6 and 8 is handled in OPS-05, which depends on this story.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Open, needs Vanilla Pay: whether it provides a daily statement, an API or only a dashboard export; the settlement schedule (D+0, D+1, D+2); where the client funds account sits and who holds it (03 mobile money 7.4). Default used: the payment adapter has two input modes, an automatic statement fetch and a manual file import by an operator with `resolve discrepancy` (audited like any other action), so the daily run works with either answer; settlement lag 1 day. Closed: this story owns the reconciliation job, `RECON_RUN_TIME`, `RECON_TOLERANCE_AR` (0) and `RECON_SETTLEMENT_LAG_DAYS` (1), and stays item-level until Vanilla Pay confirms a balance report (criterion 3). Closed: the run covers fee and tax lines (criterion 2), because the 0.5% tax line (03 mobile money 5.3) is unverified and must not be missed if it applies.
+**Open questions:** Closed: the payment adapter has two input modes, an automatic statement fetch and a manual file import by an operator with `resolve discrepancy` (audited like any other action), so the daily run works with either answer; settlement lag 1 day. Closed: this story owns the reconciliation job, `RECON_RUN_TIME`, `RECON_TOLERANCE_AR` (0) and `RECON_SETTLEMENT_LAG_DAYS` (1), and stays item-level until a balance report exists (criterion 3). Closed: the run covers fee and tax lines (criterion 2), because the 0.5% tax line (03 mobile money 5.3) is unverified and must not be missed if it applies.
 
 ---
 
@@ -259,11 +259,11 @@ Every status below is a name in this table; stories use no other name. The user-
 **Release:** MVP
 **Actor:** Gereo operator
 **Permission needed:** `resolve discrepancy`; the correction itself needs a second operator who holds `approve ledger correction`
-**Tags:** ledger, legal-gate, audit
+**Tags:** ledger, audit
 
-**Story:** When reconciliation finds a difference between the ledger and Vanilla Pay, I want to be alerted at once, see exactly what differs and fix it only by an approved reversing entry, so I can close the gap without ever rewriting history.
+**Story:** When reconciliation finds a difference between the ledger and the provider's records, I want to be alerted at once, see exactly what differs and fix it only by an approved reversing entry, so I can close the gap without ever rewriting history.
 
-**Conversation:** Alerts on discrepancies are a stated control (info.md). Ledger entries are immutable and corrected only by a reversing entry (00-conventions section 2; design foundations section 3, principle 9). Money-out failures and provider outages are where differences appear: an operator accepted but no callback, debited but not delivered (competitive analysis section 4, point 1). The user-facing rule is that Failed must say whether money moved (07 UI/UX 2.3 R-T3), so a correction that changes a balance must also tell the person. Tag legal-gate: a correction moves client money.
+**Conversation:** Alerts on discrepancies are a stated control. Ledger entries are immutable and corrected only by a reversing entry (00-conventions section 2; design foundations section 3, principle 9). Money-out failures and provider outages are where differences appear: an operator accepted but no callback, debited but not delivered (competitive analysis section 4, point 1). The user-facing rule is that Failed must say whether money moved (07 UI/UX 2.3 R-T3), so a correction that changes a balance must also tell the person.
 
 **Preconditions:** A reconciliation run has differences, failed, or the report is missing (OPS-04).
 **Trigger:** The System raises an alert at the end of a run.
@@ -283,7 +283,7 @@ Every status below is a name in this table; stories use no other name. The user-
 **Data:** Reconciliation run, Discrepancy alert, Ledger entry, Transaction, Notification, Audit entry.
 **Depends on:** OPS-01, OPS-04, WAL-18, WAL-20, NTF-05.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed: above `CORRECTION_APPROVAL_THRESHOLD` a third holder of `approve ledger correction` approves (WAL-18); the threshold value belongs to WAL and is TBD. Closed: no automatic pause of payouts in the MVP; a pause is a manual action (OPS-13), because one bad statement file could otherwise stop every user's money; the alert escalates instead, and the rule is revisited with pilot data. Open, needs Vanilla Pay and counsel: who bears a loss caused by the provider. Default used: the person is never charged; the shortfall is booked as a Gereo loss line (as WAL-18 does for a blocked negative balance) and a claim against the provider is handled outside the ledger.
+**Open questions:** Closed: above `CORRECTION_APPROVAL_THRESHOLD` a third holder of `approve ledger correction` approves (WAL-18); the threshold value belongs to WAL and is TBD. Closed: no automatic pause of payouts in the MVP; a pause is a manual action (OPS-13), because one bad statement file could otherwise stop every user's money; the alert escalates instead, and the rule is revisited with pilot data. Closed: the person is never charged; the shortfall is booked as a Gereo loss line (as WAL-18 does for a blocked negative balance) and a claim against the provider is handled outside the ledger.
 
 ---
 
@@ -366,7 +366,7 @@ Every status below is a name in this table; stories use no other name. The user-
 **Permission needed:** `publish incident`
 **Tags:** sms, offline, ledger, audit
 
-**Story:** When Vanilla Pay or a mobile money operator is down, I want to post an incident banner in three languages that appears in the app at once and tells people what works and when we will update, so I can stop a wave of "where is my money" tickets before it starts.
+**Story:** When the payment provider or a mobile money operator is down, I want to post an incident banner in three languages that appears in the app at once and tells people what works and when we will update, so I can stop a wave of "where is my money" tickets before it starts.
 
 **Conversation:** Provider outages happen: MVola had material outages in November 2025 and May to June 2026 (competitive analysis section 2; 03 mobile money 7.3). The rule is to show a "provider unavailable" state, queue payouts rather than fail, never claim funds are lost, and provide a reference people can quote (competitive analysis section 6, point 7; 03 mobile money 7.1 point 6). The banner is one of the six shared components to design once (design foundations section 5). An outage at one operator does not stop the others, so scope matters. Whether new payouts are queued or refused during an incident is decided below: queue by default, with block as an operator setting for cases where queueing is unsafe.
 
@@ -374,7 +374,7 @@ Every status below is a name in this table; stories use no other name. The user-
 **Trigger:** The operator sees a provider problem (alerts from OPS-13, OPS-04, a provider message, user tickets).
 
 **Acceptance criteria:**
-1. Happy path, publish. The operator opens `ops.incident.new` and chooses: provider (Vanilla Pay, MVola, Orange Money, Airtel Money, other), affected actions (deposit, withdrawal, contribution payment, all), start time (now or earlier), severity, and a message from a template in Malagasy, French and English with an optional expected update time written as an absolute time in Madagascar time. A preview shows the banner in each language.
+1. Happy path, publish. The operator opens `ops.incident.new` and chooses: provider (MVola, Orange Money, Airtel Money, other), affected actions (deposit, withdrawal, contribution payment, all), start time (now or earlier), severity, and a message from a template in Malagasy, French and English with an optional expected update time written as an absolute time in Madagascar time. A preview shows the banner in each language.
 2. Business rule, display. The banner appears on all screens that start an affected action (wallet, money in, money out, contribution payment, review and PIN screens) within `BANNER_PROPAGATION_SECONDS`, with icon plus word, the provider name, what is affected, what still works (reading, voting, transfers between wallets) and the time of the last update. It never covers an amount or a PIN pad and is announced to screen readers as a status (XCT-09, XCT-10).
 3. Business rule, behaviour during an incident. For each incident the operator sets one of two behaviours for new money-out requests: `Queue` (the request is accepted as in WAL-08 criterion 3: status Pending with the sub-label "Waiting for the provider", dispatched in order when the provider returns, and Failed with a reversing entry only after `PAYOUT_PROVIDER_WAIT_MAX`, owned by WAL) or `Block` (the person sees `{provider} is not available. Nothing was taken.` before entering the PIN; no request is authorised or queued, so this wording stays true). The default is `Queue`, as WAL-08 and SPD-11 already specify; `Block` is only for when the provider says it cannot accept requests or the float cannot cover the queue (see OPS-13). Deposits are never queued (WAL-08 criterion 2). Requests already sent before the incident keep their real status and are never marked Failed by the banner. In this story "Queue" means money held as Pending on the server (WAL-08), not the device queue of XCT-05; this story owns no queue parameter and only cites `PAYOUT_PROVIDER_WAIT_MAX` (WAL).
 4. Business rule, updates. The operator posts timestamped updates (`Update 14:30: ...`) that replace the banner text and are kept in an incident timeline visible to users in `ops.incident.history`. Every update shows its time. A banner without an update for `INCIDENT_NO_NEWS_MINUTES` shows `No news yet since {time}` automatically.
@@ -388,7 +388,7 @@ Every status below is a name in this table; stories use no other name. The user-
 **Data:** Incident, Transaction, Notification, Audit entry.
 **Depends on:** OPS-01, WAL-08, SPD-11, NTF-05, XCT-04, XCT-10. OPS-13 alerts can trigger an incident, and a pause in OPS-13 depends on this story, not the reverse.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed: queue by default, block as an exception (criterion 3), because the research rule is to queue payouts rather than fail them (competitive analysis section 6, point 7) and WAL-08 builds on it. Open, needs Vanilla Pay and counsel: whether holding a payout request while the provider is down is allowed and whether a float must pre-fund the queue (03 mobile money 7.3); default used: queue, and block when the provider cannot accept requests. Closed: anyone who holds `publish incident` may publish at any hour; the on-call operator holds it, and an incident posted at night is reviewed by a second holder the next morning in the Audit log. Closed: provider status pages never publish a banner by themselves in the MVP, because a wrong automatic banner on a money screen costs more trust than a late one; they may only raise an alert to the operator.
+**Open questions:** Closed: queue by default, block as an exception (criterion 3), because the research rule is to queue payouts rather than fail them (competitive analysis section 6, point 7) and WAL-08 builds on it. Closed: a payout request is held in the queue while the provider is down, and blocked when the provider cannot accept requests (03 mobile money 7.3). Closed: anyone who holds `publish incident` may publish at any hour; the on-call operator holds it, and an incident posted at night is reviewed by a second holder the next morning in the Audit log. Closed: provider status pages never publish a banner by themselves in the MVP, because a wrong automatic banner on a money screen costs more trust than a late one; they may only raise an alert to the operator.
 
 ---
 
@@ -401,9 +401,9 @@ Every status below is a name in this table; stories use no other name. The user-
 **Permission needed:** `search audit log`
 **Tags:** audit
 
-**Story:** As a Gereo operator, I want to search every recorded action by person, object, action type, reference and time, so that I can answer "who did this and when" for a ticket, a dispute or a regulator.
+**Story:** As a Gereo operator, I want to search every recorded action by person, object, action type, reference and time, so that I can answer "who did this and when" for a ticket, a dispute or an audit.
 
-**Conversation:** A complete audit log and a visible log of permission changes are core promises (info.md, permissions guard-rails and non-functional requirements). Admin fraud is the failure mode of tontines and chamas, and an audit trail is the product's answer (competitive analysis section 4, point 2). The log is also what proves an operator did not abuse access (OPS-01). Records of identity and transactions are kept for the period of ACC open question 1.
+**Conversation:** A complete audit log and a visible log of permission changes are core promises. Admin fraud is the failure mode of tontines and chamas, and an audit trail is the product's answer (competitive analysis section 4, point 2). The log is also what proves an operator did not abuse access (OPS-01). Records of identity and transactions are kept for the period of ACC open question 1.
 
 **Preconditions:** Audit entries exist (written by every other story).
 **Trigger:** Operator opens `ops.audit`, or follows an audit link from a ticket, a case or an alert.
@@ -423,7 +423,7 @@ Every status below is a name in this table; stories use no other name. The user-
 **Data:** Audit entry, all objects referenced.
 **Depends on:** OPS-01, GRP-10, GRP-11, ACC-14, plus every story that writes audit entries.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Open, needs counsel: retention and archiving duration (ACC open question 1); default used: `AUDIT_RETENTION_YEARS` is 5 (proposed, and at least `RECORD_RETENTION_YEARS`), entries older than 1 year may move to an archive that is searchable on request. Closed: members see their own entries through the export of ACC-14 and the group log of GRP-11, not through this screen, so operators and members never read the same raw record. Closed: the search target is `AUDIT_SEARCH_TARGET_SECONDS`, 5 (proposed).
+**Open questions:** Closed: `AUDIT_RETENTION_YEARS` (ACC open question 1) is 5 (proposed, and at least `RECORD_RETENTION_YEARS`), entries older than 1 year may move to an archive that is searchable on request. Closed: members see their own entries through the export of ACC-14 and the group log of GRP-11, not through this screen, so operators and members never read the same raw record. Closed: the search target is `AUDIT_SEARCH_TARGET_SECONDS`, 5 (proposed).
 
 ---
 
@@ -434,11 +434,11 @@ Every status below is a name in this table; stories use no other name. The user-
 **Release:** MVP
 **Actor:** Gereo operator
 **Permission needed:** `manage flags`
-**Tags:** legal-gate, audit
+**Tags:** audit
 
 **Story:** As a Gereo operator, I want the system to raise flags on unusual behaviour with the evidence, so that I can decide quickly whether it is a mistake, a thief or a scam, and protect the person without accusing them.
 
-**Conversation:** Fraud in mobile money is mostly social engineering around OTP and PIN, and SIM swap; operator terms put the loss on the customer and users blame the app (03 mobile money 6.7 point 4, 7.3). Anomaly detection and alerts are part of the controls (info.md). Rules to hold: first-time payee, a large amount for this wallet, or a new device raise a pause for the person (07 UI/UX 2.8 R-S3); this story is the operator side. Splitting payments just under a tax or limit threshold is a possible behaviour (03 mobile money 5.3 on the 150,000 Ar tax, status unresolved). Freezing funds and reporting suspicious activity have legal consequences; the story limits the operator to a time-limited hold on actions and leaves the reporting duty as an open question.
+**Conversation:** Fraud in mobile money is mostly social engineering around OTP and PIN, and SIM swap; operator terms put the loss on the customer and users blame the app (03 mobile money 6.7 point 4, 7.3). Anomaly detection and alerts are part of the controls. Rules to hold: first-time payee, a large amount for this wallet, or a new device raise a pause for the person (07 UI/UX 2.8 R-S3); this story is the operator side. Splitting payments just under a tax or limit threshold is a possible behaviour (03 mobile money 5.3 on the 150,000 Ar tax, status unresolved). Freezing funds and reporting suspicious activity have legal consequences; the story limits the operator to a time-limited hold on actions and leaves the reporting duty as an open question.
 
 **Preconditions:** Rules are configured; events flow in.
 **Trigger:** The System raises a flag; an operator opens `ops.flags`.
@@ -458,7 +458,7 @@ Every status below is a name in this table; stories use no other name. The user-
 **Data:** Flag, Rule definition, User, Device, Transaction, Audit entry, Notification.
 **Depends on:** OPS-01, OPS-03, OPS-06, ACC-05, ACC-11, WAL-10, GRP-13, GRP-14, SPD-10, SPD-15.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Open, needs counsel: legal duties on suspicious activity reporting and on telling the person, and whether a hold on money-out is allowed at all without a court or regulator step. Default used: the person is told at once (criterion 8) and the hold is time-limited; no report is filed by the product. Closed: starting rule values are set from the first weeks of data, not guessed now; until then every rule threshold is configuration and the rules start in "log only" mode that raises flags without holds. Closed: the on-call operator is the one who holds `manage flags` on the duty list; the duty list is managed by `manage operator access`.
+**Open questions:** Closed: when an operator hold is placed, the person is told at once (criterion 8) and the hold is time-limited; no report is filed by the product. Closed: starting rule values are set from the first weeks of data, not guessed now; until then every rule threshold is configuration and the rules start in "log only" mode that raises flags without holds. Closed: the on-call operator is the one who holds `manage flags` on the duty list; the duty list is managed by `manage operator access`.
 
 ---
 
@@ -469,11 +469,11 @@ Every status below is a name in this table; stories use no other name. The user-
 **Release:** MVP
 **Actor:** Gereo operator
 **Permission needed:** `edit limits and fees` to propose; `approve limits and fees` for a second person to apply
-**Tags:** legal-gate, ledger, audit
+**Tags:** ledger, audit
 
-**Story:** As a Gereo operator, I want to set limits per tier and the fees per type of money movement as versioned settings with a future start date and a second approval, so that the app never hard-codes a number the regulator or the provider may change.
+**Story:** As a Gereo operator, I want to set limits per tier and the fees per type of money movement as versioned settings with a future start date and a second approval, so that the app never hard-codes a number that may change.
 
-**Conversation:** Limits depend on the verification tier (info.md, account rules); the tier numbers and the CSBF instructions were not found (03 mobile money 5.1). The 100 000 000 Ar ceiling in the brief is unexplained and an individual operator wallet caps at 20 000 000 Ar (competitive analysis sections 6 and 9). Cross-network payouts cost 3 to 10 times more than same-network and the exact fee must be shown before confirmation (competitive analysis section 6, point 5). A tax line of 0.5% above 150,000 Ar was in the 2025 finance bill but its application is unverified, so tax and fee lines must be configurable without a schema change (competitive analysis section 6, point 9; 03 mobile money 5.3). Tag legal-gate and ledger: fees create ledger lines.
+**Conversation:** Limits depend on the verification tier; the tier numbers are configuration (03 mobile money 5.1). The 100 000 000 Ar ceiling in the brief is unexplained and an individual operator wallet caps at 20 000 000 Ar (competitive analysis sections 6 and 9). Cross-network payouts cost 3 to 10 times more than same-network and the exact fee must be shown before confirmation (competitive analysis section 6, point 5). A tax line of 0.5% above 150,000 Ar was in the 2025 finance bill but its application is unverified, so tax and fee lines must be configurable without a schema change (competitive analysis section 6, point 9; 03 mobile money 5.3). Tag ledger: fees create ledger lines.
 
 **Preconditions:** The operator holds the permission to propose; another operator holds the approval permission.
 **Trigger:** Operator opens `ops.config.limits` or `ops.config.fees`.
@@ -493,7 +493,7 @@ Every status below is a name in this table; stories use no other name. The user-
 **Data:** Tier configuration, Fee schedule, Tax line, Transaction (version reference), Audit entry.
 **Depends on:** OPS-01, ACC-07, WAL-06, WAL-09, WAL-13, SPD-01, XCT-02.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Open, needs the regulator (CSBF), Vanilla Pay and counsel: all limit values and their legal basis. Default used: limits are configuration only; until values exist the app shows only the levels that exist (ACC-07) and a missing value is never treated as zero or unlimited (criterion 8). Closed: the provider fee is paid by the person on top and never reduces what the wallet receives (WAL-06); Gereo may absorb it for one flow by configuration. Open, needs Vanilla Pay: whether the 100 000 000 Ar ceiling is per transaction, per day or per account; default used: per transaction, `PAYOUT_MAX_PER_TX` (WAL-09). Open, needs counsel and Vanilla Pay: whether a mobile money tax applies and is collected by Gereo; default used: the tax line exists and is off. Open, needs counsel: the legally required notice before fee changes; default used: `FEE_CHANGE_NOTICE_DAYS` is 30. Closed: no Gereo fee on core flows at launch (criterion 2), so the revenue model choice does not block this story.
+**Open questions:** Closed: limits are configuration only; until values exist the app shows only the levels that exist (ACC-07) and a missing value is never treated as zero or unlimited (criterion 8). Closed: the provider fee is paid by the person on top and never reduces what the wallet receives (WAL-06); Gereo may absorb it for one flow by configuration. Closed: the 100 000 000 Ar ceiling is per transaction, `PAYOUT_MAX_PER_TX` (WAL-09). Closed: the mobile money tax line exists and is off. Closed: `FEE_CHANGE_NOTICE_DAYS` is 30. Closed: no Gereo fee on core flows at launch (criterion 2), so the revenue model choice does not block this story.
 
 ---
 
@@ -539,11 +539,11 @@ Every status below is a name in this table; stories use no other name. The user-
 **Release:** MVP
 **Actor:** Gereo operator
 **Permission needed:** `manage payouts`
-**Tags:** ledger, legal-gate, audit
+**Tags:** ledger, audit
 
 **Story:** As a Gereo operator, I want to see every money-out request, where it stands with the provider and how long it has been there, and to retry, escalate or pause dispatching safely, so that no payout is lost, double-sent or left unexplained.
 
-**Conversation:** "Where is my money?" is the number one user complaint, with pending states that have no reference (competitive analysis section 4, point 1). Payout is often a separate and more restricted provider product, possibly needing a pre-funded float (03 mobile money 3.3, point 2), and provider callbacks can time out or double-notify (competitive analysis section 6, point 6). A payout above 20 000 000 Ar to a personal operator wallet may fail even if the aggregator allows more (03 mobile money 3.3, point 3). During an outage payouts queue and are never claimed lost (competitive analysis section 6, point 7). The operator must be able to steer without being able to edit the amount or payee. Tag legal-gate and ledger.
+**Conversation:** "Where is my money?" is the number one user complaint, with pending states that have no reference (competitive analysis section 4, point 1). Payout is often a separate and more restricted provider product, possibly needing a pre-funded float (03 mobile money 3.3, point 2), and provider callbacks can time out or double-notify (competitive analysis section 6, point 6). A payout above 20 000 000 Ar to a personal operator wallet may fail even if the aggregator allows more (03 mobile money 3.3, point 3). During an outage payouts queue and are never claimed lost (competitive analysis section 6, point 7). The operator must be able to steer without being able to edit the amount or payee. Tag ledger.
 
 **Preconditions:** Money-out requests exist (WAL-09, WAL-13, SPD-10).
 **Trigger:** Operator opens `ops.payouts`, or follows an alert.
@@ -563,7 +563,7 @@ Every status below is a name in this table; stories use no other name. The user-
 **Data:** Transaction, Ledger entry, Provider response, Incident, Audit entry.
 **Depends on:** OPS-01, OPS-04, OPS-05, OPS-08, WAL-08, WAL-09, WAL-11, SPD-10, SPD-11, SPD-15, XCT-06, NTF-05.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Open, needs Vanilla Pay: float and pre-funding of payouts and who manages it (03 mobile money 3.3 and 7.3, liquidity risk). Default used: Gereo pays queued payouts from the money already in the client-funds account (WAL-08), and a pause covers a provider that cannot pay. Open, needs Vanilla Pay: whether a status-check endpoint exists; default used: without one, `Retry` is not offered for a payout of unknown outcome and the case goes to reconciliation (WAL-07 criterion 6). Closed: this story keeps ownership of `PAYOUT_PENDING_ALERT_MINUTES` (value in the parameter table above, to be confirmed); WAL, SPD and XCT read it and never restate a value. Closed: retries are capped at `PAYOUT_RETRY_MAX`, 3 (proposed). Closed: a large discrepancy never pauses payouts automatically (OPS-05).
+**Open questions:** Closed: Gereo pays queued payouts from the money already in the client-funds account (WAL-08), and a pause covers a provider that cannot pay. Closed: no status-check endpoint is assumed, so `Retry` is not offered for a payout of unknown outcome and the case goes to reconciliation (WAL-07 criterion 6). Closed: this story keeps ownership of `PAYOUT_PENDING_ALERT_MINUTES` (value in the parameter table above, to be confirmed); WAL, SPD and XCT read it and never restate a value. Closed: retries are capped at `PAYOUT_RETRY_MAX`, 3 (proposed). Closed: a large discrepancy never pauses payouts automatically (OPS-05).
 
 ---
 
@@ -608,7 +608,7 @@ Every status below is a name in this table; stories use no other name. The user-
 | OPS-01 | Sign in to the back office and see only what my permissions allow | P0 | XCT-12 |
 | OPS-02 | See the KYC review queue and pick the next case | P0 | OPS-01, ACC-02, ACC-04, ACC-05, ACC-06, ACC-08, ACC-10, OPS-06, OPS-10 |
 | OPS-03 | Decide a KYC case: approve, reject with a reason, or ask for a retake | P0 | OPS-01, OPS-02, ACC-04, ACC-05, ACC-08, ACC-09, OPS-11, NTF-05, XCT-12 |
-| OPS-04 | Check the ledger against Vanilla Pay every day and see the result | P0 | OPS-01, WAL-07, WAL-11, WAL-20, SPD-10 |
+| OPS-04 | Check the ledger against the provider's records every day and see the result | P0 | OPS-01, WAL-07, WAL-11, WAL-20, SPD-10 |
 | OPS-05 | Get alerted to a discrepancy and resolve it with a reversing entry | P0 | OPS-01, OPS-04, WAL-18, WAL-20, NTF-05 |
 | OPS-06 | Handle support tickets with the full context | P0 | OPS-01, OPS-03, OPS-05, ACC-04, ACC-05, ACC-11, WAL-14, RUL-07, NTF-05, XCT-05, XCT-14 |
 | OPS-07 | Show the person the true status of their ticket | P1 | OPS-06, NTF-05, XCT-03, XCT-04, XCT-05, XCT-12 |
@@ -637,12 +637,12 @@ Note on size: OPS-03 and OPS-05 are the largest. If a sprint cannot hold them, s
 
 Closed unless the line says Open. Each open item states the default used and is the only kind that needs an outside party.
 
-1. **Vanilla Pay data and terms.** Open, needs Vanilla Pay: statement or API for reconciliation, payout status and idempotency, settlement timing, float and pre-funding, incident communication, the legal status and who holds client funds (03 mobile money 3.2 and 7.4). Defaults used: manual statement import beside automatic fetch (OPS-04), settlement lag 1 day, no retry without a status endpoint (OPS-13), queue by default during an incident (OPS-08). Blocks OPS-04, OPS-05, OPS-08 and OPS-13 only for the final values.
-2. **Operator model and legal duties.** Open, needs a Malagasy lawyer (competitive analysis section 10): licensing route, record retention (ACC open question 1), duties on suspicious activity reporting and on telling a person about a hold, what an operator may do with funds, the age of majority behind `KYC_MIN_AGE`, notice before fee changes. Defaults used: 5 years, the person told at once, no automatic report, `KYC_MIN_AGE` 18, 30 days of notice.
+1. **Provider data.** Closed: no provider is named; the stories assume no statement or API for reconciliation, payout status, idempotency, settlement timing, float or incident communication, and reconciliation is done by hand by an operator. Defaults used: manual statement import beside automatic fetch (OPS-04), settlement lag 1 day, no retry without a status endpoint (OPS-13), queue by default during an incident (OPS-08). Blocks OPS-04, OPS-05, OPS-08 and OPS-13 only for the final values.
+2. **Operator model.** Closed: record retention is 5 years (ACC open question 1), the person is told at once about a hold, no automatic report is filed, `KYC_MIN_AGE` is 18, and fee changes carry 30 days of notice.
 3. **Operator permissions and sign-in.** Closed: the catalogue is the table at the top of this file, the sign-in method is a password plus an authenticator code, the permission service is shared with members in a separate operator namespace, and the second-person grants are named in OPS-01 criterion 6.
-4. **Numbers.** Closed for operations: every operational target now has a proposed value in the parameter table, tuned after the pilot. Open, needs the regulator, Vanilla Pay and counsel: limits, fee values and tax lines (OPS-11), and `SMS_COST_PER_SEGMENT` and `SMS_BUDGET_DAILY_AR` (needs the aggregator quote).
+4. **Numbers.** Closed for operations: every operational target now has a proposed value in the parameter table, tuned after the pilot. Open as configuration: limits, fee values and tax lines (OPS-11), and `SMS_COST_PER_SEGMENT` and `SMS_BUDGET_DAILY_AR` (needs the aggregator quote).
 5. **Incident behaviour.** Closed: queue by default, block as an exception; any holder of `publish incident` may publish at any hour; provider status pages raise an alert, never a banner.
 6. **SMS.** Open, needs an aggregator: aggregator, rates, delivery reports. Closed: the platform pays for group SMS in the MVP inside the NTF-06 allowance; the daily budget alerts and never throttles.
-7. **KYC details.** Closed: second-person approval for Tier 3 and duplicate ID numbers only; rejection reasons are the shared list of OPS-03. Open, needs counsel and the regulator: accepted documents (default CIN and passport), image storage (default `RECORD_RETENTION_YEARS`; retention duration is ACC open question 1). Open, needs field testing: Malagasy wording of the reasons; face matching stays manual (`KYC_AUTO_MATCH_ENABLED` off, ACC).
+7. **KYC details.** Closed: second-person approval for Tier 3 and duplicate ID numbers only; rejection reasons are the shared list of OPS-03. Closed: accepted documents are CIN and passport, and image storage follows `RECORD_RETENTION_YEARS` (retention duration is ACC open question 1). Open, needs field testing: Malagasy wording of the reasons; face matching stays manual (`KYC_AUTO_MATCH_ENABLED` off, ACC).
 8. **Support promise.** Closed: 24 hours first response (proposed), every shift covers Malagasy and French, no phone or WhatsApp at launch.
 9. **Least certain screens.** Test the ticket status view (OPS-07) and the incident banner (OPS-08) in the first test round; design foundations section 5 marks them as the least evidenced.

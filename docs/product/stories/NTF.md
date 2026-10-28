@@ -129,7 +129,7 @@ Epic code NTF, release MVP. Follows [00-conventions.md](../00-conventions.md). E
 
 **Data:** Notification, Device, Delivery attempt. **Depends on:** NTF-01, NTF-05, NTF-12, CON-07 (manual reminder), VOT-07 (vote reminders).
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed: "Opened" is tracked, because NTF-05 needs it to avoid paying for an SMS nobody needed. Senders see only the count of not opened, never a name, and the group sees nothing; the tracking is disclosed in the privacy notice (ACC-13). The wording of that disclosure is part of the legal review of consent (open question 3).
+**Open questions:** Closed: "Opened" is tracked, because NTF-05 needs it to avoid paying for an SMS nobody needed. Senders see only the count of not opened, never a name, and the group sees nothing; the tracking is disclosed in the privacy notice (ACC-13). The wording of that disclosure is part of the consent text (ACC-13).
 
 ---
 
@@ -370,11 +370,11 @@ Epic code NTF, release MVP. Follows [00-conventions.md](../00-conventions.md). E
 **Release:** MVP
 **Actor:** Member
 **Permission needed:** none
-**Tags:** sms, audit, legal-gate
+**Tags:** sms, audit
 
 **Story:** As a person who gets SMS from Gereo, I want to stop them whenever I choose and to start them again later, so that the app respects my consent and my phone credit.
 
-**Conversation:** SMS is used for reminders and group decisions, not marketing (R07 R-NT1). Consent for SMS in Madagascar and the rules for opt-out keywords and sender registration were not researched, so this story is `legal-gate`: keywords, wording and record keeping depend on a legal and aggregator check (CA section 10 blocker 4). The principle stands either way: opt-out is always available in-app, and one person's opt-out must not break group deadlines (they still get push and in-app).
+**Conversation:** SMS is used for reminders and group decisions, not marketing (R07 R-NT1). Consent for SMS in Madagascar and the rules for opt-out keywords and sender registration were not researched, so keywords, wording and record keeping depend on an aggregator check (CA section 10 blocker 4). The principle stands either way: opt-out is always available in-app, and one person's opt-out must not break group deadlines (they still get push and in-app).
 
 **Preconditions:** The person has a verified phone number. **Trigger:** Turns SMS off or on in preferences, or replies with an opt-out keyword where two-way SMS is supported.
 
@@ -392,7 +392,7 @@ Epic code NTF, release MVP. Follows [00-conventions.md](../00-conventions.md). E
 
 **Data:** Notification preference, Consent record, Suppression entry (phone number), Audit entry. **Depends on:** NTF-04, NTF-05, NTF-12, VOT-07, ACC-02 (phone and OTP), ACC-13 (terms and consent text).
 **Pages:** to be filled from the information architecture.
-**Open questions:** Open, needs a lawyer and the aggregator: legal basis and wording for SMS consent, whether two-way SMS and keywords are available, and whether Critical SMS may lawfully ignore an opt-out. Default used until then: opt-out in the app only, keywords shown only where the aggregator confirms them, Critical SMS continue (criterion 4).
+**Open questions:** Open, needs the aggregator: whether two-way SMS and keywords are available. Default used until then: opt-out in the app only, keywords shown only where the aggregator confirms them, Critical SMS continue (criterion 4).
 
 ---
 
@@ -798,7 +798,7 @@ Every ID below was checked against the story files in this folder.
 
 1. **Closed: who pays for SMS.** The platform pays Pl-class SMS. Each group gets a monthly Gr-class allowance sized by member count, paid by the platform in the MVP, and may top up from a group wallet through an expense request (NTF-06). Evidence: CA section 7 (charge by group size or SMS volume, never gate core behaviour).
 2. **Open, needs the SMS aggregator: rates, sender ID registration, two-way SMS and keyword support, delivery reports, a second provider** (CA section 10 blocker 4; R04 section 14.6 risk 10). Default used: one aggregator behind the adapter, working values in the parameter table, no price shown to groups.
-3. **Open, needs a lawyer: consent.** Legal basis and wording for SMS consent in Madagascar, and whether Critical SMS may ignore an opt-out (NTF-04, NTF-10). Default used: SMS for important items is on at sign-up with the consent text in ACC-13, opt-out in the app is always available, Critical SMS continue.
+3. **Consent.** Closed (NTF-04, NTF-10): SMS for important items is on at sign-up with the consent text in ACC-13, opt-out in the app is always available, Critical SMS continue.
 4. **Closed: windows.** Starting values are in the parameter table (NTF-05, NTF-08, NTF-09). Voters on money decisions cannot opt to be woken in the MVP.
 5. **Open, needs the aggregator and field interviews: feature phones.** Whether a basic-phone user can vote or confirm by replying to an SMS or by USSD (R07 section 4, R-SMS3). Default used: no reply voting; the light web page or the group's named contact (NTF-11).
 6. **Closed: language fallback.** Recipient language, then group language, then Malagasy (NTF-07, NTF-11).
@@ -810,4 +810,4 @@ Every ID below was checked against the story files in this folder.
 12. **Open, needs field research: evidence gaps.** Reminder effectiveness in this population is unknown (R07 section 8.8 cites Bolivia, Peru, the Philippines and Uganda, not Madagascar). Default used: the starting windows; A/B test timing and wording in the first cohort.
 13. **Closed: key and parameter naming across epics.** NTF owns one key form, `msg.<epic>.<event>` with underscores and variants `.push`, `.sms`, `.inapp`, and one parameter family, `ntf.*`. Other epics rename their keys to the catalogue keys and remove their own waits and caps (`sms_fallback_delay` in SPD, `EVENT_SMS_WAIT` in EVT, `ANN_SMS_WAIT` in ANN, `ntf.event.*` keys in EVT and ANN, and `EVENT_LATE_REMINDER_MIN`, replaced by `ntf.reminder_margin_minutes`). They may keep only the scheduling offsets and the domain counts of their own reminders; for ANN the only parameter is `ANN_URGENT_MAX_PER_MONTH`.
 14. **Closed: event overlap.** One SMS ladder exists, defined in NTF-05. CON-08, SPD-04, VOT-07, EVT-05 and the ANN stories may choose only the `ntf.sms_window.<type>` value for their type and the times at which a reminder is scheduled; they may not define a second wait, cap or retry rule. Where a rule differs, the stricter one is kept (one SMS per event per person, no SMS for something already done).
-15. **Closed, with external items: freeze is Critical, and quiet hours stay unbreakable for votes.** The freeze SMS (EV-SPD-12) is Critical, direct, platform-paid, sent to holders of Wallet: freeze or Wallet: approve spend other than the person who froze, and capped at `ntf.critical_freeze_sms_per_day` (2) per wallet per day, because a freeze stops money and the people who can lift it must know; beyond the cap the notice is push and in-app only. Votes, approvals and authority votes never override quiet hours, and a payout authorised by a passed vote waits until quiet hours end, so holders of Wallet: freeze can be informed before money leaves (NTF-09). Open, needs a lawyer: whether a freeze SMS and the other Critical SMS may lawfully ignore an SMS opt-out, what consent wording names the freeze SMS (ACC-13), and the retention of consent and suppression records (`AUDIT_RETENTION_YEARS`, ACC open question 1). Open, needs the aggregator: STOP-reply handling that feeds the number suppression list.
+15. **Closed, with external items: freeze is Critical, and quiet hours stay unbreakable for votes.** The freeze SMS (EV-SPD-12) is Critical, direct, platform-paid, sent to holders of Wallet: freeze or Wallet: approve spend other than the person who froze, and capped at `ntf.critical_freeze_sms_per_day` (2) per wallet per day, because a freeze stops money and the people who can lift it must know; beyond the cap the notice is push and in-app only. Votes, approvals and authority votes never override quiet hours, and a payout authorised by a passed vote waits until quiet hours end, so holders of Wallet: freeze can be informed before money leaves (NTF-09). Closed: Critical SMS ignore an SMS opt-out, the consent text names the freeze SMS (ACC-13), and consent and suppression records are kept for `AUDIT_RETENTION_YEARS` (ACC open question 1). Open, needs the aggregator: STOP-reply handling that feeds the number suppression list.

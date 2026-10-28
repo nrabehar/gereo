@@ -62,7 +62,7 @@ Message keys: UI `evt.<area>.<name>`; notifications follow the NTF registry, bas
 
 **Story:** As a member who organises a gathering, I want to create an event with a date, a place and a host, so that everyone knows when and where without anyone phoning around.
 
-**Conversation:** Manual reminders, where someone must call everyone, are info.md problem 6. A meeting date, a host and change alerts as a first-class object come from StokFella (raw/08 section 6.10). The event card holds what, when (absolute date with weekday, time and zone), where, who is going and a three-button RSVP (raw/07 section 8.7 R-EV1). The form is short because the creator is often on a basic phone. Recurring events are EVT-02, inviting is EVT-03.
+**Conversation:** Manual reminders, where someone must call everyone, are a recurring pain. A meeting date, a host and change alerts as a first-class object come from StokFella (raw/08 section 6.10). The event card holds what, when (absolute date with weekday, time and zone), where, who is going and a three-button RSVP (raw/07 section 8.7 R-EV1). The form is short because the creator is often on a basic phone. Recurring events are EVT-02, inviting is EVT-03.
 
 **Preconditions:** The person belongs to a group that is not archived (GRP-19) and holds Event: create.
 **Trigger:** The person taps "New event" on the group page or the event list.
@@ -96,7 +96,7 @@ Message keys: UI `evt.<area>.<name>`; notifications follow the NTF registry, bas
 
 **Story:** As a member who organises regular meetings, I want to set an event to repeat, so that I do not recreate the same meeting every month.
 
-**Conversation:** Groups contribute monthly and meet on a rhythm; calendar, recurring events and reminders are a core spec line (info.md, Events module). Recurrence is kept to simple patterns because the audience has limited tools. Reminders and RSVP apply per occurrence so a missed month is not confused with a missed day.
+**Conversation:** Groups contribute monthly and meet on a rhythm; calendar, recurring events and reminders are a core spec line. Recurrence is kept to simple patterns because the audience has limited tools. Reminders and RSVP apply per occurrence so a missed month is not confused with a missed day.
 
 **Preconditions:** The create or edit form is open (EVT-01).
 **Trigger:** The person turns on "Repeat" on the event.
@@ -130,7 +130,7 @@ Message keys: UI `evt.<area>.<name>`; notifications follow the NTF registry, bas
 
 **Story:** As a member who can invite, I want to invite everyone in the group, or only some people, so that the right people are told and I do not have to message them myself.
 
-**Conversation:** Automatic reminders to all members replace manual calls (info.md, problem 6 and journey 5). Whole group is the default because most group events concern everyone. People without a smartphone must still be reached (competitive-analysis section 1: about one in five Malagasy is online, so SMS reaches more people; raw/04 section 0). Invitations use push, and SMS for people with no app or device; reminders carry the SMS rule (EVT-05).
+**Conversation:** Automatic reminders to all members replace manual calls. Whole group is the default because most group events concern everyone. People without a smartphone must still be reached (competitive-analysis section 1: about one in five Malagasy is online, so SMS reaches more people; raw/04 section 0). Invitations use push, and SMS for people with no app or device; reminders carry the SMS rule (EVT-05).
 
 **Preconditions:** The event exists and the person holds Event: invite.
 **Trigger:** The person chooses the audience in the event form, or taps "Invite" on an existing event.
@@ -202,7 +202,7 @@ Message keys: UI `evt.<area>.<name>`; notifications follow the NTF registry, bas
 
 **Story:** When an event is coming and some people have not seen it, I want Gereo to remind them at the right times, first by push and then by SMS if they have not opened it, so that nobody has to be called by hand.
 
-**Conversation:** Automatic reminders to all members, by notification and by SMS when the person has not opened the app, are in info.md (Events module). The default cadence of push at about 24 h and 2 h is a hypothesis to test (raw/07 section 8.7 R-EV3 and 8.8 R-NT3), and the evidence on reminder effect is weak (Karlan studies, raw/07 section 8.8; raw/04 section 12). SMS is costly (about USD 0.59 per segment on a global CPaaS; local rate not verified, raw/04 section 0), so SMS is rationed with a cap and a clear who-pays question. No competitor documents SMS fallback for RSVP (raw/08 section 6.10).
+**Conversation:** Automatic reminders to all members, by notification and by SMS when the person has not opened the app, are in the product scope. The default cadence of push at about 24 h and 2 h is a hypothesis to test (raw/07 section 8.7 R-EV3 and 8.8 R-NT3), and the evidence on reminder effect is weak (Karlan studies, raw/07 section 8.8; raw/04 section 12). SMS is costly (about USD 0.59 per segment on a global CPaaS; local rate not verified, raw/04 section 0), so SMS is rationed with a cap and a clear who-pays question. No competitor documents SMS fallback for RSVP (raw/08 section 6.10).
 
 **Preconditions:** The event is Scheduled and has invitees.
 **Trigger:** Each reminder time before the start, from EVENT_REMINDER_DEFAULTS or the event's own list.
@@ -304,7 +304,7 @@ Message keys: UI `evt.<area>.<name>`; notifications follow the NTF registry, bas
 
 **Story:** When I plan my week, I want to see the group's events as a list and as a month calendar, so I can tell what is coming and what I have answered.
 
-**Conversation:** The event list is part of the Follow step and the calendar is a table stake of the module (info.md, Events). Calendar is view only; two-way sync is out of v1 (competitive-analysis section 7; raw/08 section 6.10).
+**Conversation:** The event list is part of the Follow step and the calendar is a table stake of the module. Calendar is view only; two-way sync is out of v1 (competitive-analysis section 7; raw/08 section 6.10).
 
 **Preconditions:** The person belongs to at least one group with events, or has personal dates (EVT-10).
 **Trigger:** The person opens "Events".
@@ -338,7 +338,7 @@ Message keys: UI `evt.<area>.<name>`; notifications follow the NTF registry, bas
 
 **Story:** As a member who can edit events and see the project, I want to link its meetings and key dates to the project, so that the project page shows what is coming.
 
-**Conversation:** Events belong to a user, group or project (info.md object model), and the project page lists "next dates" (raw/04 section 14.5). The project timeline merges them (PRJ-11, raw/08 section 6.9). A project deadline is not an event and is not converted into one automatically.
+**Conversation:** Events belong to a user, group or project, and the project page lists "next dates" (raw/04 section 14.5). The project timeline merges them (PRJ-11, raw/08 section 6.9). A project deadline is not an event and is not converted into one automatically.
 
 **Preconditions:** The event exists and a project exists in the same group, not Closed (PRJ-09). The person holds Event: edit and Project: view.
 **Trigger:** The person picks "Project" in the event form, or taps "Add an event" on a project page.
@@ -372,7 +372,7 @@ Message keys: UI `evt.<area>.<name>`; notifications follow the NTF registry, bas
 
 **Story:** When I need to remember a date, such as a payment I owe or a family event, I want to save it with a short note and get a reminder, so I do not forget without writing it elsewhere.
 
-**Conversation:** Events, notes and dates to remember are one module for users, groups and projects (info.md, Events, notes and dates to remember). In the MVP the personal side is light: no sharing, no attachments. Group dates are events. SMS for personal reminders is not offered because of cost.
+**Conversation:** Events, notes and dates to remember are one module for users, groups and projects. In the MVP the personal side is light: no sharing, no attachments. Group dates are events. SMS for personal reminders is not offered because of cost.
 
 **Preconditions:** The person is signed in.
 **Trigger:** The person taps "Remember a date" in Events.
@@ -471,7 +471,7 @@ Story IDs are the binding reference.
 3. Closed: names of those Going and Maybe are visible to invitees; names of those who said No or did not answer are visible only to holders of Event: edit (EVT-04).
 4. Closed: the whole-group audience is dynamic (EVT-03).
 5. Closed as Later: RSVP by SMS reply and guest RSVP by link without an account. Both need inbound SMS or a light session, as for guest votes (VOT-06, ACC-16). Revisit after the first cohort shows how many members have no app; priority P2 if confirmed. Whether the aggregator supports inbound SMS is an external check, listed with the SMS blocker.
-6. Closed: an event carries no contribution or payment status in the MVP (raw/07 R-EV5), because it would need CON and WAL changes and a legal-gate review for no proven need; CON reserves a hook.
+6. Closed: an event carries no contribution or payment status in the MVP (raw/07 R-EV5), because it would need CON and WAL changes for no proven need; CON reserves a hook.
 7. Closed: members cannot propose an event for approval; a holder of Event: create creates it, and without Event: invite it stays a Draft until someone invites (EVT-01).
 8. Closed: no reopen of a cancelled event (EVT-07).
 9. Closed: time zone is Madagascar time only (XCT-03); diaspora members see the same time with the zone label.

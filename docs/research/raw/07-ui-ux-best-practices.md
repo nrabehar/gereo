@@ -55,7 +55,7 @@ Verified data (Unicode CLDR, read from https://github.com/unicode-org/cldr-json,
 - `en-MG`: decimal `.`, group `,`, pattern `¤#,##0.00` so `Ar1,250,000`. [V]
 - Observed with `Intl.NumberFormat` on Node v26.8.2 (ICU): `fr-MG` gives `1 250 000 Ar`; `mg` gives `Ar 1,250,000`; `fr` gives `1 250 000 MGA`; `en` gives `MGA 1,250,000`; 1250000.5 rounds to 1250001 (half-up), so floats silently change the amount. [V, own run]
 - The CLDR `mg` locale is thin: in my run `Intl.RelativeTimeFormat('mg')` fell back to abbreviations (`-2 d`) while date long format worked (`19 Oktobra 2026`, weekday `Alatsinainy`). Plan to ship hand-written Malagasy strings rather than rely on ICU for anything beyond numbers and dates. [V, own run]
-- ISO 4217 lists MGA with a minor unit (subunit 0.01) while CLDR treats it as 0 decimals; the ariary was historically divided into 5 iraimbilanja, now effectively obsolete (Wikipedia, May 2023). This is a classic integration trap: a payment API may expect minor units x1 or x100. [S] https://en.wikipedia.org/wiki/Malagasy_ariary . Confirm the exact amount encoding in the Vanilla Pay API before building the ledger. [U]
+- ISO 4217 lists MGA with a minor unit (subunit 0.01) while CLDR treats it as 0 decimals; the ariary was historically divided into 5 iraimbilanja, now effectively obsolete (Wikipedia, May 2023). This is a classic integration trap: a payment API may expect minor units x1 or x100. [S] https://en.wikipedia.org/wiki/Malagasy_ariary . Confirm the exact amount encoding in the payment API before building the ledger. [U]
 
 Rules:
 
@@ -109,7 +109,7 @@ Rules:
 
 - R-C1. Irreversible = outgoing mobile money, withdrawals, expense approvals that release funds, vote-implementing transfers, member removal. Reversible = renaming, goals, caps (with undo), draft rules.
 - R-C2. Review screen shows, on one screen: To (name AND number, with contact name), From wallet, Amount, Fee, Total taken, Date/time, plus the effect ("Wallet Savings goes from 80 000 to 30 000 Ar"). Primary button: `Send 50 000 Ar to Rado`. [V CGAP + NN/g; wallet-effect line is U]
-- R-C3. Show the recipient's registered name where the provider returns it (confirmation of payee). Monzo launched Confirmation of Payee: no warning on exact match, a warning before payment on mismatch or unverifiable. [V vendor behavior] https://monzo.com/blog/2020/05/04/confirmation-of-payee-launch . Whether Vanilla Pay exposes a name lookup is unknown. [U]
+- R-C3. Show the recipient's registered name where the provider returns it (confirmation of payee). Monzo launched Confirmation of Payee: no warning on exact match, a warning before payment on mismatch or unverifiable. [V vendor behavior] https://monzo.com/blog/2020/05/04/confirmation-of-payee-launch . Whether the provider exposes a name lookup is unknown. [U]
 - R-C4. Use undo (a 10-30 s "Cancel" window) only where the system can truly cancel before dispatch. Never show Undo for something already sent to the provider. The window length is a hypothesis. [U]
 - R-C5. Confirmation fatigue: confirm only money-out, rule activations that move money, and destructive actions. Do not confirm edits, filters, or navigation. [V NN/g]
 - R-C6. The PIN screen repeats amount and recipient (what-you-see-is-what-you-authorise). The EU's PSD2 RTS imposes "dynamic linking" of the authentication code to amount and payee; I could not fetch the regulation text, so treat as the principle only. [U] https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32018R0389
@@ -140,7 +140,7 @@ Rules:
 Rules:
 
 - R-E1. Accept messy phone numbers (spaces, +261, 0 prefix, dashes) and normalise; show the normalised number back. [V principle from GOV.UK; Madagascar format specifics U]
-- R-E2. Every error has: what happened, whether money moved, what to do next, a button for it. Example: "We could not reach Vanilla Pay. No money was taken. Try again" [Try again] [Save for later]. [V principles]
+- R-E2. Every error has: what happened, whether money moved, what to do next, a button for it. Example: "We could not reach the payment provider. No money was taken. Try again" [Try again] [Save for later]. [V principles]
 - R-E3. Keep a visible "Report a problem" on every transaction detail that pre-fills the reference ID and the transaction JSON for support. [U, supports CGAP #16 help-in-flow]
 - R-E4. For wrong-recipient risk, add friction before the first payment to any new number (show name if available; ask to re-read last 3 digits aloud/confirm) and allow cancel until provider accepts. [U; justified by the 25% / 50% unrecovered statistic V]
 - R-E5. In-flow contextual help, not a separate FAQ: CGAP #16 shows users appreciate help inside the transaction, including people who share their phone. [V]
@@ -174,7 +174,7 @@ Rules:
 - R-S2. OTP SMS includes purpose and amount where relevant ("Code 482913 to send 50 000 Ar to 034 xx xxx 12. Do not share."). This hampers fake-agent scams that reuse generic codes. [U; follows dynamic-linking principle]
 - R-S3. First-time payee, unusually large amount for this wallet, or new device triggers a pause screen with a plain question: "Did someone ask you to send this money?" plus Cancel as the visually primary action. [S Monzo; U wording]
 - R-S4. Mask phone numbers in group-visible ledgers (`034 ** *** 12`) and offer a "share receipt" that hides the number, because screenshots leak targeting data. [S]
-- R-S5. Trust signals that work here: visible reference IDs, SMS receipts, a named support channel with response time, the provider name (Vanilla Pay) on every payment screen, regulator/KYC tier explanation in plain words. [U]
+- R-S5. Trust signals that work here: visible reference IDs, SMS receipts, a named support channel with response time, the mobile money operator name on every payment screen, KYC tier explanation in plain words. [U]
 - R-S6. Do not use member data for third-party offers inside group views; keep the ledger purely about the group's money. [S MicroSave]
 
 ---
@@ -638,7 +638,7 @@ Sample copy (English and French; Malagasy to be written and tested by native tra
 | Situation | English | French |
 |---|---|---|
 | Payment sent | Sent 50 000 Ar to Rado. Ref 7Q4K-82. | 50 000 Ar envoyes a Rado. Ref 7Q4K-82. |
-| Payment pending | Waiting for Vanilla Pay. Usually under 2 minutes. You do not need to do anything. We will SMS you. | En attente de Vanilla Pay. En general moins de 2 minutes. Vous n'avez rien a faire. Nous vous enverrons un SMS. |
+| Payment pending | Waiting for the operator. Usually under 2 minutes. You do not need to do anything. We will SMS you. | En attente de l'operateur. En general moins de 2 minutes. Vous n'avez rien a faire. Nous vous enverrons un SMS. |
 | Payment failed | We could not send 50 000 Ar. No money was taken. [Try again] | Nous n'avons pas pu envoyer 50 000 Ar. Aucun argent n'a ete debite. [Reessayer] |
 | Late contribution (to the member, private) | 10 000 Ar is still due for October. [Pay now] [Ask for more time] | 10 000 Ar restent a payer pour octobre. [Payer] [Demander un delai] |
 | Late contributions (group view) | 3 contributions are still due. Last updated 14:05. | 3 cotisations restent a payer. Mis a jour a 14:05. |
@@ -718,7 +718,7 @@ Legend: P0 = must be true at launch; P1 = needed before general availability; P2
 
 ## 11. Open questions and recommended user research
 
-1. What is Vanilla Pay's actual amount encoding for MGA (x1 vs x100), name-lookup capability, confirmation latency and failure semantics? (Drives pending/failed copy and the confirmation-of-payee feature.)
+1. What is the provider's actual amount encoding for MGA (x1 vs x100), name-lookup capability, confirmation latency and failure semantics? (Drives pending/failed copy and the confirmation-of-payee feature.)
 2. Do target users read amounts in Ariary or francs, and do they read `5 000 Ar` correctly? Is `Ar` understood, or is `Ariary` clearer?
 3. What are the real SMS delivery latencies and costs per operator (Telma, Orange, Airtel) for OTP? This sets resend timers and budget. No measurement found.
 4. Malagasy text-expansion ratio and which dialect/standard to use for audio.

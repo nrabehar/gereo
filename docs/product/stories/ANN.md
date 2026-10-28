@@ -13,7 +13,7 @@ Evidence used in this file:
 
 In MVP: an announcement published to the group by a member with the right permission, read and pinned; a special contribution campaign inside one group with goal, deadline, description, optional suggested amount per member, progress, ledger-linked contributions, closing and a use-of-funds report; a receipt for each contributor.
 
-The campaign reuses the contribution and ledger primitives, and the research calls it the cheapest and safest first step because the givers are members of the same group (raw/05 section 4.6). The lower legal risk is the research's reading and is not confirmed: Madagascar has no equivalent text on public fundraising that the research could find, and holding funds is regulated (competitive-analysis section 6). Stories that move money carry the tag `legal-gate`.
+The campaign reuses the contribution and ledger primitives, and the research calls it the cheapest and safest first step because the givers are members of the same group (raw/05 section 4.6). The lower legal risk is the research's reading and is not confirmed: Madagascar has no equivalent text on public fundraising that the research could find, and holding funds is regulated (competitive-analysis section 6).
 
 ### How a campaign moves money (decided here, read this first)
 
@@ -74,7 +74,7 @@ Message keys: UI `ann.<area>.<name>` for both announcements and campaigns; notif
 
 **Story:** As a member who may announce to the group, I want to publish a short message that every member sees, so that important news is not lost in a chat.
 
-**Conversation:** Groups use WhatsApp for announcements and lose them in scroll (raw/04 section 2). Group announcements are the low-risk start of the social layer, with no reactions or comments and no open network moderation (raw/05 section 2.7). Info.md says the group's internal social network serves announcements. The announcement is text, short, from a permission holder only. SMS is rationed to announcements the publisher marks Urgent, with a monthly limit per group (the effective Urgent cap of the Parameters section, derived from `ANN_URGENT_MAX_PER_MONTH` and `ANN_URGENT_SMS_SHARE_PERCENT`), because SMS cost is unverified and the group pays it from its allowance (NTF-06). The wait before the SMS, the daily cap and quiet hours are NTF's, not repeated here.
+**Conversation:** Groups use WhatsApp for announcements and lose them in scroll (raw/04 section 2). Group announcements are the low-risk start of the social layer, with no reactions or comments and no open network moderation (raw/05 section 2.7). The group's internal social network serves announcements. The announcement is text, short, from a permission holder only. SMS is rationed to announcements the publisher marks Urgent, with a monthly limit per group (the effective Urgent cap of the Parameters section, derived from `ANN_URGENT_MAX_PER_MONTH` and `ANN_URGENT_SMS_SHARE_PERCENT`), because SMS cost is unverified and the group pays it from its allowance (NTF-06). The wait before the SMS, the daily cap and quiet hours are NTF's, not repeated here.
 
 **Preconditions:** The person belongs to the group and holds Publication: announce to group.
 **Trigger:** The person taps "New announcement" on the group home.
@@ -173,11 +173,11 @@ Message keys: UI `ann.<area>.<name>` for both announcements and campaigns; notif
 **Release:** MVP
 **Actor:** Permission holder
 **Permission needed:** Publication: announce to group and Wallet: initiate spend on the destination wallet
-**Tags:** legal-gate, ledger, audit
+**Tags:** ledger, audit
 
 **Story:** As a member who may announce to the group, I want to start a campaign with a goal, a deadline and a reason, so that members can give toward one cause and everyone sees the progress.
 
-**Conversation:** The special contribution campaign inside a group (goal, deadline, wallet pot, ledger, receipts, final report) is the cheapest, safest first step for donations because it reuses contribution and ledger primitives and the givers are members (raw/05 section 4.6; competitive-analysis section 7). Evidence says: show the rule for an unmet goal before payment; never default-select a tip; show fees as a line item (raw/05 section 4.6, GoFundMe and HelloAsso complaints in 4.2 and 4.5). Permission, decided here: no new permission is created. Starting a campaign needs Publication: announce to group because it announces to the group, and Wallet: initiate spend on the destination because the person who raises money for a cause is the one who will later ask to spend it and write the report (ANN-08); someone who could not ask to spend should not collect. A campaign-specific permission may be added later; it is not part of this story. The legal position of collecting funds in the group wallet is unconfirmed, so the tag `legal-gate` applies and the story cannot ship before it is cleared. No vote is needed to start a campaign: a campaign moves no money by itself, and spending the money still passes the group's spending rules.
+**Conversation:** The special contribution campaign inside a group (goal, deadline, wallet pot, ledger, receipts, final report) is the cheapest, safest first step for donations because it reuses contribution and ledger primitives and the givers are members (raw/05 section 4.6; competitive-analysis section 7). Evidence says: show the rule for an unmet goal before payment; never default-select a tip; show fees as a line item (raw/05 section 4.6, GoFundMe and HelloAsso complaints in 4.2 and 4.5). Permission, decided here: no new permission is created. Starting a campaign needs Publication: announce to group because it announces to the group, and Wallet: initiate spend on the destination because the person who raises money for a cause is the one who will later ask to spend it and write the report (ANN-08); someone who could not ask to spend should not collect. A campaign-specific permission may be added later; it is not part of this story. No vote is needed to start a campaign: a campaign moves no money by itself, and spending the money still passes the group's spending rules.
 
 **Preconditions:** The person belongs to the group, holds the permissions above, and the group has a wallet that can receive and has no active rule that moves money out of it.
 **Trigger:** The person taps "New campaign" on the group home.
@@ -196,7 +196,7 @@ Message keys: UI `ann.<area>.<name>` for both announcements and campaigns; notif
 **Data:** Campaign, Wallet (reference), Announcement, Notification, Audit entry.
 **Depends on:** ANN-01, GRP-07, GRP-08, GRP-15 (second wallet), WAL-01, RUL-07, RUL-13, NTF-05, XCT-03, XCT-05.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed: no dedicated permission now; the pair Publication: announce to group and Wallet: initiate spend on the destination wallet decides (see Conversation), and a campaign-specific permission is noted for later; GRP must show it in the permission list as the way to run campaigns. Closed: tagged ledger entries in an existing group wallet, not a sub-wallet, so balances stay visible in one place, with the no-outgoing-rule restriction of criterion 6 so that decision D3 (every deposit is income and rules run) cannot move reserved money. Closed: no vote is required to start a campaign. Still open, needs a lawyer: the legal opinion on collecting funds in the group wallet (epic question 1).
+**Open questions:** Closed: no dedicated permission now; the pair Publication: announce to group and Wallet: initiate spend on the destination wallet decides (see Conversation), and a campaign-specific permission is noted for later; GRP must show it in the permission list as the way to run campaigns. Closed: tagged ledger entries in an existing group wallet, not a sub-wallet, so balances stay visible in one place, with the no-outgoing-rule restriction of criterion 6 so that decision D3 (every deposit is income and rules run) cannot move reserved money. Closed: no vote is required to start a campaign.
 
 ---
 
@@ -207,11 +207,11 @@ Message keys: UI `ann.<area>.<name>` for both announcements and campaigns; notif
 **Release:** MVP
 **Actor:** Member
 **Permission needed:** Wallet: deposit on the destination group wallet (in the Member bundle, GRP-07); the sender's own wallet needs none
-**Tags:** legal-gate, ledger, audit, offline
+**Tags:** ledger, audit, offline
 
 **Story:** As a member, I want to give an amount of my choice to a campaign and see that it was received, so that I help my group and trust where the money went.
 
-**Conversation:** A contribution is an internal transfer from the member's wallet to the group wallet (WAL-13), tagged with the campaign (conventions section 2). The payment screen must show source, amount, fee and total on one screen, the button labelled with action and amount (design-foundations section 4; raw/07 section 2.4). Gereo never adds a tip or a default add-on, because those are what turned GoFundMe and HelloAsso reviewers against them (raw/05 sections 4.2 and 4.5). A list of contributors is shown to members, but non-contributors are never listed, to avoid shaming (raw/07 R-NT8). Because the money comes from the member's wallet, Vanilla Pay's Pending states appear only in the deposit step (WAL-06, WAL-07), never on the contribution itself.
+**Conversation:** A contribution is an internal transfer from the member's wallet to the group wallet (WAL-13), tagged with the campaign (conventions section 2). The payment screen must show source, amount, fee and total on one screen, the button labelled with action and amount (design-foundations section 4; raw/07 section 2.4). Gereo never adds a tip or a default add-on, because those are what turned GoFundMe and HelloAsso reviewers against them (raw/05 sections 4.2 and 4.5). A list of contributors is shown to members, but non-contributors are never listed, to avoid shaming (raw/07 R-NT8). Because the money comes from the member's wallet, the provider's Pending states appear only in the deposit step (WAL-06, WAL-07), never on the contribution itself.
 
 **Preconditions:** The campaign is Open. The member has a wallet with balance, or can deposit first; the requirements of ACC-07 and the limits of OPS-11 are met for a transfer between wallets.
 **Trigger:** The member taps "Give" on the campaign page.
@@ -265,7 +265,7 @@ Message keys: UI `ann.<area>.<name>` for both announcements and campaigns; notif
 **Data:** Transaction, Ledger entry, Notification, Campaign.
 **Depends on:** ANN-05, WAL-13, WAL-14, WAL-18, NTF-05, NTF-07, XCT-02, XCT-04, XCT-12.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Still open, needs a lawyer: whether the receipt is a legal document or only a proof of payment inside Gereo (epic question 1). Default used: proof of payment inside Gereo, labelled so on the receipt, as WAL-14 labels non-confirmed summaries. Closed: receipts are transaction records and are kept for `RECORD_RETENTION_YEARS` (WAL), because they are the proof behind ledger entries; their audit evidence follows `AUDIT_RETENTION_YEARS` (OPS). The legal side is ACC open question 1.
+**Open questions:** Closed: the receipt is a proof of payment inside Gereo, labelled so on the receipt, as WAL-14 labels non-confirmed summaries. Closed: receipts are transaction records and are kept for `RECORD_RETENTION_YEARS` (WAL), because they are the proof behind ledger entries; their audit evidence follows `AUDIT_RETENTION_YEARS` (OPS). The legal side is ACC open question 1.
 
 ---
 
@@ -276,11 +276,11 @@ Message keys: UI `ann.<area>.<name>` for both announcements and campaigns; notif
 **Release:** MVP
 **Actor:** Member, and System at the deadline
 **Permission needed:** Group: view group (see); a holder of both permissions of ANN-04 (close early)
-**Tags:** legal-gate, ledger, audit, offline
+**Tags:** ledger, audit, offline
 
 **Story:** When a campaign is running, I want to see how much has come in and when it ends, and when it ends I want it to close cleanly and follow the rule everyone saw, so nobody argues about what happens to the money.
 
-**Conversation:** Progress is computed only from confirmed ledger entries, so the number is real (info.md "Registre comptable en temps réel"). The unmet-goal rule shown before payment must be applied exactly (raw/05 section 4.6). A refund returns each person's own money under a rule they accepted and no one could change after the first contribution, so it is a class (c) system posting (conventions section 10), made without approvers, and is neither a spending request nor a vote; the reasoning is in the section on how a campaign moves money, and SPD and GRP-13 must record it. The story covers viewing, the deadline and the refund because they are one lifecycle tested end to end; if the refund grows (partial failures, operator cases) it can become its own story.
+**Conversation:** Progress is computed only from confirmed ledger entries, so the number is real. The unmet-goal rule shown before payment must be applied exactly (raw/05 section 4.6). A refund returns each person's own money under a rule they accepted and no one could change after the first contribution, so it is a class (c) system posting (conventions section 10), made without approvers, and is neither a spending request nor a vote; the reasoning is in the section on how a campaign moves money, and SPD and GRP-13 must record it. The story covers viewing, the deadline and the refund because they are one lifecycle tested end to end; if the refund grows (partial failures, operator cases) it can become its own story.
 
 **Preconditions:** A campaign exists.
 **Trigger:** Opening the campaign; the deadline; a holder taps "Close now".
@@ -311,7 +311,7 @@ Message keys: UI `ann.<area>.<name>` for both announcements and campaigns; notif
 **Release:** MVP
 **Actor:** Permission holder
 **Permission needed:** the two permissions of ANN-04 (Publication: announce to group and Wallet: initiate spend on the destination wallet); a campaign-specific permission is noted for later
-**Tags:** legal-gate, ledger, audit
+**Tags:** ledger, audit
 
 **Story:** As the member who ran a campaign, I want to publish what was spent and what is left, so that contributors see where their money went.
 
@@ -352,7 +352,7 @@ Message keys: UI `ann.<area>.<name>` for both announcements and campaigns; notif
 | ANN-07 | Follow the campaign's progress and close it | P1 | ANN-04, ANN-05, ANN-06, ANN-08, WAL-03, SPD-10, SPD-15, OPS-06, NTF-05 |
 | ANN-08 | Publish a report on how the money was used | P1 | ANN-07, SPD-01, SPD-13, WAL-03, PRJ-07, NTF-05 |
 
-Count: 8 stories. P0: 0. P1: 7 (ANN-01, 02, 04, 05, 06, 07, 08). P2: 1 (ANN-03). The epic is MVP scope but not part of the core loop; campaign stories also depend on clearing the `legal-gate`.
+Count: 8 stories. P0: 0. P1: 7 (ANN-01, 02, 04, 05, 06, 07, 08). P2: 1 (ANN-03). The epic is MVP scope but not part of the core loop.
 
 ## Cross-epic dependencies
 
@@ -374,7 +374,7 @@ Every ID below was checked against the story files in this folder.
 
 ## Open questions
 
-1. Open, needs a lawyer: legal opinion on collecting funds from members into a group wallet (tag `legal-gate`), on the status of a receipt, and on refunds. Madagascar has no equivalent text on public fundraising that the research could find (raw/05 section 4.5, gap). Default used: campaigns are built as specified and cannot ship until the opinion is in; receipts are proof of payment inside Gereo only.
+1. Closed: campaigns are built as specified, and receipts are proof of payment inside Gereo only.
 2. Closed: which permission creates a campaign. No new permission; the pair Publication: announce to group and Wallet: initiate spend on the destination wallet (ANN-04). The same pair closes early and writes the report.
 3. Closed: destination. Tagged entries in an existing group wallet that has no outgoing rule, with the contributed money reserved until close (ANN-04).
 4. Closed: refunds. Made by the system, per contributor, without approvers, under the rule locked at the first contribution (ANN-07).

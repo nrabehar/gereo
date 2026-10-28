@@ -1,6 +1,6 @@
 # Competitive research 01: Group savings, rotating savings and group-treasury apps
 
-Prepared for: Gereo (Madagascar, MGA, mobile money via Vanilla Pay)
+Prepared for: Gereo (Madagascar, MGA, mobile money)
 Research date: 2026-10-19
 Method: web search plus page fetches. Anything not confirmed from a fetched page or search result is labelled UNVERIFIED. Company-published numbers are labelled COMPANY CLAIM. Direct reddit.com access was blocked in this environment, so no Reddit threads were read; user feedback comes from app-store pages, Trustpilot, aggregators, forums and press.
 
@@ -207,7 +207,6 @@ Method: web search plus page fetches. Anything not confirmed from a fetched page
 - Savings products on mobile money: MVola Epargne (2% in 2017 launch, raised to 4% per MVola 2024 impact review), Orange Money plus PAMF M-Kajy and Tahiry Be (savings from 500 ariary, automatic weekly or monthly deposits, over 700,000 users borrowed or saved per press; https://www.lexpress.mg/2025/08/inclusion-financiere-la-solution.html). All are individual products, not group.
 - Savings groups: NGO-led (CARE, CRS) VSLA, SILC, AVEC and others; 15 to 25 members; 9 to 12 month cycles; transactions done in front of members in meetings "to build transparency and trust"; coordinated by RPGEM; no data found on number of groups nationwide or on digitisation (https://www.lexpress.mg/2024/03/developpement-la-finance-inclusive.html).
 - Banking penetration: an AFD fact sheet cites about 5% (via search summary; UNVERIFIED date).
-- Vanilla Pay: described as an aggregator of mobile money operators, account with phone number and email (Khaleej Times profile); no public API documentation found. Confirm integration terms directly.
 
 ---
 
@@ -224,7 +223,7 @@ Method: web search plus page fetches. Anything not confirmed from a fetched page
 ## 13. Takeaways for Gereo MVP
 
 ### Table stakes (every credible competitor has them)
-1. Mobile money in/out (M-Pesa in Kenya; Orange/MTN in Cameroon; for Gereo: MVola, Orange Money, Airtel Money via Vanilla Pay).
+1. Mobile money in/out (M-Pesa in Kenya; Orange/MTN in Cameroon; for Gereo: MVola, Orange Money, Airtel Money through a payment adapter).
 2. Contribution tracking with reminders and per-member statements; penalties or fines for late payment.
 3. Member-visible balances (Stanbic, Zimele and Malipo all stress "all members can see").
 4. Group roles or signatory approval on withdrawals (multi-signatory in Zimele and Bank of Africa; admin-only withdrawal in Revolut). Gereo's permissions-only model must still enforce multi-approval on outflows.
@@ -301,7 +300,6 @@ Method: web search plus page fetches. Anything not confirmed from a fetched page
 - https://www.lexpress.mg/2024/03/developpement-la-finance-inclusive.html
 - https://www.gsma.com/solutions-and-impact/connectivity-for-good/mobile-for-development/uncategorized/mvola-madagascar-a-case-study-for-the-gsma-mobile-money-api-and-open-platforms/
 - https://www.mvola.mg/wp-content/uploads/2025/07/Corporate-Impact-Review-MVola-2024_.pdf (via search summary)
-- https://www.khaleejtimes.com/supplements/vanilla-pay-international-we-secure-the-way-people-pay?amp=1
 - https://dsghub.org/our-digital-journey-with-savings-groups-what-we-got-wrong-and-the-lessons-weve-learned-along-the-way/
 - https://www.responseinnovationlab.com/updates/learning-from-a-savings-group-digitisation-pilot-in-uganda
 - https://usaidlearninglab.org/community/blog/digitalizing-savings-groups-sierra-leone

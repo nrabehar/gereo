@@ -23,7 +23,7 @@ Evidence labels in the raw reports: [V] verified, [S] secondary, [U] unverified 
 - Times are shown in Madagascar time (Indian/Antananarivo, UTC+3) with the zone shown on deadlines.
 - Transaction statuses are exactly Initiated, Pending, Confirmed, Failed, Cancelled, plus Needs attention in the interface. Status is always icon, word and colour. "Reversed" is a chip on a ledger entry that has been reversed (WAL-18), not a sixth status. A status may carry a plain sub-label but never a new name: a payout queued during an outage is Pending with the label "Waiting for the provider" (OPS-13 calls the same state "Queued for provider"), and a deposit waiting for the operator's answer is Pending with the label "Waiting for the operator". The provider name never appears in these labels. Money set aside for a payout goes through two stages, Reserved and then In transit, both shown as "Set aside, not sent" (conventions 10.5). A group spend waiting for approvals or a vote is an expense request with the SPD statuses (Awaiting approval, Awaiting vote), not a transaction, until its payout is dispatched.
 - Tiers follow ACC-07: Tier 1 is phone, OTP and PIN; Tier 2 adds ID and selfie; Tier 3 adds extra proof. Limits per tier come from OPS-11 and are not known.
-- Money-in and money-out always name the provider ("Vanilla Pay") and the mobile money operator on the payment screens (07 UI/UX 2.8 R-S5). Vanilla Pay sits behind a payment adapter, so no story names a Vanilla Pay field.
+- Money-in and money-out always name the mobile money operator on the payment screens (07 UI/UX 2.8 R-S5). The payment provider sits behind a payment adapter, so no story names a provider field.
 - Entries are append-only. A wallet balance is always the sum of its ledger entries, never a stored number that code can overwrite.
 - For wallets owned by the user, the user holds every wallet permission. For group wallets, each permission is checked individually.
 - Group wallets: every outflow (mobile money, transfer to a personal wallet, transfer to another group wallet) is authorised in one of two ways, chosen by the spending policy (GRP-12, GRP-13; decisions D1 and D4). Below the vote threshold: the approvals of the band, each from a person other than the requester, who can never approve their own request and for whom no setting allows it. At or above the vote threshold: a passed vote with at least two distinct voters other than the requester, which starts the payment without approvers. WAL stories describe the payout and the money states; the request and approval screens are SPD and the vote screens are VOT.
@@ -70,11 +70,11 @@ Parameters owned by other epics and used here without being redefined: `PIN_MAX_
 **Release:** MVP
 **Actor:** Individual (own wallet) or Group founder or Permission holder (group wallet)
 **Permission needed:** none for a personal wallet; Wallet: create for a group wallet (decision D2)
-**Tags:** legal-gate, ledger, audit
+**Tags:** ledger, audit
 
 **Story:** As an individual, I want to create a named wallet of a type I choose, so that I can keep money for different purposes apart.
 
-**Conversation:** Named wallets with a type, a balance and an optional goal are table stakes (02 personal finance, Takeaways, Table stakes item 1; competitive analysis section 7). Naming and separating money without new accounts is the mental model users like most (02 personal finance, Cross-cutting, "What users love" item 4, Monzo pots). Decisions: the type (budget, savings, investment, business) is a label that sets defaults, never a lock, and no wallet promises interest or yield (competitive analysis section 6 item 3; 03 mobile money 5.1, Art. 17 bars advertising e-money as savings, so the labels "Savings" and "Investment" need a lawyer's view). A wallet needs only the sign-up level (Tier 1) so that people can budget before they verify (02 personal finance, Cross-cutting, "KYC friction"). Group wallets are created from the group (GRP-15), need Wallet: create, and use the same form. Empty state of a new wallet follows 07 UI/UX 2.3 R-T7.
+**Conversation:** Named wallets with a type, a balance and an optional goal are table stakes (02 personal finance, Takeaways, Table stakes item 1; competitive analysis section 7). Naming and separating money without new accounts is the mental model users like most (02 personal finance, Cross-cutting, "What users love" item 4, Monzo pots). Decisions: the type (budget, savings, investment, business) is a label that sets defaults, never a lock, and no wallet promises interest or yield (competitive analysis section 6 item 3; 03 mobile money 5.1, so the type labels read "Goal" and "Long term" rather than "Savings" and "Investment"). A wallet needs only the sign-up level (Tier 1) so that people can budget before they verify (02 personal finance, Cross-cutting, "KYC friction"). Group wallets are created from the group (GRP-15), need Wallet: create, and use the same form. Empty state of a new wallet follows 07 UI/UX 2.3 R-T7.
 
 **Preconditions:** Signed in at Tier 1. For a group wallet, the person belongs to the group and holds Wallet: create.
 **Trigger:** The person taps "New wallet" on the wallet list or on the empty home.
@@ -93,7 +93,7 @@ Parameters owned by other epics and used here without being redefined: `PIN_MAX_
 **Data:** Wallet (write), Ledger account (write), Audit entry (write), User, Group, Membership (read).
 **Depends on:** ACC-02, ACC-03, GRP-15 (group wallets from the group).
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed: creating a group wallet needs Wallet: create (decision D2). Closed: `WALLET_MAX_PER_OWNER` starts at 10, enough for envelope budgeting (02 personal finance, Takeaways item 2) without a long list. Closed: a wallet needs Tier 1 (an account), because a wallet has an owner; there is no wallet at Tier 0. Open, needs a lawyer: whether the labels "Savings" and "Investment" may be shown under Law 2016-056 Art. 17. Default used until counsel answers: the two types appear as "Goal" and "Long term" in all three languages, behind the same message keys `wal.create.type.*`, so the wording can change without a release.
+**Open questions:** Closed: creating a group wallet needs Wallet: create (decision D2). Closed: `WALLET_MAX_PER_OWNER` starts at 10, enough for envelope budgeting (02 personal finance, Takeaways item 2) without a long list. Closed: a wallet needs Tier 1 (an account), because a wallet has an owner; there is no wallet at Tier 0. Closed: the two types appear as "Goal" and "Long term" in all three languages, behind the same message keys `wal.create.type.*`, so the wording can change without a release.
 
 ---
 
@@ -141,7 +141,7 @@ Parameters owned by other epics and used here without being redefined: `PIN_MAX_
 
 **Story:** As a wallet owner or member, I want one screen that shows the balance computed from the ledger, my goal progress and how much I can safely spend, so that I never have to guess.
 
-**Conversation:** "Where is my money?" is the top complaint class (competitive analysis section 4 item 1). The balance is computed from the ledger, which is what guarantees it is real (info.md, "Flux d'argent"; 02 personal finance, Gaps competitors leave, "Native ledger accuracy"). "What is safe to spend" is what users love in envelope budgets (02 personal finance, Cross-cutting item 1) and Monzo's budget view breaks when money sits in pots, so Gereo's version is allocation-aware (02 personal finance, Gaps item 3). Money in transit must never be silently counted or hidden (07 UI/UX 2.2 R-M11). Progress is shown as numbers plus a bar, never a bar alone (R-M12).
+**Conversation:** "Where is my money?" is the top complaint class (competitive analysis section 4 item 1). The balance is computed from the ledger, which is what guarantees it is real (02 personal finance, Gaps competitors leave, "Native ledger accuracy"). "What is safe to spend" is what users love in envelope budgets (02 personal finance, Cross-cutting item 1) and Monzo's budget view breaks when money sits in pots, so Gereo's version is allocation-aware (02 personal finance, Gaps item 3). Money in transit must never be silently counted or hidden (07 UI/UX 2.2 R-M11). Progress is shown as numbers plus a bar, never a bar alone (R-M12).
 
 **Preconditions:** The wallet exists and the person holds the permission.
 **Trigger:** The person taps a wallet card.
@@ -205,7 +205,7 @@ Parameters owned by other epics and used here without being redefined: `PIN_MAX_
 **Release:** MVP
 **Actor:** Individual, Permission holder
 **Permission needed:** none for own wallets; Wallet: close for a group wallet
-**Tags:** legal-gate, ledger, audit
+**Tags:** ledger, audit
 
 **Story:** As a wallet owner, I want to close a wallet I no longer use, only when it holds no money and nothing is still moving, so that my list stays clean and no money is ever lost in a closed wallet.
 
@@ -239,7 +239,7 @@ Parameters owned by other epics and used here without being redefined: `PIN_MAX_
 **Release:** MVP
 **Actor:** Individual, Member, Permission holder
 **Permission needed:** none for own wallets; Wallet: deposit for a group wallet
-**Tags:** legal-gate, ledger, audit
+**Tags:** ledger, audit
 
 **Story:** When I want to put money into a wallet from my mobile money account, I want to see exactly what I will pay before I confirm, so I can add money without surprises.
 
@@ -263,7 +263,7 @@ Parameters owned by other epics and used here without being redefined: `PIN_MAX_
 **Data:** Transaction (write), Wallet (read), Audit entry (write), Payment adapter request (write).
 **Depends on:** WAL-01, ACC-03, ACC-07, OPS-08, OPS-11. Consumers of its transactions, by ID only: WAL-07, WAL-08.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed: the fee is added on top, so the wallet is credited exactly "You add" and a split rule works on the full amount; taking the fee from the credited amount would make every group split smaller than what the person typed. Closed: Gereo's PIN is not asked for a deposit; the operator PIN typed on the person's phone is the authorisation. Open, needs Vanilla Pay: whether it collects from any operator number, whether the amount unit is ariary or a minor unit, and whether the 100 000 000 Ar ceiling in the brief is per transaction, per day or per account. Defaults used: any supported operator number, whole ariary, and the ceiling is treated as `DEPOSIT_MAX_PER_TX` per transaction until the provider answers.
+**Open questions:** Closed: the fee is added on top, so the wallet is credited exactly "You add" and a split rule works on the full amount; taking the fee from the credited amount would make every group split smaller than what the person typed. Closed: Gereo's PIN is not asked for a deposit; the operator PIN typed on the person's phone is the authorisation. Closed: any supported operator number can pay, the amount is whole ariary, and the 100 000 000 Ar ceiling is treated as `DEPOSIT_MAX_PER_TX` per transaction.
 
 ---
 
@@ -274,11 +274,11 @@ Parameters owned by other epics and used here without being redefined: `PIN_MAX_
 **Release:** MVP
 **Actor:** System
 **Permission needed:** none
-**Tags:** legal-gate, ledger, audit, sms
+**Tags:** ledger, audit, sms
 
-**Story:** When Vanilla Pay tells Gereo what happened to a deposit, I want Gereo to record it exactly once and in the right state, so the person's balance is always correct and nobody is ever credited twice or not at all.
+**Story:** When the provider tells Gereo what happened to a deposit, I want Gereo to record it exactly once and in the right state, so the person's balance is always correct and nobody is ever credited twice or not at all.
 
-**Conversation:** Provider callbacks can time out or double-notify, so idempotency keys, pending and settled states and a reconciliation job are mandatory (competitive analysis section 6 item 6; 03 mobile money 7.1 item 5). "Debited but not delivered" with no trace in the app is the most repeated complaint (08 competitor UX 6.3, Avoid; competitive analysis section 4 item 1). Whether Vanilla Pay signs callbacks and how it retries is unknown (03 mobile money 3.2); another aggregator signs notifications with HMAC and creates links idempotently (03 mobile money 3.4). The status mapping from the provider's words to ours is a table in the payment adapter spec.
+**Conversation:** Provider callbacks can time out or double-notify, so idempotency keys, pending and settled states and a reconciliation job are mandatory (competitive analysis section 6 item 6; 03 mobile money 7.1 item 5). "Debited but not delivered" with no trace in the app is the most repeated complaint (08 competitor UX 6.3, Avoid; competitive analysis section 4 item 1). The adapter does not assume that the provider signs callbacks or retries them; another aggregator signs notifications with HMAC and creates links idempotently (03 mobile money 3.4). The status mapping from the provider's words to ours is a table in the payment adapter spec.
 
 **Preconditions:** A deposit transaction exists (WAL-06).
 **Trigger:** A provider callback arrives, or `PENDING_TIMEOUT` passes with no answer.
@@ -289,7 +289,7 @@ Parameters owned by other epics and used here without being redefined: `PIN_MAX_
 3. Idempotency. A duplicate or replayed callback (same event or provider reference) changes nothing and is acknowledged to the provider. Test: the same callback delivered three times produces exactly one posting.
 4. Failed and Cancelled. The status is updated and no wallet entry is written. The person sees a reason in plain words and whether money moved, but only when the provider says so (key `wal.deposit.failed.*`). If the provider result leaves it unclear whether the person was charged, the transaction goes to Needs attention instead.
 5. Terminal states are final. A Confirmed callback that arrives after Failed or Cancelled, or one with an unknown reference, is stored, never credited automatically, flagged Needs attention and sent to OPS.
-6. Timeout. With no answer by `PENDING_TIMEOUT`, the system polls the provider every `STATUS_POLL_INTERVAL` up to `STATUS_POLL_MAX` times. A poll answer is handled exactly like a callback. If it stays unknown, the person sees Needs attention with "We are checking with Vanilla Pay. Reference [ID]. You do not need to do anything" and OPS is alerted. Gereo never marks a deposit Failed without a provider answer.
+6. Timeout. With no answer by `PENDING_TIMEOUT`, the system polls the provider every `STATUS_POLL_INTERVAL` up to `STATUS_POLL_MAX` times. A poll answer is handled exactly like a callback. If it stays unknown, the person sees Needs attention with "We are checking with the mobile money operator. Reference [ID]. You do not need to do anything" and OPS is alerted. Gereo never marks a deposit Failed without a provider answer.
 7. Notifications. Confirmed: SMS `msg.wal.deposit_confirmed.sms` (reference, amount, wallet; must pass the XCT-12 encoding and length lint, 160 GSM-7 characters at most) and push `msg.wal.deposit_confirmed.push` ("Added 50 000 Ar to Savings. Ref 7Q4K-82."). Failed: push `msg.wal.deposit_failed.push` and SMS `msg.wal.deposit_failed.sms` only when money moved or the outcome is unclear. For a group wallet, members with Wallet: view history see the entry in the feed and the digest, not one push each (NTF).
 8. Rules and event. This story owns and emits the "money posted to a wallet" event. After the credit is posted, every Confirmed deposit is income for that wallet (decision D3, conventions 10.1) and the event carries it, whether it is a plain deposit or a contribution (CON-04). RUL-07 consumes this event and runs the rules; the other entry points that post money into a wallet (WAL-12, WAL-13) call the same posting path. A rule failure never rolls back the credit.
 9. Ledger and audit. Every state change is an audit entry with the provider reference and actor "System". The raw callback (payload, receive time, outcome) is stored append-only for `RECORD_RETENTION_YEARS`. Each provider transaction is marked for reconciliation (WAL-20).
@@ -297,7 +297,7 @@ Parameters owned by other epics and used here without being redefined: `PIN_MAX_
 **Data:** Transaction (write status), Ledger entry (write), Notification (write), Audit entry (write), Raw provider event (write).
 **Depends on:** WAL-06, OPS-04, OPS-05, OPS-13, NTF-05, NTF-08. Consumers of its posted-money event, by ID only: RUL-07, WAL-12, WAL-13.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed: a Failed deposit never becomes Confirmed by itself; a late Confirmed callback goes to Needs attention and an operator decides (AC5, OPS-05), because a silent flip would credit a person the app already told "no money was taken". Closed: the provider fee never reduces what the wallet receives (WAL-06 decision). Open, needs Vanilla Pay: whether it signs callbacks, how it retries and whether it exposes a status endpoint. Default used: callbacks are verified by the method the contract requires, and until a status endpoint exists polling (AC6) is disabled and the transaction goes to Needs attention at `PENDING_TIMEOUT`.
+**Open questions:** Closed: a Failed deposit never becomes Confirmed by itself; a late Confirmed callback goes to Needs attention and an operator decides (AC5, OPS-05), because a silent flip would credit a person the app already told "no money was taken". Closed: the provider fee never reduces what the wallet receives (WAL-06 decision). Closed: callbacks are verified by the method the contract requires, and until a status endpoint exists polling (AC6) is disabled and the transaction goes to Needs attention at `PENDING_TIMEOUT`.
 
 ---
 
@@ -308,9 +308,9 @@ Parameters owned by other epics and used here without being redefined: `PIN_MAX_
 **Release:** MVP
 **Actor:** Individual, Member, System
 **Permission needed:** none
-**Tags:** legal-gate, ledger, sms
+**Tags:** ledger, sms
 
-**Story:** When Vanilla Pay or the mobile money operator is down, I want Gereo to say so clearly and keep my money safe, so I do not repeat a payment or believe my money is lost.
+**Story:** When the payment provider or the mobile money operator is down, I want Gereo to say so clearly and keep my money safe, so I do not repeat a payment or believe my money is lost.
 
 **Conversation:** MVola had material outages in November 2025 and May to June 2026, and aggregator calls fail with it (03 mobile money 3.4, "Operator risk passes through"; competitive analysis section 2). The rule is: show a "provider unavailable" state and queue payouts rather than failing (competitive analysis section 6 item 7; 03 mobile money 7.1 item 6). A deposit cannot be queued because the person must approve on their own phone, so only an alert is offered. Offline (no connection on the phone) and provider-down (Gereo cannot reach the provider) have different words, because the cause must be attributed accurately (07 UI/UX 4, web.dev guidance).
 
@@ -318,7 +318,7 @@ Parameters owned by other epics and used here without being redefined: `PIN_MAX_
 **Trigger:** The person starts a deposit or a withdrawal while the state is on.
 
 **Acceptance criteria:**
-1. Happy path, banner. Money screens show the banner "Vanilla Pay is not available right now" (or the operator name) with the time since it started and what still works (balances, history, moves between wallets). The state can apply to one operator only.
+1. Happy path, banner. Money screens show the banner "Payments are not available right now" (or the operator name) with the time since it started and what still works (balances, history, moves between wallets). The state can apply to one operator only.
 2. Deposit. The flow stops at the amount screen with `err.wal.provider_down_deposit`: "We cannot reach [operator] right now. No money was taken." Two buttons: "Try again" and "Tell me when it works". The second registers one alert (push, SMS if the app is not opened) when the state clears, with an expiry. No deposit is queued.
 3. Withdrawal. A personal-wallet withdrawal can complete the review and the PIN (WAL-10). It is accepted as Pending with the sub-label "Waiting for the provider" and the text "We will send it as soon as it is back. Your money is set aside." The Pending transaction is created at acceptance and the amount is reserved at that moment (Reserved, then In transit at dispatch, shown as "Set aside, not sent", conventions 10.5). The amount leaves Available at once and shows under "On its way out" with its reference ID. A group payout that is already authorised (SPD-10) behaves the same way from the moment it is accepted. The fee shown at authorisation is the fee charged; Gereo bears any later provider change.
 4. Queue rules. Queued withdrawals are sent in order of acceptance when the provider returns. Each is re-checked (limits, destination) and sent with the same idempotency key, so a retry never pays twice.
@@ -331,7 +331,7 @@ Parameters owned by other epics and used here without being redefined: `PIN_MAX_
 **Data:** Transaction (write status), Ledger entry (write), Notification (write), Audit entry (write), Provider health state (read).
 **Depends on:** WAL-06, WAL-10, OPS-08, OPS-13, NTF-05. Outcomes after the queue follow WAL-11, which builds on this story.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed: the value of `PAYOUT_PROVIDER_WAIT_MAX` is set once, in the parameter table of this file. Closed: deposits are never queued, not even by a later pay-by-link flow in the MVP, because the person must approve on their own phone. Open, needs Vanilla Pay: whether a queued withdrawal needs a float that Gereo or the provider pre-funds (03 mobile money 7.3). Default used: Gereo holds the money already in the client-funds account, and OPS-13 pause covers a provider that cannot pay.
+**Open questions:** Closed: the value of `PAYOUT_PROVIDER_WAIT_MAX` is set once, in the parameter table of this file. Closed: deposits are never queued, not even by a later pay-by-link flow in the MVP, because the person must approve on their own phone. Closed: Gereo holds the money already in the client-funds account, and OPS-13 pause covers a provider that cannot pay.
 
 ---
 
@@ -342,7 +342,7 @@ Parameters owned by other epics and used here without being redefined: `PIN_MAX_
 **Release:** MVP
 **Actor:** Individual, Permission holder
 **Permission needed:** none for own wallets; Wallet: initiate spend for a group wallet
-**Tags:** legal-gate, ledger
+**Tags:** ledger
 
 **Story:** As a wallet owner, I want to choose how much to send to a mobile money number and see the fee, the total and my balance afterwards while I type, so that I know the cost before I commit.
 
@@ -366,7 +366,7 @@ Parameters owned by other epics and used here without being redefined: `PIN_MAX_
 **Data:** Wallet (read), Transaction (draft), Saved recipient (read), Tier configuration (read).
 **Depends on:** WAL-03, ACC-07, OPS-11, GRP-12, GRP-13, SPD-01, SPD-09, SPD-10, SPD-15. WAL-10 is the next step of this flow and builds on this story.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed: limits by tier are the only restriction on who a person may pay; a Tier 1 person may pay any supported number within the Tier 1 limit set in OPS-11 (which may be zero), and the pause for a new recipient in WAL-10 is the protection against a wrong or coerced number. Closed: a group wallet never pays out directly, below a threshold or otherwise; every group payout is a request (GRP-13 floor). Open, needs Vanilla Pay: the meaning of the 100 000 000 Ar ceiling. Default used: per transaction, as `PAYOUT_MAX_PER_TX` (see WAL-06).
+**Open questions:** Closed: limits by tier are the only restriction on who a person may pay; a Tier 1 person may pay any supported number within the Tier 1 limit set in OPS-11 (which may be zero), and the pause for a new recipient in WAL-10 is the protection against a wrong or coerced number. Closed: a group wallet never pays out directly, below a threshold or otherwise; every group payout is a request (GRP-13 floor). Closed: the 100 000 000 Ar ceiling is per transaction, as `PAYOUT_MAX_PER_TX` (see WAL-06).
 
 ---
 
@@ -377,11 +377,11 @@ Parameters owned by other epics and used here without being redefined: `PIN_MAX_
 **Release:** MVP
 **Actor:** Individual, Permission holder
 **Permission needed:** none for own wallets; for a group wallet the requester holds Wallet: initiate spend and uses these screens when sending the request (SPD-01); each approver uses the PIN screen at approval (SPD-05)
-**Tags:** legal-gate, ledger, audit
+**Tags:** ledger, audit
 
 **Story:** As a person sending money out, I want one review screen, a PIN that repeats what I am approving, and a pause when the recipient is new, so that I do not send money to the wrong person or under pressure.
 
-**Conversation:** About 25 percent of mobile money owners in Sub-Saharan Africa have sent money to the wrong person and half never recovered it (design foundations section 1 item 1; CGAP Findex 2025 [V]). Hence: one review screen with everything (07 UI/UX 2.4 R-C2, CGAP principle 20), outcome-labelled button, the PIN screen repeats amount and recipient (R-C6, R-A2), PIN on every money-out (conventions section 2), and a pause for a first-time payee, a new device or a large amount (07 UI/UX 2.8 R-S3, 2.6 R-E4; Monzo "Take Five"). Whether Vanilla Pay returns the recipient's registered name is unknown (07 UI/UX 2.4 R-C3); until it is known, the screen shows the number and says the name is not available. Fraud here is social engineering around PIN and OTP (03 mobile money 6.7 item 4).
+**Conversation:** About 25 percent of mobile money owners in Sub-Saharan Africa have sent money to the wrong person and half never recovered it (design foundations section 1 item 1; CGAP Findex 2025 [V]). Hence: one review screen with everything (07 UI/UX 2.4 R-C2, CGAP principle 20), outcome-labelled button, the PIN screen repeats amount and recipient (R-C6, R-A2), PIN on every money-out (conventions section 2), and a pause for a first-time payee, a new device or a large amount (07 UI/UX 2.8 R-S3, 2.6 R-E4; Monzo "Take Five"). The provider is not assumed to return the recipient's registered name (07 UI/UX 2.4 R-C3), so the screen shows the number and says the name is not available. Fraud here is social engineering around PIN and OTP (03 mobile money 6.7 item 4).
 
 **Preconditions:** WAL-09 completed with valid values.
 **Trigger:** The person taps Next on the amount screen.
@@ -401,7 +401,7 @@ Parameters owned by other epics and used here without being redefined: `PIN_MAX_
 **Data:** Transaction (write), Ledger entry (write), Saved recipient (write on success), Audit entry (write), Device (read).
 **Depends on:** WAL-09, ACC-03, ACC-04, ACC-05, GRP-13, SPD-01, SPD-05, SPD-10, RUL-09.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed: a biometric never replaces the PIN on money-out (ACC-03 decided it). Closed: for group wallets the requester enters their PIN when sending the request and each approver when approving; nobody is asked again at payout. Closed: `UNDO_WINDOW_SECONDS` is 10 for personal-wallet payouts and 0 for group payouts (parameter table). Open, needs Vanilla Pay: whether it returns the recipient's registered name; until known the screen says "Name not available". Still TBD as configuration: `LARGE_AMOUNT_PAUSE`, set with OPS-11 and the fraud flags of OPS-10.
+**Open questions:** Closed: a biometric never replaces the PIN on money-out (ACC-03 decided it). Closed: for group wallets the requester enters their PIN when sending the request and each approver when approving; nobody is asked again at payout. Closed: `UNDO_WINDOW_SECONDS` is 10 for personal-wallet payouts and 0 for group payouts (parameter table). Closed: the screen says "Name not available" because the recipient's registered name is not looked up. Still TBD as configuration: `LARGE_AMOUNT_PAUSE`, set with OPS-11 and the fraud flags of OPS-10.
 
 ---
 
@@ -412,7 +412,7 @@ Parameters owned by other epics and used here without being redefined: `PIN_MAX_
 **Release:** MVP
 **Actor:** Individual, System
 **Permission needed:** none
-**Tags:** legal-gate, ledger, audit, sms
+**Tags:** ledger, audit, sms
 
 **Story:** When I have sent money out, I want to see honestly where it is and, if it fails, to get my money back with a clear message, so I never wonder where it went.
 
@@ -425,7 +425,7 @@ Parameters owned by other epics and used here without being redefined: `PIN_MAX_
 1. Confirmed. After an authentic, matched callback the in-transit entry moves to the external provider account in one atomic posting. Status Confirmed, receipt available (WAL-14), push `msg.wal.withdrawal_confirmed.push` ("Sent 50 000 Ar to Rado. Ref 7Q4K-82.") and the one money-out SMS `msg.wal.withdrawal_confirmed.sms` of this payout (direct at or above `ntf.money_out_sms_min_amount` or for a new payee, otherwise a fallback after an unread push; passes the XCT-12 lint; not sent again if WAL-08 already sent the SMS for a queued outcome and nothing changed). The fee is its own line.
 2. Business rule. "Sent" or "Successful" is never shown before the provider confirms. Until then the text is the Pending text of WAL-10 AC5 and a timeline Initiated, Pending, Confirmed.
 3. Failed. When the provider says it failed, the status is Failed and one atomic reversing entry returns the full total (amount plus fee) from in-transit to the wallet. The screen says "We could not send 50 000 Ar. Your money is back in Savings. Ref [ID]" with "Try again" and "Report this payment". Push `msg.wal.withdrawal_failed.push` and the one money-out SMS `msg.wal.withdrawal_failed.sms` for this outcome, under the same direct or fallback rule as AC1.
-4. Business rule, unclear. If a failure leaves it unclear whether the provider paid, the transaction is Needs attention, the money stays under "On its way out", OPS is alerted (after `NEEDS_ATTENTION_ESCALATE_HOURS` the case is escalated to a second operator, OPS-13), and the person sees "We are checking with Vanilla Pay. Your money is set aside. Ref [ID]". It is never refunded automatically without a provider final answer or an operator decision, so Gereo never pays twice.
+4. Business rule, unclear. If a failure leaves it unclear whether the provider paid, the transaction is Needs attention, the money stays under "On its way out", OPS is alerted (after `NEEDS_ATTENTION_ESCALATE_HOURS` the case is escalated to a second operator, OPS-13), and the person sees "We are checking with the mobile money operator. Your money is set aside. Ref [ID]". It is never refunded automatically without a provider final answer or an operator decision, so Gereo never pays twice.
 5. Idempotency. A duplicate callback never posts twice. A reversal can exist once per transaction, enforced by a uniqueness rule on the original entry.
 6. Timeout. Polling follows WAL-07 AC6 with the same parameters. If it stays unknown the status is Needs attention.
 7. Cancelled. A cancel during the undo window or while queued (WAL-08) ends as Cancelled with the amount and fee returned by a reversing entry; no fee is kept.
@@ -435,7 +435,7 @@ Parameters owned by other epics and used here without being redefined: `PIN_MAX_
 **Data:** Transaction (write status), Ledger entry (write), Notification (write), Audit entry (write), Raw provider event (write).
 **Depends on:** WAL-07, WAL-08, WAL-10, SPD-10, SPD-11, OPS-05, OPS-13. WAL-14 shows the receipt of its result.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed: the provider fee comes back to the wallet with the amount on any failed payment (AC3); whether Gereo recovers that fee from the provider is a finance matter that does not change what the person sees. Closed: a case may stay Needs attention `NEEDS_ATTENTION_ESCALATE_HOURS` (24 h proposed) before escalation. Open, needs Vanilla Pay: whether it offers recall or reversal and who bears its cost. Default used: Gereo promises no recall (AC8) and the person is pointed to the recipient and to their operator.
+**Open questions:** Closed: the provider fee comes back to the wallet with the amount on any failed payment (AC3); whether Gereo recovers that fee from the provider is a finance matter that does not change what the person sees. Closed: a case may stay Needs attention `NEEDS_ATTENTION_ESCALATE_HOURS` (24 h proposed) before escalation. Closed: Gereo promises no recall (AC8) and the person is pointed to the recipient and to their operator.
 
 ---
 
@@ -446,7 +446,7 @@ Parameters owned by other epics and used here without being redefined: `PIN_MAX_
 **Release:** MVP
 **Actor:** Individual, Permission holder
 **Permission needed:** none for own wallets; for wallets of one group, Wallet: initiate spend on the source and Wallet: deposit on the destination, authorised as in GRP-13 AC1
-**Tags:** legal-gate, ledger, audit
+**Tags:** ledger, audit
 
 **Story:** As a wallet owner, I want to move money between two wallets I own, instantly and at no cost, so that I can budget by moving money to where it is needed.
 
@@ -481,11 +481,11 @@ Parameters owned by other epics and used here without being redefined: `PIN_MAX_
 **Release:** MVP
 **Actor:** Individual, Member
 **Permission needed:** none for own wallets as the source; Wallet: initiate spend on a group source; Wallet: deposit on a group destination
-**Tags:** legal-gate, ledger, audit, sms
+**Tags:** ledger, audit, sms
 
 **Story:** As a person with money in Gereo, I want to send some of it to another Gereo user or to a group wallet I belong to, free and instantly, so that I do not pay mobile money fees for money that stays inside Gereo.
 
-**Conversation:** info.md says a wallet belongs to one entity "but allows transfers"; the brief asks for free ledger entries between owners and a rule for who may initiate. Decision: only the owner side of the source may initiate (push only); there is no pull and no "request money" in the MVP, so nobody can take money out of someone else's wallet. Money that leaves one owner for another is a scam target, so it gets the PIN and the first-recipient pause of WAL-10 (07 UI/UX 2.8 R-S3, R-S4). Gereo does not reverse such transfers on its own; mistakes go to support (WAL-14, WAL-18). Phone numbers are masked in group-visible ledgers (R-S4).
+**Conversation:** A wallet belongs to one entity but allows transfers; the brief asks for free ledger entries between owners and a rule for who may initiate. Decision: only the owner side of the source may initiate (push only); there is no pull and no "request money" in the MVP, so nobody can take money out of someone else's wallet. Money that leaves one owner for another is a scam target, so it gets the PIN and the first-recipient pause of WAL-10 (07 UI/UX 2.8 R-S3, R-S4). Gereo does not reverse such transfers on its own; mistakes go to support (WAL-14, WAL-18). Phone numbers are masked in group-visible ledgers (R-S4).
 
 **Preconditions:** The source wallet is open with Available above zero. The recipient is a Gereo user (by phone number) or a group wallet in which the sender holds Wallet: deposit.
 **Trigger:** The person taps "Send to a person or group" on a wallet.
@@ -652,11 +652,11 @@ This story is the wallet slice of XCT-04. Anything not listed below is defined b
 **Release:** MVP
 **Actor:** Gereo operator, System
 **Permission needed:** none for members, who only read the result. Operator permissions, from the separate operator catalogue (OPS-01): `handle tickets` or `resolve discrepancy` may propose a correction; only `approve ledger correction`, held by a different person, may approve it (OPS-05, OPS-06)
-**Tags:** legal-gate, ledger, audit
+**Tags:** ledger, audit
 
 **Story:** As a Gereo operator, I want to correct a mistake by adding a reversing entry with a reason, so that the history stays complete and the people who see it can trust it.
 
-**Conversation:** The ledger is append-only and a correction is a reversing entry (conventions section 2; info.md, "Principes comptables"). People can see an entry reversed with its reason, never silently changed (07 UI/UX 8.1 R-G5). Open Collective keeps immutable entries and adds correcting ones (08 competitor UX 6.3, Adopt). System reversals (a failed withdrawal returns the money) need no operator and are described in WAL-08 and WAL-11. The operator workflow (queue, proposal, second approver, expiry) is owned by OPS-05; this story fixes what the ledger accepts and what the person sees. Gereo cannot recall money that already left for the provider; recall happens with the provider and Gereo records only what it holds.
+**Conversation:** The ledger is append-only and a correction is a reversing entry (conventions section 2). People can see an entry reversed with its reason, never silently changed (07 UI/UX 8.1 R-G5). Open Collective keeps immutable entries and adds correcting ones (08 competitor UX 6.3, Adopt). System reversals (a failed withdrawal returns the money) need no operator and are described in WAL-08 and WAL-11. The operator workflow (queue, proposal, second approver, expiry) is owned by OPS-05; this story fixes what the ledger accepts and what the person sees. Gereo cannot recall money that already left for the provider; recall happens with the provider and Gereo records only what it holds.
 
 **Preconditions:** An entry exists. For an operator action, there is a support ticket (OPS) with a reason.
 **Trigger:** A system failure path (WAL-08, WAL-11), or an operator posts a reversal or correction from a ticket.
@@ -720,11 +720,11 @@ This story is the wallet slice of XCT-04. Anything not listed below is defined b
 **Release:** MVP
 **Actor:** Individual, Member, System
 **Permission needed:** Wallet: view balance
-**Tags:** legal-gate, ledger, audit
+**Tags:** ledger, audit
 
-**Story:** When I look at a wallet, I want a short line that tells me when the ledger was last checked against Vanilla Pay and whether it matched, so I know the numbers are real.
+**Story:** When I look at a wallet, I want a short line that tells me when the ledger was last checked against the provider's records and whether it matched, so I know the numbers are real.
 
-**Conversation:** A daily reconciliation with the provider and alerts on gaps are required (info.md, "Contrôles"; competitive analysis section 6 item 6). Nothing found documents a reconciliation visible to users (08 competitor UX 6.4, Open opportunities; design foundations section 1 item 4). The risk is alarm, so wording is factual and the next step clear. This story is the wallet-level line; CON-17 is the same line on the group ledger, and both read results owned by OPS, using the same component and the same wording to be harmonised.
+**Conversation:** A daily reconciliation with the provider and alerts on gaps are required (competitive analysis section 6 item 6). Nothing found documents a reconciliation visible to users (08 competitor UX 6.4, Open opportunities; design foundations section 1 item 4). The risk is alarm, so wording is factual and the next step clear. This story is the wallet-level line; CON-17 is the same line on the group ledger, and both read results owned by OPS, using the same component and the same wording to be harmonised.
 
 **Preconditions:** The reconciliation job has produced at least one result (OPS).
 **Trigger:** The person opens a wallet.
@@ -743,7 +743,7 @@ This story is the wallet slice of XCT-04. Anything not listed below is defined b
 **Data:** Reconciliation result (read, owned by OPS), Transaction (read), Audit entry (write).
 **Depends on:** WAL-07, WAL-11, OPS-04, OPS-05. CON-17 shows the same line on the group ledger and reads the same result.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed: the line is per wallet for items and global for the balance check (AC4 rule above). Closed: no tolerance; `RECON_TOLERANCE_AR` is 0 because amounts are whole ariary (OPS-04). Open, needs Vanilla Pay: whether it exposes a client-funds balance and a daily settlement report to compare against. Default used: only the item-level comparison by reference and amount runs, and the line never shows a provider balance.
+**Open questions:** Closed: the line is per wallet for items and global for the balance check (AC4 rule above). Closed: no tolerance; `RECON_TOLERANCE_AR` is 0 because amounts are whole ariary (OPS-04). Closed: only the item-level comparison by reference and amount runs, and the line never shows a provider balance.
 
 ---
 
@@ -794,10 +794,10 @@ Dependency direction. A story lists only what must exist before it. Where two st
 
 Closed questions say Closed with the decision; the full reasoning is in the Open questions line of the story named.
 
-1. **Legal gate.** Open, needs a lawyer. The legal basis for holding client funds is unconfirmed (Law 2016-056 Arts. 9, 16, 17, 25, 79 to 80, as read in 03 mobile money 5.1). Every story tagged legal-gate waits on counsel's opinion on the operating model (mandated agent, licensed partner or own licence) and on the status of a group wallet ledger. Default used: the stories are built and tested against a sandbox, and no real money is held before the opinion.
-2. **Labels.** Open, needs a lawyer. May wallets be called "Savings" and "Investment" given Art. 17 on advertising e-money as savings? Default used: "Goal" and "Long term" behind the same message keys (WAL-01).
-3. **Vanilla Pay facts.** Open, needs Vanilla Pay. API, sandbox, callback signing, retry policy, status endpoint, amount encoding (ariary or minor unit), recipient name lookup, recall and reversal rules, settlement timing, client-funds balance and settlement report, fees and the meaning of the 100 000 000 Ar ceiling (03 mobile money 3.2, 7.4). Defaults used are written in WAL-06, WAL-07, WAL-08, WAL-10, WAL-11 and WAL-20.
-4. **Limits and fees.** Partly closed. Closed: the deposit fee is added on top of the amount (WAL-06). Open as configuration: the values of tier limits (OPS-11), deposit and payout limits, and the 20 000 000 Ar operator wallet cap, which WAL-09 AC2 enforces per operator. Open, needs a lawyer or tax adviser: the status of the 0.5 percent mobile money tax line (`TAX_LINE`).
+1. Closed: there is no legal gate on holding client funds; the stories are built and tested against a sandbox before real money is held (decision D7).
+2. **Labels.** Closed: the types are called "Goal" and "Long term", behind the same message keys (WAL-01).
+3. Closed: the provider is not named and the adapter assumes nothing about its API, sandbox, callback signing, retry policy, status endpoint, amount encoding (ariary or minor unit), recipient name lookup, recall and reversal rules, settlement timing, client-funds balance and settlement report, fees or the meaning of the 100 000 000 Ar ceiling. The defaults are written in WAL-06, WAL-07, WAL-08, WAL-10, WAL-11 and WAL-20.
+4. **Limits and fees.** Partly closed. Closed: the deposit fee is added on top of the amount (WAL-06). Open as configuration: the values of tier limits (OPS-11), deposit and payout limits, and the 20 000 000 Ar operator wallet cap, which WAL-09 AC2 enforces per operator. Closed: the 0.5 percent mobile money tax line (`TAX_LINE`) exists and is off.
 5. **Safe to spend.** Closed: the definition of WAL-03 ships as written; field interviews may tune it later.
 6. **Income classification.** Closed: by decision D3 every deposit into a wallet is income for that wallet, whatever its source, so rules chain (CON-14 criterion 4).
 7. **Transfers between owners.** Closed (WAL-13): first wallet receives by default, no blocking in the MVP, transfers count as money-out for the sender, receiving needs only Tier 1 within the recipient's tier limit.

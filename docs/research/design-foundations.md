@@ -51,7 +51,7 @@ Rules for the process:
 Condensed from the 50-rule checklist in the raw report. P0 means true at launch.
 
 **Money and trust**
-- Money is integer ariary everywhere. Never floats. Confirm the Vanilla Pay amount encoding: ISO 4217 lists 2 minor units while CLDR says 0 [S].
+- Money is integer ariary everywhere. Never floats. Confirm the payment provider's amount encoding: ISO 4217 lists 2 minor units while CLDR says 0 [S].
 - Display `12 500 Ar`: space grouping, no decimals, no-wrap, identical in Malagasy, French and English. In the `mg` locale, "," means thousands, in French it means decimal, so space grouping avoids both.
 - Review screen on one screen. Fee and total update live while the amount is typed. Button labelled with the action and the amount.
 - Transaction states Initiated, Pending, Confirmed, Failed, Cancelled, plus a Needs-attention state. Pending says what happens next. Failed says whether money moved.
@@ -128,13 +128,9 @@ Best evidence for individual screens, all [V] unless stated: Stanbic Chama FAQ (
 
 ## 6. Open questions
 
-1. **Smartphone ownership.** The 9% figure could not be reproduced. One news item says 24%, GSMA gives 14.3% unique mobile internet penetration, DataReportal gives 20.4% internet use. Verify before it drives decisions.
-2. **Vanilla Pay licence perimeter.** [03 report](raw/03-madagascar-mobile-money.md) and the design process report both found that Vanilla Pay still seeks e-money status [S]. Get written confirmation before final copy.
-3. **Identity verification.** `info.md` says Vanilla Pay provides none yet lists "verify identity" in the start journey. Reconcile.
-4. **Channel.** Is WhatsApp or Messenger dominant for the target groups? No Madagascar data found.
-5. **Malagasy register and glossary**, and whether audio guidance belongs in the MVP or a later phase.
-6. **Figma plan.** Light and dark modes and language modes need a Professional plan (10 modes per collection); Dev Mode and Code Connect also need Professional or higher. The account plan tier is "student", so check.
-7. **Hands-on walkthrough** of Stanbic Chama, Chamasoft, Loomio, Open Collective and MVola on a real device is the cheapest way to turn [U] items into [V].
+1. **Channel.** Is WhatsApp or Messenger dominant for the target groups? No Madagascar data found.
+2. **Malagasy register and glossary**, and whether audio guidance belongs in the MVP or a later phase.
+3. **Hands-on walkthrough** of Stanbic Chama, Chamasoft, Loomio, Open Collective and MVola on a real device is the cheapest way to turn [U] items into [V].
 8. Evidence gaps from the raw reports: no Airtel Money UX source, no visual-style detail (the research could not view images), store ratings that disagree between storefronts, and Material 3 and Apple HIG pages that were not readable.
 
 ## 7. Next artifacts

@@ -1,6 +1,6 @@
 # 09 - From user stories to pages, navigation and flows: methods, evidence and a procedure for Gereo
 
-Research date: 2026-10-19. Scope: the established methods for going from requirements and user stories to a defined set of pages, navigation and flows, and which combination fits Gereo. This report does not repeat what [06-design-process.md](06-design-process.md) covers (Double Diamond, field research, sample sizes for usability tests, interpreter protocol, WCAG, performance budgets, 8-week plan). It builds on [../../product/00-conventions.md](../../product/00-conventions.md), [../../../info.md](../../../info.md), [../design-foundations.md](../design-foundations.md), [08-competitor-ux-comparison.md](08-competitor-ux-comparison.md) and [04-projects-voting-governance.md](04-projects-voting-governance.md).
+Research date: 2026-10-19. Scope: the established methods for going from requirements and user stories to a defined set of pages, navigation and flows, and which combination fits Gereo. This report does not repeat what [06-design-process.md](06-design-process.md) covers (Double Diamond, field research, sample sizes for usability tests, interpreter protocol, WCAG, performance budgets, 8-week plan). It builds on [../../product/00-conventions.md](../../product/00-conventions.md), [../design-foundations.md](../design-foundations.md), [08-competitor-ux-comparison.md](08-competitor-ux-comparison.md) and [04-projects-voting-governance.md](04-projects-voting-governance.md).
 
 ## 0. Labels, limits and the one-paragraph answer
 
@@ -72,7 +72,7 @@ Fit for Gereo: high for scope control and gap finding; low for page definition. 
 
 ### 2.2 Why it fits Gereo unusually well
 
-1. Gereo already has an explicit object model (info.md "Modele conceptuel", `00-conventions.md` section 8 lists 26 objects). OOUX's expensive first step, object discovery, is mostly done; the work is classifying and relating them.
+1. Gereo already has an explicit object model (the object model: `00-conventions.md` section 8 lists 26 objects). OOUX's expensive first step, object discovery, is mostly done; the work is classifying and relating them.
 2. Gereo has no roles. The CTA matrix traditionally has roles as columns; here the columns are **permissions** (`00-conventions.md` section 7) plus the System and Guest actors. The permission table is already roughly one half of a CTA matrix; building the full matrix will expose CTAs that have no permission (missing permissions) and permissions that no CTA uses (dead permissions) [U, but a direct consequence of the structure].
 3. Entities own things (a user or a group owns wallets, projects, events, documents). The nested object matrix is the right tool to see that "Project" appears under both "User" and "Group" and to decide whether that produces one page or two contexts (open decision D1 in section 10).
 4. Permissions inherit group, then project, then document. Nesting (Group contains Project contains Document) is exactly the relationship structure the matrix records, so the inheritance model and the navigation hierarchy can be checked against each other.
@@ -93,7 +93,7 @@ Fit for Gereo: high for scope control and gap finding; low for page definition. 
 
 - NN/g: task analysis studies how a single user performs tasks to reach a goal. A task is "any activity that is usually observable and has a start and an end point"; a goal is the outcome, not the task (filling a form is a task, registering is the goal). Method: gather information by observing and talking with users (contextual inquiry, critical-incident interviews, diaries), then analyse number, sequence, hierarchy and complexity. The usual deliverable is a **hierarchical task analysis** (HTA) with **plans** showing how steps vary (novice versus expert, conditional steps) [V][7].
 - HTA originates with Annett and Duncan (1967) for training process-control operators. It represents a goal, its subtasks and operations; **plans** state whether subtasks are sequential, parallel, conditional or iterative; decomposition stops when the source of a performance failure can be identified and a fix proposed [S][8]. A vendor guide gives a "P x C" stopping rule and 2 to 3 levels for consumer software; treat as a rule of thumb, not a standard [S][8].
-- Fit for Gereo: use a light HTA only for the six key journeys in info.md and for the money-moving tasks (contribute, spend, approve, vote). Its main value is the **plans** (conditions): "if quorum not reached", "if the permission holder is the only approver", "if the provider callback is late". Those conditions are what the story acceptance criteria already hint at.
+- Fit for Gereo: use a light HTA only for the six key journeys and for the money-moving tasks (contribute, spend, approve, vote). Its main value is the **plans** (conditions): "if quorum not reached", "if the permission holder is the only approver", "if the provider callback is late". Those conditions are what the story acceptance criteria already hint at.
 
 ### 3.2 User flows, task flows, wireflows
 
@@ -234,7 +234,7 @@ Design-system guidance (three independent systems, with some disagreement):
 5. **Disable only for state, never for permission**, and always with a visible reason and a focusable control or a plain-text equivalent: quorum closed, deadline passed, offline (money-out), KYC tier limit (with a path to verify, because the person can fix it), balance insufficient.
 6. **Four different "nothing here" states, never conflated:** (a) empty (no data yet), (b) forbidden (exists, you may not see it), (c) not found or expired, (d) not synced (offline). Each has its own wording and next step. Forbidden offers "Request access" to the people who can grant it (Drive, Notion pattern [V/S]). For objects whose existence is itself sensitive, the page is indistinguishable from not found (GitHub pattern [V][34]); decide per object type. Proposal: a private group or personal wallet does not confirm existence; a link carrying a valid invite or vote token always shows the guest view.
 7. **Inheritance is visible.** Every permission-gated panel can answer "why can I do this": "From the group" or "On this project". A per-member **Effective access** panel is the tested pattern (83.6% against 56.5% accuracy, n=36, from design-foundations [V]).
-8. **Decision D3 (affects IA): can a child narrow what a parent grants?** Drive and Notion do not let you give less than the parent (Drive) or apply the broadest grant (Notion) [V][30][32]. info.md only says permissions "can descend" from parent to child. If children can only widen, the effective-access panel and the nav stay simple; if they can narrow, forbidden states appear inside objects the person can otherwise see. Decide before the screen inventory is frozen.
+8. **Decision D3 (affects IA): can a child narrow what a parent grants?** Drive and Notion do not let you give less than the parent (Drive) or apply the broadest grant (Notion) [V][30][32]. The brief only says permissions "can descend" from parent to child. If children can only widen, the effective-access panel and the nav stay simple; if they can narrow, forbidden states appear inside objects the person can otherwise see. Decide before the screen inventory is frozen.
 9. **Money amounts are a separate permission (view balance, view history).** Decision D4: when a member lacks "view balance", does the wallet row show a masked amount or disappear? Recommendation: show the row with a masked amount and the reason, because disappearing wallets look like theft in a trust product [U].
 10. **Guest and limited views are first-class screens** with their own inventory rows (vote guest, invite preview, public receipt), no bottom bar, no dead-end links.
 11. **Permissions change live.** If access changes while the person has the app open or cached, the next server response shows "Your access changed" with the new reality; cached pages show last-synced time and never let a stale permission trigger a money action (money-out is online-only already).
@@ -328,7 +328,7 @@ Step 4. **CTA matrix with permissions as columns.** Extract verbs from stories a
 
 Step 5. **Attribute matrix** for page-worthy P0 objects only. Artifact: `04c-attribute-matrix.md`. Ranked attribute order becomes the on-screen priority order, and the "visible to" column feeds the permission variants.
 
-Step 6. **Task analysis and flows.** HTA with plans for the six info.md journeys plus spend, approve and vote; then a flow spec per story cluster with error branches. Artifact: `05-flows/{FLOW-ID}.md`. Done when every branch names its message key and says whether money moved.
+Step 6. **Task analysis and flows.** HTA with plans for the six key journeys plus spend, approve and vote; then a flow spec per story cluster with error branches. Artifact: `05-flows/{FLOW-ID}.md`. Done when every branch names its message key and says whether money moved.
 
 Step 7. **Derive the screen inventory** by applying the page triggers (5.2) to the object map and flows, then run the coverage check both ways (stories to screens, screens to stories). Artifact: `04d-screen-inventory.md` (replaces the "Pages" placeholder in each story). Done when no story lacks a screen and no screen lacks a story, and each screen has its state list and permission variants.
 
@@ -346,7 +346,7 @@ Rough effort for steps 0 to 8 [U]: 6 to 8 working days for the MVP slice, with t
 
 **Story map** (spreadsheet or markdown, one row per story; the visual map is generated from it):
 
-| Story ID | Journey step (1 to 8) | Backbone activity | Task (verb phrase) | Actor | Permission needed | Release lane (skeleton / MVP / later) | Priority (P0 to P2) | Outcome served | Tags (legal-gate, sms, offline, ledger, audit) | Depends on | System lane? (Y/N) |
+| Story ID | Journey step (1 to 8) | Backbone activity | Task (verb phrase) | Actor | Permission needed | Release lane (skeleton / MVP / later) | Priority (P0 to P2) | Outcome served | Tags (sms, offline, ledger, audit) | Depends on | System lane? (Y/N) |
 
 **Object map** (one row per object) plus nested matrix:
 
@@ -436,7 +436,7 @@ A story enters design when all of these are true (apply to the current slice onl
 8. Notifications: push, SMS or none, with message keys.
 9. Ledger and audit entries listed for anything that changes money or permissions.
 10. Objects read or written listed with their glossary names.
-11. Dependencies by story ID, and no unresolved `legal-gate` that blocks the story's wording.
+11. Dependencies by story ID.
 12. Evidence cited in the Conversation, and open questions listed with an owner.
 
 ### 10.6 Definition of Ready for screens (build-ready)

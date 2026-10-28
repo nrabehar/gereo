@@ -26,8 +26,7 @@ Structural checks run by script over the first 195 stories (OPS-14 was added lat
 6. **Cross-epic references.** SPD and CON were written before the other epics existed and name capabilities instead of story IDs in their cross-epic lists. Replace them with real IDs.
 7. **Shared parameters.** `sms_fallback_delay` is defined in SPD; NTF must be the single source for the push-then-SMS window.
 8. **Ledger model.** SPD-10 and WAL agree on the in-transit posting (wallet to in-transit, then to the external account on Confirmed, reversing entry on failure). Confirmed consistent by reading SPD-10, SPD-11, WAL-09 to WAL-11.
-9. **Slice 0 and `legal-gate`.** Slice 0 includes stories that carry `legal-gate` (WAL-06, WAL-07, SPD-10). They are built against a simulated payment adapter in slice 0; the tag blocks only the real release.
-10. **Size of P0.** 120 P0 stories is too large for one release (see `03-story-map.md` section 7).
+9. **Size of P0.** 120 P0 stories is too large for one release (see `03-story-map.md` section 7).
 
 ## 4. To do
 

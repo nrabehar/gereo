@@ -2,7 +2,7 @@
 
 This file fixes the vocabulary, actors, story format and scope rules that every story file in `docs/product/stories/` follows. Read it before writing or reviewing a story.
 
-Sources: [info.md](../../info.md), [competitive-analysis.md](../research/competitive-analysis.md), [design-foundations.md](../research/design-foundations.md) and the raw reports in `docs/research/raw/`.
+Sources: [competitive-analysis.md](../research/competitive-analysis.md), [design-foundations.md](../research/design-foundations.md) and the raw reports in `docs/research/raw/`.
 
 ## 1. Order of work
 
@@ -22,7 +22,7 @@ Pages are never invented first. A page exists because one or more stories need i
 - Identity verification (KYC) is done by Gereo. Money-in and money-out need the tier shown in the ACC-07 table, with limits from OPS-11. Browsing, joining and voting need only phone and OTP.
 - A guest has phone and OTP only: no tier, no account. Tier 1 means an account with phone, OTP and PIN.
 - Stories and code say "tier". The UI says Level / Niveau (ACC-07 criterion 10). Stories never write "Level".
-- Payments go through Vanilla Pay behind a payment adapter so another rail can replace it. The legal basis for holding client funds is unconfirmed; stories that move or hold money carry the tag `legal-gate`.
+- Payments go through a payment adapter so the rail can be replaced.
 - The product must work on low-end Android phones and slow connections. Anything critical has an SMS path. Money-out is online only. Everything else the person needs to read works offline from cache with a "last synced" time.
 - Languages: Malagasy, French, English from the start. Stories never hard-code text; they refer to message keys. Every key in the string catalogue needs Malagasy, French and English text, including `ledger.rounding_line`.
 - The database is read-only for assistants working on this repo. Stories describe behaviour; they do not run migrations.
@@ -95,7 +95,7 @@ Each story is a card, a conversation and a confirmation (3 Cs), small enough to 
 **Release:** MVP | Later
 **Actor:** from section 3
 **Permission needed:** none | <permission name from section 7>
-**Tags:** legal-gate, sms, offline, ledger, audit (only the ones that apply)
+**Tags:** sms, offline, ledger, audit (only the ones that apply)
 
 **Story:** As a ..., I want ..., so that ...
 (or) When ..., I want ..., so I can ...
@@ -265,7 +265,7 @@ Table A, system constants, in capitals, owned here with one citing owner story e
 
 | Name | Owner | Value or note |
 | --- | --- | --- |
-| `RECORD_RETENTION_YEARS` | WAL | Identity images, transaction records, ledger, firing history, attachments and expense files. Lawyer text: see ACC open question 1 |
+| `RECORD_RETENTION_YEARS` | WAL | Identity images, transaction records, ledger, firing history, attachments and expense files. See ACC open question 1 |
 | `AUDIT_RETENTION_YEARS` | OPS | Audit log, consent evidence, decision log. Must be at least `RECORD_RETENTION_YEARS` |
 | `NEEDS_ATTENTION_ESCALATE_HOURS` | WAL | Owner story holds the value |
 | `DISCREPANCY_ESCALATE_HOURS` | OPS | Owner story holds the value |
@@ -305,7 +305,7 @@ Table B, group settings, lowercase `<epic>.<name>` (written without prefix in st
 | `grp.plan_change_requires_vote` | CON gate section | GRP-12 | |
 | `change_apply_window_days` | CON gate section | GRP-12 | 7; also applies to freeze-lift votes |
 
-Retention: two names only. `grp.retention_period` is retired and GRP cites `AUDIT_RETENTION_YEARS`. Attachments on expense requests (SPD-03) and ANN attachments use `RECORD_RETENTION_YEARS`; audit data (CON-18, audit log) uses `AUDIT_RETENTION_YEARS`. Retention after a project or group closes stays an open lawyer question. The legal-gate item names both values.
+Retention: two names only. `grp.retention_period` is retired and GRP cites `AUDIT_RETENTION_YEARS`. Attachments on expense requests (SPD-03) and ANN attachments use `RECORD_RETENTION_YEARS`; audit data (CON-18, audit log) uses `AUDIT_RETENTION_YEARS`. Retention after a project or group closes follows ACC open question 1.
 
 Extra parameters: the floor-failed money vote extension window is 48 hours (reuse VOT-03 criterion 6); a voter counts toward the D4 floor only after a minimum tenure owned by VOT. `vote_late_grace_hours` does not exist.
 
@@ -405,4 +405,4 @@ Story index and story map: WAL-17 is marked "wallet slice of XCT-04".
 
 ## 14. Founder decisions
 
-Founder decisions D1 to D6 are in [05-decisions.md](05-decisions.md) and override any story. In short: D1 no self-approval; D2 wallet-level permissions (names in section 7); D3 every deposit is income, so rules chain; D4 a passed vote authorises spending, with at least two distinct voters other than the requester; D5 the split leftover goes to Gereo as a visible Rounding line; D6 XCT-05 owns the device queue. When a story contradicts a decision, the story is wrong.
+Founder decisions D1 to D7 are in [05-decisions.md](05-decisions.md) and override any story. In short: D1 no self-approval; D2 wallet-level permissions (names in section 7); D3 every deposit is income, so rules chain; D4 a passed vote authorises spending, with at least two distinct voters other than the requester; D5 the split leftover goes to Gereo as a visible Rounding line; D6 XCT-05 owns the device queue; D7 there is no legal gate, Gereo holds the money, no payment provider is named and verifications are manual. When a story contradicts a decision, the story is wrong.

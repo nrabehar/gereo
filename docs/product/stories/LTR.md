@@ -3,7 +3,7 @@
 > **NOT MVP. NONE OF THIS IS IN THE MVP.**
 > These are stubs, not committed scope. The MVP is groups, wallets, contributions, ledger, votes, projects, events and in-group announcements. Every module below is later because it either (a) depends on a stable wallet, ledger and group base, (b) carries a legal question that is not answered, or (c) adds moderation and scam load that a small team cannot carry yet. Stories here are short on purpose: 3 to 5 job stories per epic, 3 to 4 acceptance criteria each. They must be expanded to the full format in `00-conventions.md` section 6 only after the gate of their epic is cleared. Nothing here is a promise to build.
 
-Sources: [00-conventions.md](../00-conventions.md), [info.md](../../../info.md), [raw/05-marketplace-social-lending-donations.md](../../research/raw/05-marketplace-social-lending-donations.md) (called "raw/05" below), [competitive-analysis.md](../../research/competitive-analysis.md) section 3.5.
+Sources: [00-conventions.md](../00-conventions.md), [raw/05-marketplace-social-lending-donations.md](../../research/raw/05-marketplace-social-lending-donations.md) (called "raw/05" below), [competitive-analysis.md](../../research/competitive-analysis.md) section 3.5.
 
 Release for every story below: **Later**. Priority is left open until the gate is cleared. Phasing follows raw/05 section 5.2.
 
@@ -11,11 +11,11 @@ Release for every story below: **Later**. Priority is left open until the gate i
 
 | Code | Epic | Phase | Gate to clear first |
 | --- | --- | --- | --- |
-| MKT | In-group marketplace with wallet escrow | 2 | Stable WAL, CON, GRP in production; escrow legal basis (`legal-gate`) |
+| MKT | In-group marketplace with wallet escrow | 2 | Stable WAL, CON, GRP in production |
 | COM | Member-only communities | 2 | Moderation tooling and report-and-hide proven in ANN |
 | SOC | Public social network and discoverable campaigns | 3 | Moderation, rate limits, verification badges, anti-solicitation rules; public fundraising legal question |
-| DON | Public donations | 3 | Organiser verification, multi-signer withdrawal, public reporting; legal opinion (`legal-gate`) |
-| LND | Lending | 4 | Written lawyer opinion (`legal-gate`); stable CON, VOT, SPD |
+| DON | Public donations | 3 | Organiser verification, multi-signer withdrawal, public reporting |
+| LND | Lending | 4 | Stable CON, VOT, SPD |
 | MRK | Marketing | Last, possibly never | Strategic decision to build at all |
 
 Order note: DON is listed before LND because it is phase 3 in raw/05. MRK is last on purpose.
@@ -24,11 +24,11 @@ Order note: DON is listed before LND because it is phase 3 in raw/05. MRK is las
 
 ## MKT: In-group marketplace with wallet escrow
 
-**Phase:** 2. **Tags:** legal-gate, ledger, audit.
+**Phase:** 2. **Tags:** ledger, audit.
 
-**Gate:** (1) WAL, CON and GRP are stable in production. (2) Legal basis for holding a buyer's money until delivery is confirmed. The legal basis for holding client funds is already unconfirmed for the MVP (conventions section 2); escrow is a further use of it. Not researched in raw/05 (gap, lawyer required).
+**Gate:** (1) WAL, CON and GRP are stable in production. (2) A rule for holding a buyer's money until delivery is confirmed. Not researched in raw/05 (gap).
 
-**Permissions used (info.md):** Marketplace: publish an offer, edit an offer, manage orders, view sales. Wallet: view balance, initiate spend, approve spend. Group: enable module.
+**Permissions used:** Marketplace: publish an offer, edit an offer, manage orders, view sales. Wallet: view balance, initiate spend, approve spend. Group: enable module.
 
 **Scope in one line:** members sell to members, or the group sells to members, inside one group. Payment is held in escrow in the wallet and released when the buyer confirms. No logistics, no search at scale, no seller ads, no category tree (raw/05 section 1.9).
 
@@ -61,10 +61,9 @@ MKT-04 When I sell regularly, I want to see my orders and my sales, so I can kno
 **Evidence:** raw/05 section 1.5 (Madagascar scam pattern, escrow wedge), 1.9 (takeaways), 5.2 (phasing). competitive-analysis 3.5.
 
 **Open questions**
-- Is holding funds in escrow covered by the arrangement with Vanilla Pay, or does it need its own legal basis?
 - Order value cap and confirm window length: not decided; no evidence on right values.
 - Who is the first arbiter when the seller is the group itself?
-- Fee on escrowed payments: info.md lists a platform commission as a revenue idea, undecided. Avoid paid visibility at first (raw/05 section 1.3, Jiji complaint pattern).
+- Fee on escrowed payments: A platform commission is a revenue idea, undecided. Avoid paid visibility at first (raw/05 section 1.3, Jiji complaint pattern).
 
 ---
 
@@ -74,7 +73,7 @@ MKT-04 When I sell regularly, I want to see my orders and my sales, so I can kno
 
 **Gate:** report-and-hide and basic moderation exist and have been used in ANN. Communities are closed: no public discovery, no follows from outsiders.
 
-**Permissions used (info.md):** Publication: publish, announce to group, moderate. Group: view group, enable module, invite member.
+**Permissions used:** Publication: publish, announce to group, moderate. Group: view group, enable module, invite member.
 
 **Scope in one line:** a space with a feed, reactions and comments for members only, on top of existing group membership. Extends ANN (announcements) from admin-to-members to member-to-member.
 
@@ -113,11 +112,11 @@ COM-04 When a post offers a loan, an investment or a way to "double money", I wa
 
 ## SOC: Public social network and discoverable campaigns
 
-**Phase:** 3. **Tags:** legal-gate (for discoverable campaigns), audit.
+**Phase:** 3. **Tags:** audit.
 
 **Gate:** (1) Moderation tooling, rate limits, verification badges and anti-solicitation rules are in place (raw/05 section 2.7). (2) For discoverable campaigns: the DON gate is cleared. Raw/05 shows open feeds attract scams and that even a large platform with hundreds of contractors fails at reactive-only moderation (section 2.5, 2.7).
 
-**Permissions used (info.md):** Publication: publish, moderate. Group: view group. Marketplace and Prêt permissions are not used here.
+**Permissions used:** Publication: publish, moderate. Group: view group. Marketplace and Prêt permissions are not used here.
 
 **Scope in one line:** public profiles and communities with follows, reactions and moderation; a public page where verified campaigns can be found. No creator payouts.
 
@@ -156,11 +155,11 @@ SOC-04 When I come across a public campaign, I want to see whether it is verifie
 
 ## DON: Public donations
 
-**Phase:** 3. **Tags:** legal-gate, ledger, audit.
+**Phase:** 3. **Tags:** ledger, audit.
 
-**Gate:** (1) Organiser identity verification, multi-signer withdrawal and a mandatory use-of-funds report exist (raw/05 section 4.6). (2) Legal opinion: raw/05 found no Malagasy text on public appeals or crowdfunding. That is a negative finding, not clearance. Rules on holding funds for third parties (BCM, CSBF) were not researched. Lawyer required.
+**Gate:** (1) Organiser identity verification, multi-signer withdrawal and a mandatory use-of-funds report exist (raw/05 section 4.6). (2) raw/05 found no Malagasy text on public appeals or crowdfunding, and rules on holding funds for third parties were not researched.
 
-**Permissions used (info.md):** Wallet: view balance, view history, deposit, initiate spend, approve spend. Group: view group. Publication: publish. A dedicated donation permission set does not exist in info.md and would have to be added.
+**Permissions used:** Wallet: view balance, view history, deposit, initiate spend, approve spend. Group: view group. Publication: publish. A dedicated donation permission set does not exist and would have to be added.
 
 **Scope in one line:** the in-group "special contribution campaign" (ANN-04 to ANN-08, MVP) opened to people outside the group. Donations are not loans and have no interest.
 
@@ -191,7 +190,6 @@ DON-04 When a campaign looks fake, I want to flag it, so I can help stop abuse.
 **Evidence:** raw/05 section 4.3 (M-Changa multi-treasurer and refunds, the benchmark), 4.2 (GoFundMe default tip and unauthorised pages), 4.5 (Que Choisir advice), 4.6.
 
 **Open questions**
-- Is a public appeal for money regulated in Madagascar? Unknown; lawyer required.
 - Does an organiser need an incorporated body or an authorisation? Not found in raw/05.
 - Who decides refund versus keep when a goal is not reached, and in what time frame?
 - Fee level: undecided, no evidence collected for Madagascar.
@@ -200,9 +198,9 @@ DON-04 When a campaign looks fake, I want to flag it, so I can help stop abuse.
 
 ## LND: Lending
 
-**Phase:** 4. **Tags:** legal-gate, ledger, audit.
+**Phase:** 4. **Tags:** ledger, audit.
 
-**Gate: legal, hard.** Do not build, pilot or test with real money before a written opinion from a Malagasy banking and microfinance lawyer, ideally with CSBF and BCM engagement (raw/05 section 3.9).
+**Gate: hard.** Lending is the riskiest module and is built last (raw/05 section 3.9).
 
 What raw/05 reports, with the caveat that **the legal texts themselves were not read**; it relies on a fact-check article (Studio Sifaka) and links to Law 2017-026:
 - Unlicensed habitual lending may be an offence under Law 2020-011 arts. 228-229.
@@ -212,7 +210,7 @@ What raw/05 reports, with the caveat that **the legal texts themselves were not 
 
 No penalty figure or legal conclusion is restated here as established fact.
 
-**Permissions used (info.md):** Prêt: request, approve, repay, view. Vote: view, vote, create, close. Wallet: initiate spend, approve spend. Group: view group.
+**Permissions used:** Prêt: request, approve, repay, view. Vote: view, vote, create, close. Wallet: initiate spend, approve spend. Group: view group.
 
 **Safeguards (from raw/05 section 3.10), non-negotiable for any version:**
 - Group funds only. Never lend platform funds.
@@ -255,11 +253,10 @@ LND-05 When someone repays, I want it to show on the group ledger at once, so I 
 **Evidence:** raw/05 sections 3.2 (Tala due-date result), 3.6 (Kiva auto-lend complaints), 3.8 (Andhra Pradesh, chama embezzlement), 3.9 (Kenya debt-shaming, Nigeria court freeze, Madagascar law), 3.10. competitive-analysis 3.5.
 
 **Open questions**
-- Does the lawyer treat a group lending its own members' money as outside professional credit? Unknown. Does a platform-run schedule change that answer?
 - Are late fees allowed at all? If any fee counts as interest in law, the no-interest safeguard needs a precise wording.
 - Value of the exposure cap and the concurrent loans cap.
-- Is info.md's "interest on loans" revenue line compatible with the safeguards? As written it is not; it must be dropped or re-opened with the lawyer.
-- Info.md also says a user or group can request a loan from the platform. That conflicts with "group funds only" and is out of scope here.
+- Is an "interest on loans" revenue line compatible with the safeguards? As written it is not; it must be dropped.
+- The brief also says a user or group can request a loan from the platform. That conflicts with "group funds only" and is out of scope here.
 
 ---
 
@@ -267,11 +264,11 @@ LND-05 When someone repays, I want it to show on the group ledger at once, so I 
 
 **Phase:** Last, only after everything above, and possibly never. **Tags:** audit.
 
-> **Warning: pr.social is NOT a model for this module.** info.md cites pr.social as inspiration for "small add-on features that can also earn money for others". Raw/05 section 2.4 verified that pr.social is a paid micro-task platform: advertisers pay for follows, likes and comments, and performers do them from their own accounts and are paid in crypto (USDT or TRX). It sells inauthentic engagement, names no company, and has 2.3 out of 5 on Trustpilot from 27 reviews, with 67 percent 1-star, mostly about withdrawals pending or rejected and tickets unanswered. It is not a marketing toolkit. Do not copy its model. Trustpilot is not representative, but nothing found supports reuse.
+> **Warning: pr.social is NOT a model for this module.** The brief cited pr.social as inspiration for "small add-on features that can also earn money for others". Raw/05 section 2.4 verified that pr.social is a paid micro-task platform: advertisers pay for follows, likes and comments, and performers do them from their own accounts and are paid in crypto (USDT or TRX). It sells inauthentic engagement, names no company, and has 2.3 out of 5 on Trustpilot from 27 reviews, with 67 percent 1-star, mostly about withdrawals pending or rejected and tickets unanswered. It is not a marketing toolkit. Do not copy its model. Trustpilot is not representative, but nothing found supports reuse.
 
 **Gate:** (1) COM and SOC exist with working moderation. (2) A product decision that marketing is worth its scam adjacency (raw/05 section 2.7: highest risk, lowest relevance to the core wallet). (3) A real Madagascar quote for any SMS-based promotion (raw/05 section 2.6: SMS pricing sources conflict).
 
-**Permissions used (info.md):** Marketing: create a campaign, spend a marketing budget, view results. Publication: publish. Wallet: initiate spend.
+**Permissions used:** Marketing: create a campaign, spend a marketing budget, view results. Publication: publish. Wallet: initiate spend.
 
 **Scope in one line:** at most, a paid highlight or pin inside a Gereo community with a ledger receipt, and audience numbers about real members reached. No external ad networks, no task-for-reward, no creator payouts.
 
@@ -297,7 +294,7 @@ MRK-03 When I give a group member a spending limit for promotion, I want it enfo
 **Evidence:** raw/05 sections 2.4 (pr.social), 2.5 (Meta boosts: vanity engagement), 2.7, 5.2 (last or possibly never). competitive-analysis 3.5.
 
 **Open questions**
-- Is there real demand? The only source is info.md's problem 4 (marketing "blind"); no field interview evidence yet.
+- Is there real demand? The only source is the founder's problem statement (marketing "blind"); no field interview evidence yet.
 - Which of the three Madagascar mobile money flows can pay for promotions without extra friction? Not researched.
 - Should this module exist at all?
 
@@ -305,7 +302,6 @@ MRK-03 When I give a group member a spending limit for promotion, I want it enfo
 
 ## Cross-epic open questions
 
-- Legal basis for holding client funds is unconfirmed for the MVP itself; all `legal-gate` epics inherit that question.
-- Malagasy texts on e-money custody, AML for non-bank wallets and public fundraising were not read (raw/05 section 5.4); lawyer review required.
+- Malagasy texts on e-money custody, AML for non-bank wallets and public fundraising were not read (raw/05 section 5.4).
 - Reach: about four in five Malagasy people were offline in the DataReportal figure cited in raw/05, so every later module needs an SMS path and low-data design (XCT-04, XCT-07).
 - Later actors named in conventions section 3 (Seller, Buyer, Borrower, Lender, Donor) need definitions before these stubs are expanded.

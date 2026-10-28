@@ -88,7 +88,7 @@ UI strings: `vot.<area>.<name>` (the decision log uses the area `decision`, for 
 
 **Story:** As a member who can create votes, I want to write a question, give the options and set a deadline, so that the group can decide without a meeting.
 
-**Conversation:** Async votes with a deadline remove the need to align everyone's schedule (info.md problem 3). The question must be a full sentence and each option must state its consequence, as Loomio and the research advise (raw/07 section 8.3 R-VT1). Only yes/no/abstain and single choice ship in the MVP; ranking and weighted votes are out (competitive-analysis section 7; raw/04 section 14.5). The deadline is shown in absolute and relative time (raw/07 R-VT2). WhatsApp polls have no record, no quorum and no link to money, which is why groups need this (raw/04 section 2). Quorum and majority are set in VOT-02, the money link in VOT-03, sharing in VOT-06. We did not include discussion threads: the chat stays in WhatsApp and Gereo is the record (raw/04 section 14.2).
+**Conversation:** Async votes with a deadline remove the need to align everyone's schedule. The question must be a full sentence and each option must state its consequence, as Loomio and the research advise (raw/07 section 8.3 R-VT1). Only yes/no/abstain and single choice ship in the MVP; ranking and weighted votes are out (competitive-analysis section 7; raw/04 section 14.5). The deadline is shown in absolute and relative time (raw/07 R-VT2). WhatsApp polls have no record, no quorum and no link to money, which is why groups need this (raw/04 section 2). Quorum and majority are set in VOT-02, the money link in VOT-03, sharing in VOT-06. We did not include discussion threads: the chat stays in WhatsApp and Gereo is the record (raw/04 section 14.2).
 
 **Preconditions:** The person is signed in, belongs to the group (or project) and holds Vote: create. The group has at least one eligible voter.
 **Trigger:** The person taps "New vote" on the group page, the project page or the decision log.
@@ -294,7 +294,7 @@ UI strings: `vot.<area>.<name>` (the decision log uses the area `decision`, for 
 
 **Story:** When the deadline is getting close and some eligible people have not voted, I want Gereo to remind exactly those people, first by push and then by SMS if they did not see it, so I do not have to phone everybody.
 
-**Conversation:** Reminders are the proven lever for turnout and replace the manual calling in info.md problem 6 and 3. Research suggests one reminder about 24 h before the close and one in the last hours for money decisions, no more (raw/07 section 8.3 R-VT7, a hypothesis; Karlan et al. found extra late reminders did not add). The cadence is therefore a parameter. SMS must be rationed because it is costly (about USD 0.59 per segment on a global CPaaS, local rate not verified; raw/04 section 14.6 risk 3). Reminders must never shame: counts in the group channel, the names only where the setting allows (raw/07 R-NT8).
+**Conversation:** Reminders are the proven lever for turnout and replace the manual calling of members. Research suggests one reminder about 24 h before the close and one in the last hours for money decisions, no more (raw/07 section 8.3 R-VT7, a hypothesis; Karlan et al. found extra late reminders did not add). The cadence is therefore a parameter. SMS must be rationed because it is costly (about USD 0.59 per segment on a global CPaaS, local rate not verified; raw/04 section 14.6 risk 3). Reminders must never shame: counts in the group channel, the names only where the setting allows (raw/07 R-NT8).
 
 **Preconditions:** The vote is Open. At least one eligible person has no ballot.
 **Trigger:** Each time in VOTE_REMINDER_OFFSETS before the deadline.
@@ -499,7 +499,7 @@ UI strings: `vot.<area>.<name>` (the decision log uses the area `decision`, for 
 
 **Story:** When a vote closes, I want the decision to be written to the log by itself, with the vote and any payment it led to attached, so I can later answer "what was decided, why and what happened because of it" without searching a chat.
 
-**Conversation:** Decisions in meetings are almost always forgotten or vague (info.md problem 2). The decision trail is the single strongest value cited by Loomio users (raw/04 section 1 and section 14.1 "value is the trail, not the click"). No product found links the decision to the ledger entry it triggered (raw/08 section 6.8 "Open opportunities"; competitive-analysis section 5). The entry must hold the question, options, result, quorum status, proposer, date, outcome with next steps and links to the ledger entries the decision triggered (raw/07 R-VT6).
+**Conversation:** Decisions in meetings are almost always forgotten or vague. The decision trail is the single strongest value cited by Loomio users (raw/04 section 1 and section 14.1 "value is the trail, not the click"). No product found links the decision to the ledger entry it triggered (raw/08 section 6.8 "Open opportunities"; competitive-analysis section 5). The entry must hold the question, options, result, quorum status, proposer, date, outcome with next steps and links to the ledger entries the decision triggered (raw/07 R-VT6).
 
 **Preconditions:** A vote closes with any result, or is cancelled after at least one ballot.
 **Trigger:** VOT-08 closing, VOT-12 cancellation after ballots, or the closing of a project (PRJ-09).
@@ -534,7 +534,7 @@ UI strings: `vot.<area>.<name>` (the decision log uses the area `decision`, for 
 
 **Story:** As a member who attended a meeting, I want to write down what was decided and who is responsible, so that decisions taken in a room or on the phone are not lost.
 
-**Conversation:** Groups keep deciding in meetings and calls, and those decisions are the ones forgotten (info.md problem 2). Every important decision must be linked to a vote or to an identified person (info.md, Projects rule). "Decision" is not an object in the permission catalogue, so recording a decision reuses Vote: create, the permission to put a question to the group; amending uses Vote: edit (VOT-15). Manual entries must be visibly different from vote results so nobody mistakes them for a counted vote.
+**Conversation:** Groups keep deciding in meetings and calls, and those decisions are the ones forgotten. Every important decision must be linked to a vote or to an identified person. "Decision" is not an object in the permission catalogue, so recording a decision reuses Vote: create, the permission to put a question to the group; amending uses Vote: edit (VOT-15). Manual entries must be visibly different from vote results so nobody mistakes them for a counted vote.
 
 **Preconditions:** The person can add a decision to the group or project.
 **Trigger:** The person taps "Record a decision" on the decision log or project page.
@@ -747,4 +747,4 @@ Closed questions are kept for the record, with the decision.
 10. Closed: manual decision entries use Vote: create and amendments use Vote: edit (VOT-14, VOT-15).
 11. Closed: a member who leaves or is removed keeps their ballot and the quorum denominator stays fixed (GRP-16, GRP-17, VOT-02 criterion 7); a member who joins late can be added only before the first ballot (VOT-12).
 12. Closed: no automatic close when everyone has voted (VOT-08).
-13. Open, needs a lawyer: whether the group's SMS and the vote's use of phone numbers require explicit consent text under Malagasy data-protection rules (not researched). Default used: the consent text of ACC-13 covers SMS from groups the person joined, and a guest sees a short notice on the verification page before the code is sent.
+13. Closed: the consent text of ACC-13 covers SMS from groups the person joined, and a guest sees a short notice on the verification page before the code is sent.

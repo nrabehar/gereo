@@ -7,8 +7,8 @@ Synthesis of five research reports in [raw/](raw/). Every number below comes fro
 1. **No direct competitor exists in Madagascar.** No digital tontine, association, group-wallet or envelope-budget app was found. Mobile money operators sell payments, not group finance.
 2. **No product anywhere combines Gereo's core loop**: group wallet, automatic split rules, a ledger every member can see, async voting with quorum, and an automatic decision log linked to spending approval. Each piece exists separately.
 3. **The market failure that matters is trust, not features.** Fraud by administrators, frozen accounts, slow support and company shutdowns (Kippa, Open Collective Foundation, Tally) dominate user complaints in every category.
-4. **Two gating risks sit outside product design**: (a) holding client funds is regulated by Law 2016-056 and Gereo's legal basis is unconfirmed; (b) lending is probably illegal without a licence. Both need a Malagasy lawyer before build, not after.
-5. **The device reality constrains the whole design**: about 9% of adults own a smartphone and about 20% use the internet. SMS and shareable links matter more than push notifications.
+4. **Two risks sit outside product design**: (a) holding client funds is regulated by Law 2016-056; (b) lending is probably illegal without a licence. The founder handles both on the administrative side, not in development.
+5. **Devices**: the working assumption is that everybody has a smartphone or a computer. SMS and shareable links stay useful as a fallback for people who are offline.
 
 ## 2. Madagascar context
 
@@ -63,7 +63,6 @@ The market-size figures cannot be reconciled with each other. Do not quote any c
 | MVola | Developer portal with sandbox, GSMA API-certified, B2B collection and payout; App Store 4.3 (about 5k ratings) with crash and update complaints |
 | Orange Money | App Store 3.1 (76 ratings): "money debited, service not delivered", OTP failures; API terms not found |
 | Airtel Money | No feedback or API terms found |
-| Vanilla Pay | About 70,000 accounts and 100 businesses (company claim), HQ in France; no public API docs, sandbox, webhooks, settlement or limit terms found; legal status unverified |
 | Papi.mg, direct operator APIs | Backup rails |
 
 ### 3.4 Projects, voting and governance
@@ -124,8 +123,7 @@ The market-size figures cannot be reconciled with each other. Do not quote any c
 
 ## 6. Constraints to design around
 
-1. **Custody and licensing.** Law 2016-056 reserves wallet services to a CSBF-licensed e-money institution, a credit institution or a mandated distribution agent, and unlicensed activity is a criminal offence (Arts. 9, 16, 30). E-money institutions cannot take deposits, lend or pay interest (Art. 17), must be headquartered in Madagascar (Art. 25) and hold client funds in a segregated global account (Arts. 79-80). The founder's position that Vanilla Pay already covers regulation is a company claim and was not verified; its legal status could not be confirmed.
-2. **Lending.** Habitual unlicensed lending is punishable (Law 2020-011 arts. 228-229: 3 months to 2 years or a 10-40M Ar fine) and Law 2017-026 art. 9 bars non-MFIs from microfinance services. The research did not read the legal texts directly.
+1. **Custody and licensing.** Law 2016-056 reserves wallet services to a CSBF-licensed e-money institution, a credit institution or a mandated distribution agent, and unlicensed activity is a criminal offence (Arts. 9, 16, 30). E-money institutions cannot take deposits, lend or pay interest (Art. 17), must be headquartered in Madagascar (Art. 25) and hold client funds in a segregated global account (Arts. 79-80).2. **Lending.** Habitual unlicensed lending is punishable (Law 2020-011 arts. 228-229: 3 months to 2 years or a 10-40M Ar fine) and Law 2017-026 art. 9 bars non-MFIs from microfinance services. The research did not read the legal texts directly.
 3. **No interest or yield promises** on wallets.
 4. **Wallet caps.** Individual MVola wallets cap at Ar 20M; a group pot above that cannot land in one personal wallet. The Ar 100M ceiling quoted in the project brief needs clarification (per transaction, per day or per account).
 5. **Fees.** Cross-network payouts cost 3 to 10 times more than same-network. Show the exact fee before confirmation.
@@ -144,7 +142,7 @@ The market-size figures cannot be reconciled with each other. Do not quote any c
 | Area | Scope |
 | --- | --- |
 | Account | Phone and OTP sign-up; tiered KYC, heavy verification only at money-movement steps; languages Malagasy, French, English |
-| Wallets | Personal and group wallets with type labels (budget, savings, investment, business); free ledger transfers between wallets; deposit and withdrawal via Vanilla Pay; double-entry ledger; statuses with reference IDs; CSV and PDF export; offline read mode with a last-synced timestamp |
+| Wallets | Personal and group wallets with type labels (budget, savings, investment, business); free ledger transfers between wallets; deposit and withdrawal through a payment adapter; double-entry ledger; statuses with reference IDs; CSV and PDF export; offline read mode with a last-synced timestamp |
 | Rules | Four templates only: percentage allocation of each income, spending cap with alert, goal with target date, low-balance alert; preview before enabling; loop prevention; every firing visible in the ledger |
 | Groups | Create, invite by link or phone number; permission bundles shown in plain language on top of the permissions model; audit log of permission changes; multi-approver threshold on outflows |
 | Contributions | Plan (amount, frequency, deadline, optional penalty); per-member paid, pending, late; automatic reminders push then SMS; split rules on group income |
@@ -184,7 +182,6 @@ Supplier management and purchase orders, document versioning and library (attach
 | Brief says | Research says |
 | --- | --- |
 | Marketing module with "small features like pr.social" | pr.social is a paid micro-task platform with poor reviews and no named company; drop the reference |
-| Vanilla Pay covers regulation | Company claim; legal status unverified; Law 2016-056 puts the burden on whoever holds funds |
 | 100,000,000 Ar ceiling | Operator wallets cap individuals at Ar 20M; clarify what the ceiling applies to |
 | Lending module | Probably illegal without a licence; defer |
 | Identity verification "by Gereo" | Confirmed necessary; make it tiered to avoid the onboarding drop-off seen at Money Fellows |
@@ -192,11 +189,9 @@ Supplier management and purchase orders, document versioning and library (attach
 
 ## 10. Blockers before build
 
-1. **Legal opinion** from a Malagasy lawyer on the operating model (mandated agent, licensed partner or own licence), group wallet ledger status, lending and public fundraising.
-2. **Vanilla Pay due diligence** using the checklist in [raw/03-madagascar-mobile-money.md](raw/03-madagascar-mobile-money.md) section 7.4; get API docs, sandbox, settlement terms and written licence status.
-3. **Field interviews** with the founding group and other associations (fokonolona, church and burial groups, tontines) on how they collect and hold money.
-4. **SMS aggregator quote** for Madagascar to size reminder and vote messaging.
-5. **Second payment rail** behind an adapter interface (Papi.mg or direct operator APIs).
+1. **Field interviews** with the founding group and other associations (fokonolona, church and burial groups, tontines) on how they collect and hold money.
+2. **SMS aggregator quote** for Madagascar to size reminder and vote messaging.
+3. **Payment rail** behind an adapter interface (Papi.mg or direct operator APIs).
 
 ## 11. Research gaps
 

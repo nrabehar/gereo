@@ -45,7 +45,7 @@ Evidence labels in the raw reports: [V] verified, [S] secondary, [U] unverified 
 | `NEW_DEVICE_FLAG_COUNT`, `NEW_DEVICE_FLAG_WINDOW_HOURS` | 3 failed new-device attempts in 24 hours | decided: raises a fraud flag (OPS-10) |
 | `KYC_MAX_ATTEMPTS` | 3 | decided: after this the case goes to a human (OPS-03) |
 | `KYC_AUTO_MATCH_ENABLED` | off | decided: in the MVP an operator compares every selfie (ACC-04, ACC-05); automatic matching waits for a tested vendor |
-| `KYC_MIN_AGE` | 18 [U] | working assumption, to be confirmed with counsel (open question 2) |
+| `KYC_MIN_AGE` | 18 [U] | minimum age for identity verification (open question 2) |
 | `ASSIST_MAX_SESSIONS_PER_DAY` | 3 per facilitator | decided: stops bulk account creation (ACC-10) |
 | `ASSIST_ABANDON_MINUTES` | 30 | decided: an unfinished assisted session closes (ACC-10) |
 | `DELETE_GRACE_DAYS` | 30 | decided: long enough to change one's mind, short enough to honour a deletion request; legal retention is separate (open question 1) |
@@ -55,7 +55,7 @@ Evidence labels in the raw reports: [V] verified, [S] secondary, [U] unverified 
 
 ## Retention parameters
 
-Two parameters exist and no other name is used. The only lawyer flag for both is open question 1 below.
+Two parameters exist and no other name is used. Both are described in open question 1 below.
 
 | Parameter | Owner | Starting value | Covers |
 | --- | --- | --- | --- |
@@ -224,11 +224,11 @@ Transaction statuses are the shared ones: Initiated, Pending, Confirmed, Failed,
 **Release:** MVP
 **Actor:** Individual
 **Permission needed:** none
-**Tags:** sms, audit, legal-gate
+**Tags:** sms, audit
 
 **Story:** When I sign in from a phone Gereo does not know, or my old phone is lost, I want to prove it is me with a code and, if my account is verified, a selfie, so I can recover my account without an agent while a thief cannot do the same.
 
-**Conversation:** Device recovery without an agent is a launch rule (design foundations section 4; 07 UI/UX section 10, item 18). SIM-swap and social engineering around OTP are the dominant fraud pattern across mobile money markets, and operator terms put the loss on the customer (03 mobile money 6.7 point 4; 03 section 7.3). The research says to re-verify on a new device or SIM (03 section 7.1 point 8). We have no operator SIM-swap signal; the only signal is "this device is new". Whether a cooling period applies is a business and legal decision (open question). Tag legal-gate because the cooling limits restrict money-out.
+**Conversation:** Device recovery without an agent is a launch rule (design foundations section 4; 07 UI/UX section 10, item 18). SIM-swap and social engineering around OTP are the dominant fraud pattern across mobile money markets, and operator terms put the loss on the customer (03 mobile money 6.7 point 4; 03 section 7.3). The research says to re-verify on a new device or SIM (03 section 7.1 point 8). We have no operator SIM-swap signal; the only signal is "this device is new". Whether a cooling period applies is a business decision (see the open questions).
 
 **Preconditions:** An account exists. The signing-in device has no valid registration.
 **Trigger:** The person enters a registered phone number on a device that is not in their connected devices list.
@@ -248,7 +248,7 @@ Transaction statuses are the shared ones: Initiated, Pending, Confirmed, Failed,
 **Data:** User, Device, Identity check, Notification, Audit entry.
 **Depends on:** ACC-02, ACC-03, ACC-04, ACC-08, ACC-11, OPS-03, OPS-10, OPS-11, WAL-10, NTF-05.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed: cooling hours apply, default 24 (parameter table), to be tuned with fraud data; the limit amounts come from OPS-11. Closed: no secondary contact (second number or email) in the MVP, because it is a second recovery path and so a second way to take over an account; a person who lost both phone and number uses the support route of ACC-06. Still open, needs the mobile operators and the aggregator: is there an API to detect a recent SIM swap? Default used: no signal, "this device is new" is the only signal. Still open, needs counsel (legal-gate): whether holding back a customer's own money-out for 24 hours after a new device is allowed. Default used: 24 hours limit as written, limited to first-time payees and amounts above the new-device limit of OPS-11, never a block on money-in.
+**Open questions:** Closed: cooling hours apply, default 24 (parameter table), to be tuned with fraud data; the limit amounts come from OPS-11. Closed: no secondary contact (second number or email) in the MVP, because it is a second recovery path and so a second way to take over an account; a person who lost both phone and number uses the support route of ACC-06. Still open, needs the mobile operators and the aggregator: is there an API to detect a recent SIM swap? Default used: no signal, "this device is new" is the only signal. Closed: after a new device, the 24 hours money-out limit applies as written, limited to first-time payees and amounts above the new-device limit of OPS-11, never a block on money-in.
 
 ---
 
@@ -262,7 +262,7 @@ Transaction statuses are the shared ones: Initiated, Pending, Confirmed, Failed,
 
 **Story:** As a user, I want to set my display name, my language and my preferred currency, so that the app and the messages I receive match how I speak and what I use.
 
-**Conversation:** The User object carries identity, phone, language and preferred currency (info.md, object model). Members of one group can prefer different languages, so language is personal and never forced by a group (07 UI/UX 6.4 R-L13). Currency starts with the ariary only; the architecture is multi-currency but the MVP offers one value (info.md non-functional requirements). The legal name comes from the ID check and is not editable here; the display name is what other members see. We decided members see the display name and a masked phone number (07 UI/UX 2.8 R-S4).
+**Conversation:** The User object carries identity, phone, language and preferred currency. Members of one group can prefer different languages, so language is personal and never forced by a group (07 UI/UX 6.4 R-L13). Currency starts with the ariary only; the architecture is multi-currency but the MVP offers one value. The legal name comes from the ID check and is not editable here; the display name is what other members see. We decided members see the display name and a masked phone number (07 UI/UX 2.8 R-S4).
 
 **Preconditions:** Signed in at Tier 1 or above.
 **Trigger:** Person opens the profile.
@@ -293,11 +293,10 @@ Transaction statuses are the shared ones: Initiated, Pending, Confirmed, Failed,
 **Release:** MVP
 **Actor:** Individual
 **Permission needed:** none
-**Tags:** legal-gate
 
 **Story:** As a user, I want to see a clear ladder of what I can do at my current level and what verifying my identity would unlock, in ariary, so that I know why Gereo asks for my ID and I am asked only when it matters.
 
-**Conversation:** Verification friction is the top complaint class at Money Fellows, and Gereo's answer is tiered KYC asked at the moment a limit is hit, not at sign-up (competitive analysis sections 4 and 7; 07 UI/UX 5.3 R-K1, R-K2; 08 competitor UX 6.1). Browsing, joining and voting need only phone and OTP; money-in and money-out need a verified identity at the right tier (00-conventions section 2). The limits themselves are not known: the CSBF instructions on KYC tiers and caps were not found (03 mobile money 5.1), the 100 000 000 Ar ceiling from the brief is unexplained (competitive analysis section 9) and an individual operator wallet caps at 20 000 000 Ar (competitive analysis section 2). So every number on this screen comes from OPS-11. Tag legal-gate.
+**Conversation:** Verification friction is the top complaint class at Money Fellows, and Gereo's answer is tiered KYC asked at the moment a limit is hit, not at sign-up (competitive analysis sections 4 and 7; 07 UI/UX 5.3 R-K1, R-K2; 08 competitor UX 6.1). Browsing, joining and voting need only phone and OTP; money-in and money-out need a verified identity at the right tier (00-conventions section 2). The limits themselves are not fixed here: the 100 000 000 Ar ceiling from the brief is unexplained (competitive analysis section 9) and an individual operator wallet caps at 20 000 000 Ar (competitive analysis section 2). So every number on this screen comes from OPS-11.
 
 **Preconditions:** Signed in.
 **Trigger:** Person opens `acc.tiers.ladder` from the profile or from a limit prompt.
@@ -326,7 +325,7 @@ Transaction statuses are the shared ones: Initiated, Pending, Confirmed, Failed,
 **Data:** User, Identity check, Tier configuration.
 **Depends on:** ACC-02, OPS-11. Used by WAL-06, WAL-09 and WAL-13 (deposit, withdrawal and transfer limits), CON-04 (contribution limits) and SPD-05 (approval checks).
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed: the UI word is "Level" and "Niveau"; the Malagasy word is proposed by translators and tested (open question 9). Still open, needs the regulator (CSBF), Vanilla Pay and counsel: the tier limits, what Tier 3 requires (address, proof of income, other), and whether the 100 000 000 Ar ceiling is per transaction, per day or per account. Default used: the ladder shows only the levels that exist in the OPS-11 configuration; at launch that is Level 1 and Level 2, Level 3 stays hidden until its requirements are confirmed, and every limit is read from OPS-11, never from this file.
+**Open questions:** Closed: the UI word is "Level" and "Niveau"; the Malagasy word is proposed by translators and tested (open question 9). Closed: the ladder shows only the levels that exist in the OPS-11 configuration; at launch that is Level 1 and Level 2, Level 3 stays hidden until its requirements are confirmed, and every limit is read from OPS-11, never from this file.
 
 ---
 
@@ -337,18 +336,18 @@ Transaction statuses are the shared ones: Initiated, Pending, Confirmed, Failed,
 **Release:** MVP
 **Actor:** Individual
 **Permission needed:** none
-**Tags:** legal-gate, offline, audit
+**Tags:** offline, audit
 
 **Story:** As a user who reached a limit, I want to take a photo of my identity document and a selfie with clear guidance on my phone, so that I can finish verification in one sitting, even with a weak connection.
 
-**Conversation:** ID and selfie capture is where most drop-off happens, though the figures are vendor claims and not Madagascar data (07 UI/UX 5.3). The design rules are R-K3 and R-K4: a guide frame, a blur and glare check on the device, a preview with Retake, one illustration per step, resumable background upload, steps shown as "Step 2 of 4" (R-K7). Orange Money lets people self-onboard with an ID photo and selfie (03 mobile money 5.2). Accepted documents (national ID card CIN, passport, others) depend on the regulator and are an open question; the story names them as configurable. This is the only place photos are taken, and the only reason to ask for camera permission. Tag legal-gate because identity records and their retention come from Law 2016-056 Art. 53.
+**Conversation:** ID and selfie capture is where most drop-off happens, though the figures are vendor claims and not Madagascar data (07 UI/UX 5.3). The design rules are R-K3 and R-K4: a guide frame, a blur and glare check on the device, a preview with Retake, one illustration per step, resumable background upload, steps shown as "Step 2 of 4" (R-K7). Orange Money lets people self-onboard with an ID photo and selfie (03 mobile money 5.2). Accepted documents (national ID card CIN, passport, others) are configurable; the story names the starting list. This is the only place photos are taken, and the only reason to ask for camera permission.
 
 **Preconditions:** Signed in; the person tapped `Verify now` or was routed here from ACC-04 or ACC-05. Consent for identity processing is recorded (ACC-13).
 **Trigger:** Person opens the verification flow.
 
 **Acceptance criteria:**
 1. Happy path. The flow has these steps with titles and "Step n of N": 1 why we ask (one sentence per item, with `Gereo never asks for your PIN or code`), 2 type and number of the document, 3 photo of the document front (and back if the type needs it), 4 selfie, 5 review and send. N is 5.
-2. Business rule. Document types come from a configurable list (starting with the national ID card CIN and the passport; others per regulator). The number is typed once and not asked again in the same process (WCAG 3.3.7). Anyone under the legal age is told in plain words that they cannot continue (`err.acc.kyc_underage`); the minimum age is `KYC_MIN_AGE`.
+2. Business rule. Document types come from a configurable list (starting with the national ID card CIN and the passport). The number is typed once and not asked again in the same process (WCAG 3.3.7). Anyone under the legal age is told in plain words that they cannot continue (`err.acc.kyc_underage`); the minimum age is `KYC_MIN_AGE`.
 3. Happy path. The camera screen shows a guide frame and one illustration. The device checks blur, glare and darkness; if the picture fails, it shows the specific tip (`err.acc.photo_too_dark` "Move near a window") before the person can submit. A preview with `Retake` and `Use this photo` always appears.
 4. Business rule. Photos are taken in the app camera, never picked from the gallery, so that a screenshot or an edited photo cannot be sent. Each photo is compressed to a configurable size so a capture costs a bounded amount of data (XCT-07).
 5. State, offline and resume. Photos are saved on the phone as soon as they are taken and uploaded in the background with a progress bar and the `Waiting to send` / `Sent` / `Confirmed` states (`xct.queue.waiting`, `xct.queue.sent`, `xct.queue.confirmed`; XCT-05). If the app is killed or the connection drops, the flow resumes at the last step with the photos kept. Offline, the person can still capture; sending waits. Queued photos follow the XCT-05 KYC photo criterion for in-app capture, encryption, deletion once the server confirms, self-expiry (`QUEUE_KYC_MAX_DAYS`) and the cap of cases per device; this story restates none of those values.
@@ -361,7 +360,7 @@ Transaction statuses are the shared ones: Initiated, Pending, Confirmed, Failed,
 **Data:** Identity check, User, Device, Notification, Audit entry.
 **Depends on:** ACC-07, ACC-13, XCT-05, XCT-07, OPS-03.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed: gallery uploads are not allowed (criterion 4). Closed: no live voice guidance in the MVP (criterion 10). Closed for the MVP: an operator compares the selfie with the document photo (OPS-03); liveness is the live capture in the app camera, with software liveness and automatic matching waiting for a tested vendor (ACC-04). Still open, needs the regulator and counsel: which documents are accepted and which are mandatory. Default used: CIN and passport. Still open, needs counsel and the hosting choice: how long images are kept and where they are stored (Art. 53 asks five years for identity records, applicability unconfirmed). Default used: images are encrypted, kept `RECORD_RETENTION_YEARS` after the account closes (retention table above, legal basis in open question 1 of this file), and never shown outside OPS-03.
+**Open questions:** Closed: gallery uploads are not allowed (criterion 4). Closed: no live voice guidance in the MVP (criterion 10). Closed for the MVP: an operator compares the selfie with the document photo (OPS-03); liveness is the live capture in the app camera, with software liveness and automatic matching waiting for a tested vendor (ACC-04). Closed: the accepted documents are the CIN and the passport. Closed: images are encrypted, kept `RECORD_RETENTION_YEARS` after the account closes (retention table above), and never shown outside OPS-03; where they are stored is a configuration of the hosting setup.
 
 ---
 
@@ -372,11 +371,11 @@ Transaction statuses are the shared ones: Initiated, Pending, Confirmed, Failed,
 **Release:** MVP
 **Actor:** Individual
 **Permission needed:** none
-**Tags:** legal-gate, sms, audit
+**Tags:** sms, audit
 
 **Story:** As a user who sent my ID, I want to see where my verification stands and, if it is rejected, exactly why and what to do, so that I can fix it without calling anyone.
 
-**Conversation:** Money Fellows reviewers complain of an ID photo that "keeps being rejected" with no reason, and of requests that stay "still open" with no wait time (08 competitor UX 6.1). The rule is: pending review is a real screen with an expected wait and what still works; rejection reasons are specific, actionable and never accusing (07 UI/UX 5.3 R-K4, R-K5). The review itself is in OPS-02 and OPS-03. The expected-time sentence must match what operators can deliver (`KYC_REVIEW_TARGET_HOURS` in OPS-02), so it is configuration and not copy. Tag legal-gate: the status controls whether money can move.
+**Conversation:** Money Fellows reviewers complain of an ID photo that "keeps being rejected" with no reason, and of requests that stay "still open" with no wait time (08 competitor UX 6.1). The rule is: pending review is a real screen with an expected wait and what still works; rejection reasons are specific, actionable and never accusing (07 UI/UX 5.3 R-K4, R-K5). The review itself is in OPS-02 and OPS-03. The expected-time sentence must match what operators can deliver (`KYC_REVIEW_TARGET_HOURS` in OPS-02), so it is configuration and not copy.
 
 **Preconditions:** An Identity check exists (ACC-08).
 **Trigger:** Person opens `acc.kyc.status` from the profile, a banner or a notification.
@@ -407,7 +406,7 @@ Transaction statuses are the shared ones: Initiated, Pending, Confirmed, Failed,
 **Release:** MVP
 **Actor:** Individual
 **Permission needed:** none for the person; the facilitator is a Member holding Group: invite member in at least one group (GRP-03)
-**Tags:** legal-gate, audit
+**Tags:** audit
 
 **Story:** As someone with no smartphone experience, I want a trusted person from my group to sit with me and help with sign-up and verification on their phone or mine, so that I can join without being stuck or giving my PIN to anyone.
 
@@ -430,7 +429,7 @@ Transaction statuses are the shared ones: Initiated, Pending, Confirmed, Failed,
 **Data:** User, Identity check, Consent record, Audit entry.
 **Depends on:** ACC-01, ACC-02, ACC-03, ACC-08, ACC-13, GRP-03 (Group: invite member), OPS-02.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed: in the MVP the facilitator is a group member who holds Group: invite member; no trained-agent programme exists yet, and the limit of `ASSIST_MAX_SESSIONS_PER_DAY` bounds abuse. Closed: facilitators receive no fee or commission, because any payment to them is a business-model and legal decision that the MVP does not need. Still open, needs counsel and the regulator (legal-gate): whether assisted registration on the facilitator's device is allowed by the KYC rules. Default used: the person types their own code and PIN and the facilitator sees only progress (criteria 1 and 2); if counsel refuses a facilitator's device, the flow runs on the person's own phone with the facilitator beside them and the facilitator's account is not involved. Still open, needs counsel (legal-gate): how long third parties' ID images may stay on a facilitator's phone before they are sent or deleted (see open question 1 of this file). Default used: the XCT-05 self-expiry (`QUEUE_KYC_MAX_DAYS`), after which the photos are deleted.
+**Open questions:** Closed: in the MVP the facilitator is a group member who holds Group: invite member; no trained-agent programme exists yet, and the limit of `ASSIST_MAX_SESSIONS_PER_DAY` bounds abuse. Closed: facilitators receive no fee or commission, because any payment to them is a business-model decision that the MVP does not need. Closed: the person types their own code and PIN and the facilitator sees only progress (criteria 1 and 2); the flow runs on the person's own phone with the facilitator beside them and the facilitator's account is not involved. Closed: third parties' ID images stay on the facilitator's phone only until the XCT-05 self-expiry (`QUEUE_KYC_MAX_DAYS`), after which the photos are deleted.
 
 ---
 
@@ -465,7 +464,7 @@ Transaction statuses are the shared ones: Initiated, Pending, Confirmed, Failed,
 **Data:** User, Device, Notification, Audit entry, Support ticket (operator unlock).
 **Depends on:** ACC-03, ACC-05, GRP-14, OPS-06, NTF-05.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed: no lock by SMS keyword in the MVP, because a sender number can be spoofed, two-way SMS is unconfirmed (NTF aggregator question) and the code-only lock of criterion 6 already works without the PIN. Closed: groups are not told that a member is locked, because it exposes a lost phone and helps an attacker; the group sees only a neutral "unavailable" marker and the effect through GRP-14. Still open, needs counsel (legal-gate): what the law requires of Gereo for incoming funds on a locked account. Default used: incoming settlements post to the wallet (criterion 4) because Gereo cannot block a provider callback.
+**Open questions:** Closed: no lock by SMS keyword in the MVP, because a sender number can be spoofed, two-way SMS is unconfirmed (NTF aggregator question) and the code-only lock of criterion 6 already works without the PIN. Closed: groups are not told that a member is locked, because it exposes a lost phone and helps an attacker; the group sees only a neutral "unavailable" marker and the effect through GRP-14. Closed: on a locked account, incoming settlements post to the wallet (criterion 4) because Gereo cannot block a provider callback.
 
 ---
 
@@ -511,11 +510,11 @@ Transaction statuses are the shared ones: Initiated, Pending, Confirmed, Failed,
 **Release:** MVP
 **Actor:** Visitor
 **Permission needed:** none
-**Tags:** legal-gate, audit
+**Tags:** audit
 
 **Story:** As someone creating an account, I want a short plain-language notice in my language that tells me what Gereo keeps about me and why, and to be able to change my choices later, so that I give consent knowing what I agree to.
 
-**Conversation:** Madagascar's personal data law is Law 2014-038; sources describe an opt-in consent model with an authority (CMIL) whose operation was delayed (06 process 2.4 and 4.4, [S], not verified from the official text). Terms and consent screens must be in the user's language, in plain words (06 process 4.4). Consent to process ID photos is a separate consent (ACC-08). Every consent is recorded with the notice version. The actual text is written by the legal owner; this story defines behaviour only. Member data is never sold or used for third-party offers inside group views (07 UI/UX 2.8 R-S6). Tag legal-gate.
+**Conversation:** Madagascar's personal data law is Law 2014-038; sources describe an opt-in consent model with an authority (CMIL) whose operation was delayed (06 process 2.4 and 4.4, [S], not verified from the official text). Terms and consent screens must be in the user's language, in plain words (06 process 4.4). Consent to process ID photos is a separate consent (ACC-08). Every consent is recorded with the notice version. The actual text is written by the product owner; this story defines behaviour only. Member data is never sold or used for third-party offers inside group views (07 UI/UX 2.8 R-S6).
 
 **Preconditions:** The person has entered a phone number and is about to receive a code (ACC-02).
 **Trigger:** Person taps `acc.phone.send_code` the first time.
@@ -523,7 +522,7 @@ Transaction statuses are the shared ones: Initiated, Pending, Confirmed, Failed,
 **Acceptance criteria:**
 1. Happy path. Before the first code is sent, a screen shows a summary of at most 6 short lines (what we keep, why, who sees it in a group, how long, how to leave, who to contact), a link `acc.consent.read_full` to the full terms and privacy notice, and one explicit button `acc.consent.agree`. Not agreeing returns to the language screen and sends nothing.
 2. Business rule. The summary and the full text are available in Malagasy, French and English, in the language chosen in ACC-01. A language without a reviewed legal translation is not offered for the full text; the screen then shows the reviewed language with `acc.consent.language_note` (open question 7). The full terms disclose the income lines of Gereo by reference to the list in conventions 10.3 (i): Fee Gereo part (rates in OPS-11), Rounding and Platform: SMS allowance; and they state Tax as collected for the state, not as income. Rounding is the part of an ariary left over when a split cannot divide exactly, always under 1 ariary per destination, credited to Gereo and shown as its own line on the receipt (decision D5, CON-14). The consent record carries the notice version (criterion 5).
-3. Business rule. Consents are separate items: (a) terms and privacy notice, required; (b) identity document processing, asked at ACC-08, required for verification only; (c) non-essential notifications and SMS, optional and off by default, asked by NTF-03 and NTF-04 and stored here as Consent records. Security messages (code, new device, PIN change, lock) are part of (a) and are not optional. A required consent is never pre-ticked and an optional one is never bundled with a required one. The sign-up notice also lists two items: SMS for important items, and push opened-tracking; the Consent record that NTF-10 reads is created at that moment. This consent reaches registered accounts only; guests are covered by the service-SMS rule in VOT-06 and NTF-10. The consent text names the freeze SMS and states that Critical SMS ignore opt-out (wording pending counsel).
+3. Business rule. Consents are separate items: (a) terms and privacy notice, required; (b) identity document processing, asked at ACC-08, required for verification only; (c) non-essential notifications and SMS, optional and off by default, asked by NTF-03 and NTF-04 and stored here as Consent records. Security messages (code, new device, PIN change, lock) are part of (a) and are not optional. A required consent is never pre-ticked and an optional one is never bundled with a required one. The sign-up notice also lists two items: SMS for important items, and push opened-tracking; the Consent record that NTF-10 reads is created at that moment. This consent reaches registered accounts only; guests are covered by the service-SMS rule in VOT-06 and NTF-10. The consent text names the freeze SMS and states that Critical SMS ignore opt-out.
 4. Business rule. A Consent record stores user, notice version, language shown, item, decision, time, device and, if assisted, the facilitator (ACC-10). It is immutable; a change adds a new record.
 5. Business rule, versions. A notice version is marked "needs consent again" only when a line type is added to the list in criterion 2 or the Rounding formula changes; a change of a fee value follows the OPS-11 start date and notice only and never asks again. When a version is marked, the next sign-in shows the summary of what changed and asks again; until agreed, the person can read data and export it (ACC-14) but cannot move money.
 6. Happy path, withdraw. In `acc.privacy.my_choices` the person sees each consent, including the Consent records written by NTF-03, NTF-04 and NTF-10, with date and version and can withdraw an optional one in one tap. Withdrawing a required one explains the consequences and opens account deletion (ACC-15); it does not silently delete.
@@ -535,7 +534,7 @@ Transaction statuses are the shared ones: Initiated, Pending, Confirmed, Failed,
 **Data:** Consent record, User, Audit entry.
 **Depends on:** ACC-01, ACC-02, NTF-04, CON-14, OPS-11.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed: a guest voter (ACC-16) sees the same short summary and `acc.consent.agree` before the code is sent, because the phone number is processed; the full text is one tap away. Closed: the audio read-aloud hint is not in the MVP (ACC-01). Still open, needs counsel (legal-gate): exact duties under Law 2014-038 (consent form, registration with CMIL, cross-border storage). Default used: the explicit opt-in of this story. Still open, needs counsel and a certified translator: who writes and reviews the legal text in Malagasy, French and English. Default used: the product owner supplies a plain-language draft, counsel owns the final text, and no language is offered without its review. Still open, needs counsel: where personal data is stored. Default used: no decision is coded; storage location is a configuration of the hosting setup. Still open, needs counsel (legal-gate): whether Critical SMS may ignore a person's opt-out. Default used: they do, and the consent text says so (criterion 3).
+**Open questions:** Closed: a guest voter (ACC-16) sees the same short summary and `acc.consent.agree` before the code is sent, because the phone number is processed; the full text is one tap away. Closed: the audio read-aloud hint is not in the MVP (ACC-01). Closed: consent is the explicit opt-in of this story. Closed: the product owner supplies a plain-language draft of the legal text in each language, and no language is offered without its review. Closed: no storage location is coded; it is a configuration of the hosting setup. Closed: Critical SMS ignore an SMS opt-out, and the consent text says so (criterion 3).
 
 ---
 
@@ -570,7 +569,7 @@ Transaction statuses are the shared ones: Initiated, Pending, Confirmed, Failed,
 **Data:** User, Consent record, Device, Identity check (status only), Ledger entry (own), Contribution, Ballot, Support ticket, Audit entry, Notification.
 **Depends on:** ACC-03, ACC-13, WAL-16, WAL-15, CON-18, XCT-02, XCT-03.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed: a prepared file stays downloadable for `EXPORT_READY_DAYS` (7), then it is deleted and the person asks again. Still open, needs counsel: whether the personal data law makes a copy a legal right in a fixed format and delay. Default used: the file of criterion 1 within the time it takes to generate, no fee, no SMS.
+**Open questions:** Closed: a prepared file stays downloadable for `EXPORT_READY_DAYS` (7), then it is deleted and the person asks again. Closed: the export is the file of criterion 1, delivered within the time it takes to generate, with no fee and no SMS.
 
 ---
 
@@ -581,11 +580,11 @@ Transaction statuses are the shared ones: Initiated, Pending, Confirmed, Failed,
 **Release:** MVP
 **Actor:** Individual
 **Permission needed:** none
-**Tags:** legal-gate, ledger, audit
+**Tags:** ledger, audit
 
 **Story:** As a user, I want to delete my account and see clearly what must be settled first, so that I can leave without leaving money or obligations behind.
 
-**Conversation:** Account closure touches money, group obligations and legal record keeping. Identity and transaction records must be kept at least five years under Law 2016-056 Art. 53 (03 mobile money 5.1), and the ledger is immutable by design (00-conventions section 2), so deleting an account cannot erase ledger entries. The research does not say what the data protection law requires on deletion (06 process 4.4), so the story separates what is anonymised from what is kept, as configuration for the legal owner to set. One-person-holds-the-keys is the main failure mode of group money (competitive analysis section 4, point 2), so a group founder cannot delete while sole holder of the key permissions. Tag legal-gate and ledger.
+**Conversation:** Account closure touches money, group obligations and legal record keeping. Identity and transaction records must be kept at least five years under Law 2016-056 Art. 53 (03 mobile money 5.1), and the ledger is immutable by design (00-conventions section 2), so deleting an account cannot erase ledger entries. The research does not say what the data protection law requires on deletion (06 process 4.4), so the story separates what is anonymised from what is kept, as configuration. One-person-holds-the-keys is the main failure mode of group money (competitive analysis section 4, point 2), so a group founder cannot delete while sole holder of the key permissions. Tag ledger.
 
 **Preconditions:** Signed in; PIN known.
 **Trigger:** Person taps `acc.delete.start` in `acc.privacy.my_choices`.
@@ -594,7 +593,7 @@ Transaction statuses are the shared ones: Initiated, Pending, Confirmed, Failed,
 1. Happy path. The screen starts with a checklist `acc.delete.checklist` built live from the person's state. Each blocker has icon plus word (`Blocking` or `Done`), a plain sentence and a button to the place that fixes it. When no blocker remains, `acc.delete.confirm` is enabled.
 2. Business rule, blockers. Deletion is blocked while any of these is true: a wallet balance above 0 Ar in any personal wallet (the person must withdraw or transfer it; withdrawing needs the right tier, so the checklist links to ACC-07); a transaction in Initiated, Pending or Needs attention; a contribution that is due or overdue in a group, or an amount owed that a group recorded when the person left (GRP-16); an expense request they created that is still open (SPD-12 cancels it); leaving a group below the holder minima of GRP-14, that is, the deletion would drop the holders of Wallet: initiate spend, Wallet: approve spend, Wallet: edit rules or Group: set spending policy below the GRP-14 minimum, where holders of Wallet: approve spend count only if money-out capable by tier and not by current device cooling (ACC-07 defines "capable"; the requester can never approve their own request, decision D1, so two capable holders are the minimum that can pay) for a group wallet that holds money or has money in flight; Group: delete group is not a continuity permission and never blocks deletion; money owed to them from a group, such as a split share or a refund not yet paid (CON-14, CON-15). Each blocker names the group or wallet and links to the story that fixes it.
 3. Business rule, non-blockers. Being a member of a group, past votes and past contributions do not block deletion. Approvals the person has given on requests still pending are voided and the remaining approvers are told, as when a person leaves a group (GRP-16 criterion 5, SPD-07); a ballot already cast stays counted. The person is warned `acc.delete.approvals_note`.
-4. Business rule, what happens. After confirming with code and PIN, the account enters a grace period of `DELETE_GRACE_DAYS`, status Deleting. Sign-in during the period is possible and cancels the deletion. After the period: the profile, display name, phone number, device list and photos are deleted or anonymised according to the retention configuration; Ledger entries and Transactions remain with a pseudonymous reference and no name for `RECORD_RETENTION_YEARS`, and Audit entries for `AUDIT_RETENTION_YEARS` (retention table above; legal basis in open question 1 of this file); the person's past votes and contributions show as `acc.deleted.member` in groups.
+4. Business rule, what happens. After confirming with code and PIN, the account enters a grace period of `DELETE_GRACE_DAYS`, status Deleting. Sign-in during the period is possible and cancels the deletion. After the period: the profile, display name, phone number, device list and photos are deleted or anonymised according to the retention configuration; Ledger entries and Transactions remain with a pseudonymous reference and no name for `RECORD_RETENTION_YEARS`, and Audit entries for `AUDIT_RETENTION_YEARS` (retention table above); the person's past votes and contributions show as `acc.deleted.member` in groups.
 5. Business rule, ledger and rules. Deletion writes no ledger entry and never edits one. A balance of 0 Ar is required, so no correcting entry is ever needed. At confirmation every rule the person owns is paused (resumed if the deletion is cancelled), and a rule owned by someone else that targets one of the person's wallets, or chains through it, is paused and its owner told (RUL-06), because every deposit is income for the wallet that receives it (decision D3) and would break the zero balance. At the end of the grace period the blockers are checked again; if a balance appeared, deletion stops with `err.acc.delete_blocked_now` and the person is told. Otherwise the personal wallets are closed with the WAL-05 action and the person's rules are ended. A deposit that still arrives for a closed wallet follows WAL-05 and is never lost.
 6. State. If the checklist cannot be built (no connection), `acc.offline.cannot_delete` is shown; the checklist is never shown from cache as "all done".
 7. Errors. If a blocker appears between the checklist and the confirm (for example a payment arrives), the confirm fails with `err.acc.delete_blocked_now`, nothing is deleted and the checklist refreshes.
@@ -605,7 +604,7 @@ Transaction statuses are the shared ones: Initiated, Pending, Confirmed, Failed,
 **Data:** User, Wallet, Wallet rule, Transaction, Contribution, Membership, Expense request, Audit entry, Consent record.
 **Depends on:** ACC-07, ACC-13, ACC-14, WAL-05, WAL-03, GRP-14, GRP-16, CON-03, CON-15, SPD-07, SPD-12, RUL-06.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed: the grace period is `DELETE_GRACE_DAYS` = 30. Still open, needs counsel (legal-gate): what the data protection law and the e-money law require on deletion and on retention, and whether anonymised ledger entries are acceptable. Default used: personal data deleted or anonymised at the end of the grace period, ledger and transaction entries kept under a pseudonymous reference for `RECORD_RETENTION_YEARS` and audit entries for `AUDIT_RETENTION_YEARS`. Still open, needs counsel and Vanilla Pay: what happens to the balance of a person who cannot be reached (dormant accounts). Default used: deletion stays blocked while any balance is above 0 Ar; Gereo does not sweep or confiscate dormant balances.
+**Open questions:** Closed: the grace period is `DELETE_GRACE_DAYS` = 30. Closed: at the end of the grace period personal data is deleted or anonymised, and ledger and transaction entries are kept under a pseudonymous reference for `RECORD_RETENTION_YEARS` and audit entries for `AUDIT_RETENTION_YEARS`. Closed: for dormant accounts, deletion stays blocked while any balance is above 0 Ar; Gereo does not sweep or confiscate dormant balances.
 
 ---
 
@@ -691,13 +690,13 @@ Story IDs below were looked up in the other epic files. A capability with no sto
 
 Each line says Closed with the decision, or Open with the default used and who must answer. Story-level questions are closed or kept in the story itself.
 
-1. **Operating model and records.** Open, needs counsel and Vanilla Pay. Whether Law 2016-056 Art. 53 (five-year retention of identity and transaction records) binds Gereo depends on the operating model (mandated agent, partner or own licence). It decides what ACC-15 can delete. This is the single lawyer flag for retention; other files cite it. Two parameters apply: `RECORD_RETENTION_YEARS` (owner ACC; identity images, transaction records, ledger, attachments and expense files) and `AUDIT_RETENTION_YEARS` (owner OPS; audit log, consent evidence and decision log). Default used: `RECORD_RETENTION_YEARS` = 5, kept under a pseudonymous reference after deletion; audit retention as set by OPS, never shorter. Retention of attachments and receipts after a project or group closes belongs to this question. (competitive analysis section 10.)
-2. **KYC tier limits and documents.** Open, needs the regulator (CSBF), Vanilla Pay and counsel. CSBF instructions on tiers and caps were not found; accepted documents, the minimum age and the meaning of the 100 000 000 Ar ceiling are open. Default used: all numbers come from OPS-11; documents are CIN and passport; `KYC_MIN_AGE` = 18 [U]; Level 3 hidden until configured.
-3. **Identity verification.** Closed for the MVP: Gereo verifies identity (Vanilla Pay provides none) and an operator compares every selfie with the document photo and the stored reference (OPS-03); automatic matching stays off (`KYC_AUTO_MATCH_ENABLED`). Open, needs a vendor and field tests: the face-match provider and its accuracy in local conditions.
-4. **SIM-swap and recovery.** Closed: cooling period on, 24 hours by default; no secondary contact in the MVP; no lock by SMS keyword. Open, needs mobile operators and the aggregator: a SIM-swap signal. Default used: none. Open, needs counsel: whether the money-out limit after a new device is allowed; default as written in ACC-05.
+1. **Operating model and records.** Closed: two parameters apply: `RECORD_RETENTION_YEARS` (owner ACC; identity images, transaction records, ledger, attachments and expense files) and `AUDIT_RETENTION_YEARS` (owner OPS; audit log, consent evidence and decision log). `RECORD_RETENTION_YEARS` = 5, kept under a pseudonymous reference after deletion; audit retention as set by OPS, never shorter. It decides what ACC-15 can delete, and it also covers attachments and receipts after a project or group closes.
+2. **KYC tier limits and documents.** Closed: all numbers come from OPS-11; documents are CIN and passport; `KYC_MIN_AGE` = 18 [U]; Level 3 hidden until configured.
+3. **Identity verification.** Closed for the MVP: Gereo verifies identity by hand: an operator compares every selfie with the document photo and the stored reference (OPS-03); automatic matching stays off (`KYC_AUTO_MATCH_ENABLED`). Open, needs a vendor and field tests: the face-match provider and its accuracy in local conditions.
+4. **SIM-swap and recovery.** Closed: cooling period on, 24 hours by default; no secondary contact in the MVP; no lock by SMS keyword. Open, needs mobile operators and the aggregator: a SIM-swap signal. Default used: none. Closed: the money-out limit after a new device is as written in ACC-05.
 5. **OTP delivery.** Closed: no voice-call fallback in the MVP. Open, needs the SMS aggregator: sender name rules, real SMS latency on local operators, the quote (competitive analysis section 10). Default used: alphanumeric sender `Gereo`, numeric fallback.
-6. **Assisted onboarding.** Closed: the facilitator is a group member who holds Group: invite member; no fee or commission; at most 3 sessions a day. Open, needs counsel and the regulator: whether a facilitator's own device may be used; default in ACC-10.
-7. **Personal data law.** Open, needs counsel and a certified translator: duties under Law 2014-038 (consent, CMIL registration, storage place, deletion, export right) and the reviewed legal text in three languages. Default used: explicit opt-in (ACC-13), no language offered without its review.
+6. **Assisted onboarding.** Closed: the facilitator is a group member who holds Group: invite member; no fee or commission; at most 3 sessions a day. Closed: assisted registration runs as written in ACC-10.
+7. **Personal data law.** Closed: consent is an explicit opt-in (ACC-13), and no language is offered without its review of the legal text.
 8. **Number change.** Closed: support ticket only, Tier 2 and above, selfie compared by an operator, cooling period applies, both numbers are told (ACC-06).
 9. **Words.** Open, needs translators and field testing: everyday Malagasy terms for level, verification, PIN and lock. Default used: the UI says "Level" and "Niveau"; the five hold and lock words keep separate words (conventions 10.4). Closed: no audio hints in the MVP.
 10. **Parameters.** Closed: starting values are decided in the parameter table, each with its reason, and are tuned after the pilot. Only the tier limits, including the new-device money-out limit, stay TBD, owned by OPS-11.

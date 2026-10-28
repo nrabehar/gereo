@@ -9,7 +9,6 @@ Sources used in the Conversation sections. Raw reports are cited as file plus se
 | 02 personal finance | [02-personal-finance.md](../../research/raw/02-personal-finance.md) |
 | 07 UI/UX | [07-ui-ux-best-practices.md](../../research/raw/07-ui-ux-best-practices.md) |
 | 08 competitor UX | [08-competitor-ux-comparison.md](../../research/raw/08-competitor-ux-comparison.md) |
-| info.md | [info.md](../../../info.md), section on wallets and wallet rules |
 | competitive analysis | [competitive-analysis.md](../../research/competitive-analysis.md) |
 | design foundations | [design-foundations.md](../../research/design-foundations.md) |
 
@@ -17,7 +16,7 @@ Evidence labels in the raw reports: [V] verified, [S] secondary, [U] unverified 
 
 ## Shared definitions for this epic
 
-**What a rule is.** A wallet rule belongs to one wallet and has a trigger, an optional condition and an action (info.md, entity "Wallet rule"). The MVP offers four templates and no blank builder (02 personal finance, Takeaways item 2; 08 competitor UX 6.5 Adopt):
+**What a rule is.** A wallet rule belongs to one wallet and has a trigger, an optional condition and an action. The MVP offers four templates and no blank builder (02 personal finance, Takeaways item 2; 08 competitor UX 6.5 Adopt):
 
 | Template | Sentence | Acts on | Story |
 | --- | --- | --- | --- |
@@ -53,7 +52,7 @@ A deleted rule line is not a state: it leaves the list and keeps "(deleted)" aft
 - Rule-produced ledger entries carry `rule_name`, `rule_version`, `hop` and `caused_by_entry_id`, are flagged as rule-made (for the "Made by a rule" filter and the "Why" line), and are classified Split, or Rounding for the line to Gereo, in the controlled type vocabulary shared with CON and WAL-15. Outcome: a Split line is income for its destination (decision D3; see conventions 10.1).
 - A wallet balance is always the sum of its ledger entries (WAL-03). Rules read it; they never store a balance.
 - On a personal wallet the person holds every wallet permission. On a group wallet, Wallet: edit rules is checked for every create, edit, pause, resume and delete (RUL-13).
-- A rule applies to future income only. A change or a new rule never touches income already received (info.md, wallet rules; CON-13).
+- A rule applies to future income only. A change or a new rule never touches income already received (CON-13).
 - Times are shown in Madagascar time (Indian/Antananarivo, UTC+3).
 
 **Configurable parameters**
@@ -158,7 +157,7 @@ A deleted rule line is not a state: it leaves the list and keeps "(deleted)" aft
 
 **Story:** As a wallet owner, I want to say "when income arrives in this wallet, move this percent to that wallet" by filling three slots in a sentence, so that part of every income is set aside without me doing it.
 
-**Conversation:** The three-slot sentence "When [trigger] arrives in [wallet], move [percent] to [destination]" is the recommended builder shape (07 UI/UX 8.2 R-RB1). Automatic percentage allocation of every income is the differentiator: YNAB, Goodbudget and Monzo users do it by hand each pay period, and Qapital and Chime offer only fixed or round-up rules (02 personal finance, Gaps competitors leave item 1; Table stakes list, "Percentage-based auto-allocation"; 08 competitor UX 6.5 Open opportunities). The sum of percentages may be below 100 and the rest stays in the wallet (info.md, wallet rules and group split rules). For a group wallet the same rule is defined in CON-11 and this story does not repeat its group parts: the group sentence, the destinations in the group, the vote gate and the audit entry `splitrule.created` are in CON-11 to CON-13. This story defines the personal-wallet builder and the shared validation.
+**Conversation:** The three-slot sentence "When [trigger] arrives in [wallet], move [percent] to [destination]" is the recommended builder shape (07 UI/UX 8.2 R-RB1). Automatic percentage allocation of every income is the differentiator: YNAB, Goodbudget and Monzo users do it by hand each pay period, and Qapital and Chime offer only fixed or round-up rules (02 personal finance, Gaps competitors leave item 1; Table stakes list, "Percentage-based auto-allocation"; 08 competitor UX 6.5 Open opportunities). The sum of percentages may be below 100 and the rest stays in the wallet. For a group wallet the same rule is defined in CON-11 and this story does not repeat its group parts: the group sentence, the destinations in the group, the vote gate and the audit entry `splitrule.created` are in CON-11 to CON-13. This story defines the personal-wallet builder and the shared validation.
 
 **Preconditions:** The person chose "Share each income" (RUL-02). At least one other open wallet exists that can be a destination.
 **Trigger:** The person opens the share builder.
@@ -227,7 +226,7 @@ A deleted rule line is not a state: it leaves the list and keeps "(deleted)" aft
 
 **Story:** When I have several rules on a wallet, I want one summary of what happens to a new income, in order, with the total and what stays, so I am never surprised by where my money went.
 
-**Conversation:** Effective-result views beat rule lists: in the Expandable Grid study people read outcomes correctly 83.6 percent of the time against 56.5 percent for lists (07 UI/UX 8.2 R-RB3 and section 8.5). The summary is also the only place that shows the sum and the remainder, which is what makes a total under 100 safe (info.md; CON-11 AC3 key `con.split.summary`). Monzo's budget view breaks when money sits in pots (02 personal finance, Gaps item 3), so Gereo shows the whole effect in one place. On group wallets this is the same summary that CON-11 describes and the screen is shared.
+**Conversation:** Effective-result views beat rule lists: in the Expandable Grid study people read outcomes correctly 83.6 percent of the time against 56.5 percent for lists (07 UI/UX 8.2 R-RB3 and section 8.5). The summary is also the only place that shows the sum and the remainder, which is what makes a total under 100 safe (CON-11 AC3 key `con.split.summary`). Monzo's budget view breaks when money sits in pots (02 personal finance, Gaps item 3), so Gereo shows the whole effect in one place. On group wallets this is the same summary that CON-11 describes and the screen is shared.
 
 **Preconditions:** The wallet has at least one rule.
 **Trigger:** The person opens "What happens when money arrives" from RUL-01, from the builder, or after saving a change.
@@ -292,11 +291,11 @@ A deleted rule line is not a state: it leaves the list and keeps "(deleted)" aft
 **Release:** MVP
 **Actor:** System
 **Permission needed:** none (rule authorised at definition time, class (b) of conventions 10.4)
-**Tags:** legal-gate, ledger, audit
+**Tags:** ledger, audit
 
 **Story:** When income is confirmed in a wallet, I want every active share rule to run at once, under its own name, and the wallets that receive a share to run their own rules in turn, so that I never have to move money by hand and I can see exactly what happened.
 
-**Conversation:** Automatic application on every income, with loop prevention and each firing logged, is Gereo's stated differentiator and Monzo staff described full automation as "planned for later" (08 competitor UX 6.5 Open opportunities; 02 personal finance, Gaps item 1). Manual sorting is forgotten or runs after fixed payments leave (08 competitor UX 6.5 Avoid). Money must move only on Confirmed, never on Pending, because provider callbacks can double-notify (WAL-07; CON-14 AC8). Group split execution is CON-14: this story defines the shared engine that runs both personal rules and group split rules, and CON-14 stays the reference for group-only behaviour (timing "At a set time", vote-gated versions, members' view). Decision D3 settles what counts as income: every Confirmed credit, whatever its source, so nobody tags deposits by hand and rules chain. Decision D5 settles the leftover ariary: it goes to Gereo as a visible Rounding line. The tag legal-gate is there because crediting Gereo with the rounding amount is platform income that the lawyer must confirm (CON-14).
+**Conversation:** Automatic application on every income, with loop prevention and each firing logged, is Gereo's stated differentiator and Monzo staff described full automation as "planned for later" (08 competitor UX 6.5 Open opportunities; 02 personal finance, Gaps item 1). Manual sorting is forgotten or runs after fixed payments leave (08 competitor UX 6.5 Avoid). Money must move only on Confirmed, never on Pending, because provider callbacks can double-notify (WAL-07; CON-14 AC8). Group split execution is CON-14: this story defines the shared engine that runs both personal rules and group split rules, and CON-14 stays the reference for group-only behaviour (timing "At a set time", vote-gated versions, members' view). Decision D3 settles what counts as income: every Confirmed credit, whatever its source, so nobody tags deposits by hand and rules chain. Decision D5 settles the leftover ariary: it goes to Gereo as a visible Rounding line.
 
 **Preconditions:** An active rule version exists on the wallet. An income reaches Confirmed after that version's effective time.
 **Trigger:** The "money posted to a wallet" event that WAL-07 owns and emits for any Confirmed credit into the wallet, including a move or transfer received, a contribution or late fee paid in (CON-04), or another rule's Split line (a chain hop). This story consumes that event.
@@ -317,7 +316,7 @@ A deleted rule line is not a state: it leaves the list and keeps "(deleted)" aft
 **Data:** Transaction (read), Wallet rule (read), Ledger entry (write), Rule firing (write), Notification (write), Audit entry (write).
 **Depends on:** WAL-06, WAL-07, WAL-11, WAL-18, RUL-03, RUL-06, RUL-12, RUL-09, RUL-10, RUL-11, CON-04, CON-14, CON-15, NTF-08, ACC-13, SPD-15.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed: every Confirmed credit is income, so nobody tags deposits and there is no per-wallet choice; contributions and late fees are such credits (decision D3; CON-09, CON-14 AC1). Closed: round down per destination, the leftover goes to Gereo as a Rounding line, not largest-remainder and not back to the wallet (decision D5; CON-14). Closed: provider fees are never taken off a credit before the percent, because the fee is its own line and the wallet is credited the net amount (CON-14 AC1; reconciliation line CON-17). Closed: when a credit is reversed (WAL-18), the rule entries reverse down the chain, last hop first, with a reason, and the Rounding line reverses too; a downstream wallet that no longer holds the money is Needs attention for operators (CON-14 AC8, OPS-05). Open, external (lawyer): that crediting the rounding amount to Gereo is lawful platform income and is worded correctly in the terms; default used: the line exists, under 1 Ar per destination, disclosed in ACC-13.
+**Open questions:** Closed: every Confirmed credit is income, so nobody tags deposits and there is no per-wallet choice; contributions and late fees are such credits (decision D3; CON-09, CON-14 AC1). Closed: round down per destination, the leftover goes to Gereo as a Rounding line, not largest-remainder and not back to the wallet (decision D5; CON-14). Closed: provider fees are never taken off a credit before the percent, because the fee is its own line and the wallet is credited the net amount (CON-14 AC1; reconciliation line CON-17). Closed: when a credit is reversed (WAL-18), the rule entries reverse down the chain, last hop first, with a reason, and the Rounding line reverses too; a downstream wallet that no longer holds the money is Needs attention for operators (CON-14 AC8, OPS-05). Closed: the Rounding line exists, under 1 Ar per destination, and is disclosed in ACC-13.
 
 ---
 
@@ -332,7 +331,7 @@ A deleted rule line is not a state: it leaves the list and keeps "(deleted)" aft
 
 **Story:** As a wallet owner, I want to switch a rule off for a while, change it or delete it, knowing it never touches money already moved, so that I stay in control and history stays true.
 
-**Conversation:** A modified rule applies only to future income and history is never rewritten (info.md, wallet rules). A one-tap pause is a recommended safeguard (07 UI/UX 8.2 R-RB7). Rules must be explainable and reversible and the firing history must stay visible (02 personal finance, Qapital, Implication). Pause, edit and delete are reversible or non-destructive for money, so they need no confirmation sheet, except delete which removes a rule people may rely on (07 UI/UX 2.4 R-C1, R-C5). The group version, with its vote gate, is CON-13; this story is the same behaviour for every template and every wallet and defers to CON-13 for the vote.
+**Conversation:** A modified rule applies only to future income and history is never rewritten. A one-tap pause is a recommended safeguard (07 UI/UX 8.2 R-RB7). Rules must be explainable and reversible and the firing history must stay visible (02 personal finance, Qapital, Implication). Pause, edit and delete are reversible or non-destructive for money, so they need no confirmation sheet, except delete which removes a rule people may rely on (07 UI/UX 2.4 R-C1, R-C5). The group version, with its vote gate, is CON-13; this story is the same behaviour for every template and every wallet and defers to CON-13 for the vote.
 
 **Preconditions:** The rule exists and the person holds the permission. The wallet is open (WAL-05 stops rules on a closed one).
 **Trigger:** The person taps Pause, Resume, Edit or Delete on a rule.
@@ -503,7 +502,7 @@ A deleted rule line is not a state: it leaves the list and keeps "(deleted)" aft
 
 **Story:** As a group member, I want only people who hold the right permission to change the rules on the group's wallet, and every change to be visible and recorded, so that nobody can quietly change where the group's money goes.
 
-**Conversation:** Wallet: edit rules is a wallet permission (conventions section 7) and "Treasurer" is only a bundle (conventions section 2; GRP-07, GRP-08). GRP-08 treats it as a money-out permission, so granting it asks for the grantor's PIN, because a rule can move group money between the group's wallets without a request at each firing (GRP-13 AC4). The group rules that split income are defined in CON-11 (define), CON-12 (preview), CON-13 (change, pause, end and the vote gate) and CON-14 (execution) and this story references them and does not duplicate them. Cap, goal and low-balance rules on a group wallet are not split rules and have no vote gate in CON, so this story fixes who edits them and when the group's vote setting applies (info.md: an important change may need a vote). A vote linked to a rule change is VOT-01 opened with a proposal reference; the competitive analysis lists automatic vote-triggered rule changes as out of v1, so the first version gates the save behind a vote the person starts (CON-13 open questions; competitive analysis section 7).
+**Conversation:** Wallet: edit rules is a wallet permission (conventions section 7) and "Treasurer" is only a bundle (conventions section 2; GRP-07, GRP-08). GRP-08 treats it as a money-out permission, so granting it asks for the grantor's PIN, because a rule can move group money between the group's wallets without a request at each firing (GRP-13 AC4). The group rules that split income are defined in CON-11 (define), CON-12 (preview), CON-13 (change, pause, end and the vote gate) and CON-14 (execution) and this story references them and does not duplicate them. Cap, goal and low-balance rules on a group wallet are not split rules and have no vote gate in CON, so this story fixes who edits them and when the group's vote setting applies (an important change may need a vote). A vote linked to a rule change is VOT-01 opened with a proposal reference; the competitive analysis lists automatic vote-triggered rule changes as out of v1, so the first version gates the save behind a vote the person starts (CON-13 open questions; competitive analysis section 7).
 
 **Preconditions:** The wallet belongs to a group. The person is a member.
 **Trigger:** The person opens the rules of a group wallet (RUL-01), or a holder saves, pauses, resumes or deletes a rule.
@@ -578,4 +577,4 @@ Closed in the stories above and summarised here. Closed items carry the decision
 11. **Closed: reversal of income.** Rule entries reverse automatically down the chain, last hop first, with a reason; the Rounding line reverses too (CON-14 AC8).
 12. **Closed: failure plan.** A share whose destination is closed or held is skipped, not queued, and the owner can "Run again" on the original rule version (RUL-12 AC10; CON-15 for groups).
 13. **Open, external (field research): evidence gaps.** No competitor documents a preview or a skipped-run history (08 competitor UX 6.5 [U]); both are hypotheses to test in field interviews. How many rules a Malagasy user can read in the combined summary before it stops helping is unknown. Default used: the four templates, the limits above and the summary as written.
-14. **Open, external (lawyer): the Rounding line to Gereo.** That the rounding amount credited to Gereo is lawful platform income, and the wording in the terms (ACC-13). Default used: the line exists, always under 1 Ar per destination, visible on the receipt.
+14. **Rounding line to Gereo.** Closed: the line exists, always under 1 Ar per destination, visible on the receipt and disclosed in the terms (ACC-13).

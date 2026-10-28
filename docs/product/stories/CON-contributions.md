@@ -1,6 +1,6 @@
 # CON: Contributions and income split
 
-Epic code CON, release MVP. Follows [00-conventions.md](../00-conventions.md) (story format, actors, permission names, IDs). Sources: [info.md](../../../info.md) (section "Cotisations et repartition"), [competitive-analysis.md](../../research/competitive-analysis.md), [design-foundations.md](../../research/design-foundations.md) and the raw reports in `docs/research/raw/`.
+Epic code CON, release MVP. Follows [00-conventions.md](../00-conventions.md) (story format, actors, permission names, IDs). Sources: [competitive-analysis.md](../../research/competitive-analysis.md), [design-foundations.md](../../research/design-foundations.md) and the raw reports in `docs/research/raw/`.
 
 Contributions and income split are the core of the product: they replace the manual calculation of contributions and revenue sharing, and make every flow visible to every authorised member.
 
@@ -22,7 +22,7 @@ A contribution plan generates one **item** per member per cycle. An item has one
 | Exempt | A permission holder exempted this member for this item, with a reason |
 | Cancelled | Item removed by the system with a stated reason: the member left or was removed and the item was waived or never opened (policy `grp.leave_obligation_policy`, GRP-16), or the plan was deleted. An item that the leaving policy records as an outstanding debt is not Cancelled: it keeps its status, is marked "Former member", and gets no reminder and no late fee |
 
-The board and the member view show Paid, Pending and Late as the three headline states from [info.md](../../../info.md). The other states are secondary chips. Money states of a payment (Initiated, Pending, Confirmed, Failed, Cancelled, Needs attention) are the transaction statuses of [00-conventions.md](../00-conventions.md) and WAL; the item status Processing is derived from them.
+The board and the member view show Paid, Pending and Late as the three headline states. The other states are secondary chips. Money states of a payment (Initiated, Pending, Confirmed, Failed, Cancelled, Needs attention) are the transaction statuses of [00-conventions.md](../00-conventions.md) and WAL; the item status Processing is derived from them.
 
 ### Plan, split rule and split run statuses
 
@@ -124,7 +124,7 @@ Every ledger row carries a classification chip from the controlled list of conve
 
 **Story:** As a permission holder, I want to create a contribution plan with an amount, a frequency, a due date and an optional late fee, so that every member knows what to pay and when, and nobody calculates by hand.
 
-**Conversation:** The contribution plan is the first thing a founder like Sara must finish. Calculating contributions by hand is problem 7 in info.md. Table stakes: plan with optional penalty ([competitive-analysis.md](../../research/competitive-analysis.md) section 5). Late fee is optional and off by default because rigid late rules can hurt a member who pays late for a legitimate reason (`raw/07-ui-ux-best-practices.md` section 8.1, MicroSave note; section 9). The plan summary sentence mirrors the "what you see is what you set" principle of the rule builder (`raw/07` section 8.2 R-RB2). Single amount for all members in the MVP: per-member amounts are deferred, see Open questions. See also `raw/01-group-savings.md` section 13 (table stakes 2) and `raw/08-competitor-ux-comparison.md` section 6.6.
+**Conversation:** The contribution plan is the first thing a founder like Sara must finish. Calculating contributions by hand is a core pain of a founder. Table stakes: plan with optional penalty ([competitive-analysis.md](../../research/competitive-analysis.md) section 5). Late fee is optional and off by default because rigid late rules can hurt a member who pays late for a legitimate reason (`raw/07-ui-ux-best-practices.md` section 8.1, MicroSave note; section 9). The plan summary sentence mirrors the "what you see is what you set" principle of the rule builder (`raw/07` section 8.2 R-RB2). Single amount for all members in the MVP: per-member amounts are deferred, see Open questions. See also `raw/01-group-savings.md` section 13 (table stakes 2) and `raw/08-competitor-ux-comparison.md` section 6.6.
 
 **Preconditions:** The group exists and has a group wallet. The person holds Contribution plan: edit. No active plan exists on that wallet (see criterion 6).
 **Trigger:** The person opens "Set up contributions" from the group home or an empty-state prompt.
@@ -159,7 +159,7 @@ Every ledger row carries a classification chip from the controlled list of conve
 
 **Story:** As a permission holder, I want to change, pause or end the plan without disturbing what members already owe, so that nobody finds their past or current amount rewritten.
 
-**Conversation:** Rule from info.md: a changed rule never rewrites history. The same discipline applies to plans: an item keeps the terms it was created with. Members dislike surprise changes to money obligations, and changes to money-out rules may need a vote (`raw/07` section 8.5 R-PM5). Stanbic lets treasurers configure invoices but not their effect on past ones (`raw/08` section 6.6). Ending is the normal way to stop a plan; deleting is restricted so that history is never lost.
+**Conversation:** Rule: a changed rule never rewrites history. The same discipline applies to plans: an item keeps the terms it was created with. Members dislike surprise changes to money obligations, and changes to money-out rules may need a vote (`raw/07` section 8.5 R-PM5). Stanbic lets treasurers configure invoices but not their effect on past ones (`raw/08` section 6.6). Ending is the normal way to stop a plan; deleting is restricted so that history is never lost.
 
 **Preconditions:** An Active or Paused plan exists.
 **Trigger:** The person opens the plan and taps Edit, Pause or End.
@@ -224,11 +224,11 @@ Every ledger row carries a classification chip from the controlled list of conve
 **Release:** MVP
 **Actor:** Member
 **Permission needed:** none (own item)
-**Tags:** legal-gate, ledger, audit
+**Tags:** ledger, audit
 
 **Story:** As a member, I want to pay a contribution from a pre-filled item, see the fee before I confirm, and receive a receipt with a reference, so that I trust where my money went.
 
-**Conversation:** Invoice-first: the item is pre-filled and the member chooses nothing but the confirmation (Stanbic, `raw/08` section 6.6). Avoid making the member leave the app to type a paybill and a composed account number (Stanbic Q28). Fee shown before confirmation; cross-network payouts cost 3 to 10 times more (`raw/03-madagascar-mobile-money.md` section 7.1 item 4). One decision per screen at the money moment, PIN screen repeats amount and recipient (design-foundations section 3 and 4; `raw/07` section 2.4 R-C2 and R-C6; section 2.7 R-A2). Fee as its own ledger line (`raw/07` section 2.5 R-F5). Moves client money: legal-gate.
+**Conversation:** Invoice-first: the item is pre-filled and the member chooses nothing but the confirmation (Stanbic, `raw/08` section 6.6). Avoid making the member leave the app to type a paybill and a composed account number (Stanbic Q28). Fee shown before confirmation; cross-network payouts cost 3 to 10 times more (`raw/03-madagascar-mobile-money.md` section 7.1 item 4). One decision per screen at the money moment, PIN screen repeats amount and recipient (design-foundations section 3 and 4; `raw/07` section 2.4 R-C2 and R-C6; section 2.7 R-A2). Fee as its own ledger line (`raw/07` section 2.5 R-F5).
 
 **Preconditions:** The member has an open item (Pending or Late), is online, has a PIN, and holds the identity tier required by the amount (ACC-07). A wallet or mobile money account is available as the source.
 **Trigger:** The member taps Pay on an item.
@@ -248,7 +248,7 @@ Every ledger row carries a classification chip from the controlled list of conve
 **Data:** Contribution (write), Transaction (write), Ledger entry (write), Wallet (read, write), Notification (write), Audit entry (write).
 **Depends on:** CON-03, WAL-06, WAL-07, WAL-12, WAL-14, ACC-03, ACC-05, ACC-07, NTF-05, XCT-06.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed: the member bears the provider fee, shown before confirmation, so the plan amount means what it says for the group; Gereo may later absorb part of it through `FEE_TABLE_GEREO` without changing this story. The fee amounts themselves depend on Vanilla Pay terms (external, see the epic's open questions). Closed: partial payment and overpayment are refused in the MVP. Closed: the member pays from the wallet balance or from mobile money, one source per payment, and a mobile money payment passes through the member wallet in the ledger. Pay on behalf of another member with a second confirmation (StokFella, `raw/08` section 6.6): later.
+**Open questions:** Closed: the member bears the provider fee, shown before confirmation, so the plan amount means what it says for the group; Gereo may later absorb part of it through `FEE_TABLE_GEREO` without changing this story. The fee amounts themselves come from OPS-11. Closed: partial payment and overpayment are refused in the MVP. Closed: the member pays from the wallet balance or from mobile money, one source per payment, and a mobile money payment passes through the member wallet in the ledger. Pay on behalf of another member with a second confirmation (StokFella, `raw/08` section 6.6): later.
 
 ---
 
@@ -259,7 +259,7 @@ Every ledger row carries a classification chip from the controlled list of conve
 **Release:** MVP
 **Actor:** Member
 **Permission needed:** none
-**Tags:** legal-gate, ledger, sms, audit
+**Tags:** ledger, sms, audit
 
 **Story:** When I paid my contribution and the app does not say Confirmed, I want to know whether my money left my account and what happens next, so I do not pay twice or lose money.
 
@@ -282,7 +282,7 @@ Every ledger row carries a classification chip from the controlled list of conve
 **Data:** Transaction (read, write), Contribution (write), Ledger entry (write), Notification (write), Audit entry (write), Support ticket (create from Report).
 **Depends on:** CON-04, WAL-07, WAL-11, WAL-14, WAL-18, OPS-04, OPS-05, OPS-06, NTF-05.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed: `failed_payment_grace_hours` defaults to 24 and the timeout is WAL's `PENDING_TIMEOUT`. Still open and external: what the provider returns on refunds and how long a refund takes (Vanilla Pay terms unknown, `raw/03` section 3.2). Default used until then: any refund is shown as "refund in progress, reference X" and closed by an operator after the provider confirms.
+**Open questions:** Closed: `failed_payment_grace_hours` defaults to 24 and the timeout is WAL's `PENDING_TIMEOUT`. Closed: no refund timing is assumed from the provider, so any refund is shown as "refund in progress, reference X" and closed by an operator after the provider confirms.
 
 ---
 
@@ -365,7 +365,7 @@ Every ledger row carries a classification chip from the controlled list of conve
 
 **Story:** When a contribution is due soon or overdue, I want the system to remind the member by push and then by SMS if they have not seen it, so that nobody forgets and the treasurer does not have to call.
 
-**Conversation:** Reminders are table stakes and the second-biggest manual job (info.md problem 6 and 7). Push first, SMS as a first-class channel because only a minority of adults own smartphones ([competitive-analysis.md](../../research/competitive-analysis.md) sections 1 and 2; design-foundations section 3 rule 7). Cadence defaults are hypotheses (`raw/07-ui-ux-best-practices.md` section 8.8 R-NT3, R-NT4, R-NT5, R-NT7). Extra late reminders add little (R-VT7, Karlan et al., single study), so the number is capped.
+**Conversation:** Reminders are table stakes and the second-biggest manual job. Push first, SMS as a first-class channel because only a minority of adults own smartphones ([competitive-analysis.md](../../research/competitive-analysis.md) sections 1 and 2; design-foundations section 3 rule 7). Cadence defaults are hypotheses (`raw/07-ui-ux-best-practices.md` section 8.8 R-NT3, R-NT4, R-NT5, R-NT7). Extra late reminders add little (R-VT7, Karlan et al., single study), so the number is capped.
 
 **Preconditions:** A plan with open items exists and reminders are enabled for the plan.
 **Trigger:** A scheduled job runs at each `reminder_offsets` point, and at each late step up to `late_reminder_max`.
@@ -396,11 +396,11 @@ Every ledger row carries a classification chip from the controlled list of conve
 **Release:** MVP
 **Actor:** System
 **Permission needed:** none (configured by Contribution plan: edit; waived by Contribution plan: exempt member)
-**Tags:** legal-gate, ledger, audit
+**Tags:** ledger, audit
 
 **Story:** When an item stays unpaid past the due date and grace period, I want the plan's late fee to be added automatically and visibly, so that the rule is fair, the same for everyone and nobody calculates it by hand.
 
-**Conversation:** Optional penalty is table stakes (`raw/01-group-savings.md` section 13; `raw/08` section 6.6 "late handling with a visible remedy"). Penalties appear as a named classification in the ledger (Stanbic vocabulary, `raw/08` section 6.3). Rigid rules can hurt a member who pays late for a legitimate reason (`raw/07` section 8.1, section 9): waiving must be possible and logged. Legality of penalties charged on client money is part of the `legal-gate`.
+**Conversation:** Optional penalty is table stakes (`raw/01-group-savings.md` section 13; `raw/08` section 6.6 "late handling with a visible remedy"). Penalties appear as a named classification in the ledger (Stanbic vocabulary, `raw/08` section 6.3). Rigid rules can hurt a member who pays late for a legitimate reason (`raw/07` section 8.1, section 9): waiving must be possible and logged.
 
 **Preconditions:** The plan has a late fee configured. An item reaches Late (due date plus `late_grace_days` passed, not Processing, not Exempt).
 **Trigger:** Daily job at the end of the grace period.
@@ -419,7 +419,7 @@ Every ledger row carries a classification chip from the controlled list of conve
 **Data:** Contribution (write), Contribution plan (read), Ledger entry (write on payment), Audit entry (write), Notification (write).
 **Depends on:** CON-01, CON-04, CON-05, NTF-05.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Still open and external (lawyer): is a late fee allowed at all on client funds. Default used until the opinion is in: the late fee is off in every plan and the feature stays behind its `legal-gate`. Closed: the fee lands in the plan's destination wallet only. Closed: introducing or raising a late fee in a running group counts as an amount increase for `plan_change_requires_vote` (CON-02 criterion 6), so by default it needs a vote. Closed: the fee is not a receivable in the ledger (criterion 6). Closed: waiving a fee needs no separate permission beyond Contribution plan: exempt member.
+**Open questions:** Closed: the late fee is off in every plan by default. Closed: the fee lands in the plan's destination wallet only. Closed: introducing or raising a late fee in a running group counts as an amount increase for `plan_change_requires_vote` (CON-02 criterion 6), so by default it needs a vote. Closed: the fee is not a receivable in the ledger (criterion 6). Closed: waiving a fee needs no separate permission beyond Contribution plan: exempt member.
 
 ---
 
@@ -434,7 +434,7 @@ Every ledger row carries a classification chip from the controlled list of conve
 
 **Story:** As a permission holder, I want to exempt a member from one or several contributions with a reason, so that someone in hardship is not chased or fined and the group still has a record.
 
-**Conversation:** Real groups waive contributions for illness, mourning or hardship. Without a record, the treasurer's decision looks arbitrary and trust drops (info.md problem 1 and 8). The exemption is a permission, not a role (conventions section 7). The reason is private to avoid shaming (`raw/07` section 8.1 R-G7; section 8.8 R-NT8).
+**Conversation:** Real groups waive contributions for illness, mourning or hardship. Without a record, the treasurer's decision looks arbitrary and trust drops. The exemption is a permission, not a role (conventions section 7). The reason is private to avoid shaming (`raw/07` section 8.1 R-G7; section 8.8 R-NT8).
 
 **Preconditions:** The plan exists. The item or period is not Paid. The person holds Contribution plan: exempt member and is online.
 **Trigger:** The person taps "Exempt" on a member's row or item, or on a member's profile.
@@ -464,11 +464,11 @@ Every ledger row carries a classification chip from the controlled list of conve
 **Release:** MVP
 **Actor:** Permission holder
 **Permission needed:** Wallet: edit rules
-**Tags:** legal-gate, ledger, audit
+**Tags:** ledger, audit
 
 **Story:** As a permission holder, I want to say what percentage of each income goes to which destination, and when, so that nobody calculates revenue sharing by hand and every member can see the rule.
 
-**Conversation:** Automatic split rules are Gereo's main differentiator and no competitor has them on a group wallet (`raw/01-group-savings.md` section 13 gaps; [competitive-analysis.md](../../research/competitive-analysis.md) section 5). Build the rule as a three-slot sentence (`raw/07-ui-ux-best-practices.md` section 8.2 R-RB1) with a "what happens when money arrives" summary showing the sum and the remainder (R-RB3). The sum may be under 100 percent (info.md). Money moves between wallets of the same group in the MVP; "members" as a destination is out of the MVP because it implies payouts to personal wallets. Under D3 every credit into a wallet is income for it, so rules chain from wallet to wallet; cycles and over-long chains are blocked (R-RB4, RUL-06). Vocabulary: a split rule here is a named set of destination lines; RUL calls each line a share rule.
+**Conversation:** Automatic split rules are Gereo's main differentiator and no competitor has them on a group wallet (`raw/01-group-savings.md` section 13 gaps; [competitive-analysis.md](../../research/competitive-analysis.md) section 5). Build the rule as a three-slot sentence (`raw/07-ui-ux-best-practices.md` section 8.2 R-RB1) with a "what happens when money arrives" summary showing the sum and the remainder (R-RB3). The sum may be under 100 percent. Money moves between wallets of the same group in the MVP; "members" as a destination is out of the MVP because it implies payouts to personal wallets. Under D3 every credit into a wallet is income for it, so rules chain from wallet to wallet; cycles and over-long chains are blocked (R-RB4, RUL-06). Vocabulary: a split rule here is a named set of destination lines; RUL calls each line a share rule.
 
 **Preconditions:** The group has a group wallet and the person holds Wallet: edit rules. At least one destination wallet exists; a group wanting split rules on its main wallet opens a second wallet for campaigns (GRP-15).
 **Trigger:** The person opens "Split income" on the group wallet.
@@ -531,11 +531,11 @@ Every ledger row carries a classification chip from the controlled list of conve
 **Release:** MVP
 **Actor:** Permission holder
 **Permission needed:** Wallet: edit rules
-**Tags:** legal-gate, audit, ledger
+**Tags:** audit, ledger
 
 **Story:** As a permission holder, I want to change, pause or end a split rule knowing it only affects income that arrives later, and that important changes can need the group's vote, so that history stays intact and nobody changes the sharing alone.
 
-**Conversation:** info.md rules: a modified rule applies only to future income; history is never rewritten; an important change may require a vote according to group settings. Raw/07 section 8.2 R-RB6 states that rule changes in a group wallet are proposals that go to vote, and R-RB7 asks for a one-tap pause. Vote-triggered rule changes are out of v1 in [competitive-analysis.md](../../research/competitive-analysis.md) section 7 and the vote form of VOT-01 only takes a prefilled question linked to a snapshot (VOT-01 criterion 10 extends the two-voter floor to policy-change proposals; VOT-03 owns it for expense votes), so the first version gates saving behind a vote that the person starts, as the decision gate in the shared definitions describes. RUL-08 covers pause, resume, edit and delete for every kind of rule; this story adds what is specific to group split rules.
+**Conversation:** Rule: a modified rule applies only to future income; history is never rewritten; an important change may require a vote according to group settings. Raw/07 section 8.2 R-RB6 states that rule changes in a group wallet are proposals that go to vote, and R-RB7 asks for a one-tap pause. Vote-triggered rule changes are out of v1 in [competitive-analysis.md](../../research/competitive-analysis.md) section 7 and the vote form of VOT-01 only takes a prefilled question linked to a snapshot (VOT-01 criterion 10 extends the two-voter floor to policy-change proposals; VOT-03 owns it for expense votes), so the first version gates saving behind a vote that the person starts, as the decision gate in the shared definitions describes. RUL-08 covers pause, resume, edit and delete for every kind of rule; this story adds what is specific to group split rules.
 
 **Preconditions:** A split rule exists. The person holds Wallet: edit rules.
 **Trigger:** The person taps Edit, Pause or End on a rule.
@@ -567,7 +567,7 @@ RUL-07 criterion 4 is the engine rule for a split run and this story does not re
 **Release:** MVP
 **Actor:** System
 **Permission needed:** none (rule authorised by CON-11 and, if required, a vote)
-**Tags:** legal-gate, ledger, audit
+**Tags:** ledger, audit
 
 **Story:** When income is confirmed in a group wallet, I want every destination to receive its share immediately and visibly under the rule's name, so that nobody has to do the sharing and every member can see it.
 
@@ -602,7 +602,7 @@ RUL-07 criterion 4 is the engine rule for a split run and this story does not re
 **Release:** MVP
 **Actor:** Permission holder
 **Permission needed:** Wallet: edit rules
-**Tags:** legal-gate, ledger, audit
+**Tags:** ledger, audit
 
 **Story:** When a split could not run (for example a destination closed), I want to know exactly what happened to the income and to re-run it, so I am sure no money is lost or shared the wrong way.
 
@@ -640,7 +640,7 @@ RUL-07 criterion 4 is the engine rule for a split run and this story does not re
 
 **Story:** As a member, I want to see in one place the group's balance, where the money goes and every movement with its reason, so that I can trust the group without asking anyone.
 
-**Conversation:** Lack of visibility on the real balance after contributions is problem 1 and 8 in info.md; the real-time visible ledger is the product promise ([competitive-analysis.md](../../research/competitive-analysis.md) section 1 point 2). Structure from `raw/07-ui-ux-best-practices.md` section 8.1: headline sentences, then a ranked list with percentage bars (direct-labelled, no legend, sorted descending), then the ledger with classification chips (R-G1 to R-G6). Sankey is optional and never alone (design-foundations section 4). Stanbic shows all members all transactions (`raw/08` section 6.4).
+**Conversation:** Lack of visibility on the real balance after contributions is a founding pain; the real-time visible ledger is the product promise ([competitive-analysis.md](../../research/competitive-analysis.md) section 1 point 2). Structure from `raw/07-ui-ux-best-practices.md` section 8.1: headline sentences, then a ranked list with percentage bars (direct-labelled, no legend, sorted descending), then the ledger with classification chips (R-G1 to R-G6). Sankey is optional and never alone (design-foundations section 4). Stanbic shows all members all transactions (`raw/08` section 6.4).
 
 **Preconditions:** The person is a member who holds the two Wallet permissions. The wallet exists.
 **Trigger:** The person opens the group ledger from the group home.
@@ -674,7 +674,7 @@ RUL-07 criterion 4 is the engine rule for a split run and this story does not re
 
 **Story:** When I look at the group balance, I want to see that the ledger matches what the payment provider holds, so I know the numbers are real and nothing is missing.
 
-**Conversation:** Nothing found documents a visible reconciliation to members ([competitive-analysis.md](../../research/competitive-analysis.md) section 5; design-foundations section 1 point 4; `raw/08-competitor-ux-comparison.md` section 6.4 open opportunity). info.md specifies a daily reconciliation with Vanilla Pay and alerts on gaps. The risk is the opposite: a visible mismatch can alarm members, so the wording must be factual and the next step clear.
+**Conversation:** Nothing found documents a visible reconciliation to members ([competitive-analysis.md](../../research/competitive-analysis.md) section 5; design-foundations section 1 point 4; `raw/08-competitor-ux-comparison.md` section 6.4 open opportunity). The product specifies a daily reconciliation and alerts on gaps. The risk is the opposite: a visible mismatch can alarm members, so the wording must be factual and the next step clear.
 
 **Preconditions:** The daily reconciliation job exists (OPS-04) and has produced a result for the wallet.
 **Trigger:** The person opens the group ledger (CON-16).
@@ -691,7 +691,7 @@ RUL-07 criterion 4 is the engine rule for a split run and this story does not re
 **Data:** Reconciliation run (read, owned by OPS-04), Ledger entry (read), Support ticket (create).
 **Depends on:** CON-16, WAL-20, OPS-04, OPS-05, OPS-06.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed: only operators see the amount of a difference, as WAL-20 says. Closed: there is no tolerance, matching is per transaction and per group wallet, and the provider-held total is checked globally by OPS-04 (criteria 1 and 2). Still open and external (Vanilla Pay): whether the provider offers a daily statement or balance to compare against. Default used until then: the line compares the ledger with the provider callbacks and polls we hold, and the global total check waits for OPS-04.
+**Open questions:** Closed: only operators see the amount of a difference, as WAL-20 says. Closed: there is no tolerance, matching is per transaction and per group wallet, and the provider-held total is checked globally by OPS-04 (criteria 1 and 2). Closed: the line compares the ledger with the provider callbacks and polls we hold, and the global total check waits for OPS-04.
 
 ---
 
@@ -706,7 +706,7 @@ RUL-07 criterion 4 is the engine rule for a split run and this story does not re
 
 **Story:** When the group meets or the accountant asks for the books, I want to export the ledger as a file or a summary page, so I can share it without retyping anything.
 
-**Conversation:** WAL-16 owns export generation for every wallet (formats, columns, size limits, background build, link life); this story adds the group meeting pack and the group-specific columns, and does not restate WAL-16. Export on day one is a design rule and table stakes (CSV and PDF) ([competitive-analysis.md](../../research/competitive-analysis.md) sections 5 and 7). Meetings are where today's trust problems surface (info.md problem 1 and 2). Phone numbers leak targeting data in screenshots, so exports mask them by default (`raw/07-ui-ux-best-practices.md` section 2.8 R-S4). Open Collective filters and exports its ledger (`raw/08` section 6.3).
+**Conversation:** WAL-16 owns export generation for every wallet (formats, columns, size limits, background build, link life); this story adds the group meeting pack and the group-specific columns, and does not restate WAL-16. Export on day one is a design rule and table stakes (CSV and PDF) ([competitive-analysis.md](../../research/competitive-analysis.md) sections 5 and 7). Meetings are where today's trust problems surface. Phone numbers leak targeting data in screenshots, so exports mask them by default (`raw/07-ui-ux-best-practices.md` section 2.8 R-S4). Open Collective filters and exports its ledger (`raw/08` section 6.3).
 
 **Preconditions:** The person holds Wallet: export history and the wallet has entries.
 **Trigger:** The person taps Export on the ledger.
@@ -740,7 +740,7 @@ RUL-07 criterion 4 is the engine rule for a split run and this story does not re
 
 **Story:** When I paid my contribution, I want to see what my group did with its money since, so I can believe my money is used well.
 
-**Conversation:** "Where does my money go" is the question members ask Mamy by phone (info.md problems 1 and 8). Groups pool money, so the honest answer is the group's outflows in the period, not a coin-by-coin trace; the only exact trace is the split chain that the contribution itself started, because split rules run on every credit. Ownership claims over pooled funds are legally sensitive and are avoided (raw/07 section 8.1 R-G6 two numbers; competitive-analysis section 6 item 1). Screen design from `raw/07` section 8.1 and Stanbic statements (`raw/08` section 6.4).
+**Conversation:** "Where does my money go" is the question members ask Mamy by phone. Groups pool money, so the honest answer is the group's outflows in the period, not a coin-by-coin trace; the only exact trace is the split chain that the contribution itself started, because split rules run on every credit. Ownership claims over pooled funds are legally sensitive and are avoided (raw/07 section 8.1 R-G6 two numbers; competitive-analysis section 6 item 1). Screen design from `raw/07` section 8.1 and Stanbic statements (`raw/08` section 6.4).
 
 **Preconditions:** The member has at least one Paid contribution.
 **Trigger:** The member opens a receipt or "Where did it go" on a Paid item.
@@ -758,7 +758,7 @@ RUL-07 criterion 4 is the engine rule for a split run and this story does not re
 **Data:** Contribution (read), Ledger entry (read), Wallet rule (read).
 **Depends on:** CON-03, CON-14, CON-16.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed: the story stays P2 in the MVP release and ships after the P0 and P1 stories; field groups confirm it before it is built. Still open and external (lawyer): the legal wording about a member's "share of the pool"; default used until then is the plain statement in criterion 1 that the money is pooled and no ownership share is claimed.
+**Open questions:** Closed: the story stays P2 in the MVP release and ships after the P0 and P1 stories; field groups confirm it before it is built. Closed: the wording about a member's "share of the pool" is the plain statement in criterion 1 that the money is pooled and no ownership share is claimed.
 
 ---
 
@@ -773,7 +773,7 @@ RUL-07 criterion 4 is the engine rule for a split run and this story does not re
 
 **Story:** As a member, I want every action on the plan and the split rules to need the right permission and be written in a log I can read, so that no one person can change the group's money rules in secret.
 
-**Conversation:** Permissions only, no roles (conventions section 2 and 7). Every permission change is audited and visible to authorised members (info.md "Garde-fous"). Transparent, hidden-admin power is the failure mode of tontines (`raw/01-group-savings.md` section 13 risks 1; `raw/08` section 6.11). When blocked, say which permission is missing and who can grant it (`raw/07` section 8.5 R-PM7).
+**Conversation:** Permissions only, no roles (conventions section 2 and 7). Every permission change is audited and visible to authorised members. Transparent, hidden-admin power is the failure mode of tontines (`raw/01-group-savings.md` section 13 risks 1; `raw/08` section 6.11). When blocked, say which permission is missing and who can grant it (`raw/07` section 8.5 R-PM7).
 
 **Preconditions:** A plan or a split rule exists.
 **Trigger:** Any action on a plan, a reminder, an exemption, a split rule or an export; or a member opening the activity log.
@@ -792,7 +792,7 @@ RUL-07 criterion 4 is the engine rule for a split run and this story does not re
 **Data:** Audit entry (read, write), Membership (read), Permission (read).
 **Depends on:** CON-01, CON-02, CON-07, CON-10, CON-11, CON-13, CON-18, GRP-08, GRP-09, GRP-10, GRP-11, OPS-09.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed: a member without a view permission reads only the entries about themselves (criterion 6). Closed: audit data is kept for OPS `AUDIT_RETENTION_YEARS`. Still open and external (lawyer): the retention question is tracked in ACC open question 1.
+**Open questions:** Closed: a member without a view permission reads only the entries about themselves (criterion 6). Closed: audit data is kept for OPS `AUDIT_RETENTION_YEARS`. Retention is described in ACC open question 1.
 
 ---
 
@@ -842,10 +842,10 @@ Count: 20 stories. P0: 12 (CON-01, 02, 03, 04, 05, 06, 08, 11, 12, 14, 16, 20). 
 
 Closed questions keep their number so references stay stable.
 
-1. **Closed: provider fee on a contribution.** The member bears it, shown before confirmation; the group receives the full item amount (CON-04). The fee amounts depend on Vanilla Pay terms (see 15).
+1. **Closed: provider fee on a contribution.** The member bears it, shown before confirmation; the group receives the full item amount (CON-04). The fee amounts come from OPS-11.
 2. **Closed: partial payment and overpayment.** Both are refused in the MVP (CON-04).
 3. **Closed: payment source.** Member wallet balance or mobile money, one source per payment; a mobile money payment passes through the member wallet in the ledger (CON-04).
-4. **Open, external (lawyer): late fee legality.** Is a penalty allowed on client funds. Default used: late fee off in every plan, feature behind its `legal-gate`. The rest of the question is closed: the fee lands in the plan's destination wallet, introducing or raising it counts as an amount increase for the decision gate, it is not a ledger receivable, and waiving needs no extra permission (CON-09).
+4. **Late fee default.** Default used: late fee off in every plan. The rest of the question is closed: the fee lands in the plan's destination wallet, introducing or raising it counts as an amount increase for the decision gate, it is not a ledger receivable, and waiving needs no extra permission (CON-09).
 5. **Closed by D3: what counts as income.** Every Confirmed credit into a wallet, contributions and late fees included. `contributions_feed_split` is removed. Provider fees are never deducted from the credit before the split (CON-11, CON-14).
 6. **Closed by D5: rounding.** Rounded down per destination; the leftover goes to Gereo as a visible Rounding line shown on the receipt and disclosed in the terms (CON-12, CON-14).
 7. **Closed: "members" as a split destination.** Not in the MVP; it needs payouts to personal wallets, individual wallet caps and the approvals of GRP-13 (CON-11).
@@ -855,6 +855,6 @@ Closed questions keep their number so references stay stable.
 11. **Partly closed: reminder economics.** Closed: reminder SMS are paid by the group allowance, `late_reminder_max` is 2, `manual_reminder_min_interval` is 48 hours, the SMS wait is NTF's, and quiet hours never swallow a due-day reminder (NTF-09). Open, external (SMS aggregator): the real SMS cost for Madagascar. Default used: only the SMS count is shown until a quote exists (CON-07, CON-08).
 12. **Closed: reconciliation visibility.** Only operators see the amount of a difference; no tolerance; matching is per transaction and per group wallet, the provider-held total is checked globally by OPS-04 (CON-17). The provider statement itself is open and external (see 15).
 13. **Closed: Wallet freeze and splits.** Splits inside the group and the Rounding line continue during a Wallet freeze (Wallet: freeze); a wallet Held by Gereo stops them too (CON-14, CON-15, SPD-15).
-14. **Open, external (lawyer): legal gate for the whole epic.** Holding contributions in a group wallet, penalties, any payout to members, the rounding amount credited to Gereo, and the wording of a member's "share of the pool" (CON-19) depend on the unconfirmed legal basis for holding client funds (Law 2016-056, see competitive-analysis section 6 item 1). Every story tagged `legal-gate` is blocked from release until that opinion is in. Default used: build behind the gate.
-15. **Open, external (Vanilla Pay): amount encoding, ceilings, fees, refunds and statements.** The Vanilla Pay amount unit (design-foundations section 4), what the Ar 100 000 000 ceiling applies to (competitive-analysis section 9), per-transaction limits, provider fee amounts, refund behaviour and timing, and whether a daily statement or balance exists. Defaults used: `plan_amount_max` equals the lowest per-transaction deposit limit in force, refunds are closed by an operator after provider confirmation, the reconciliation line compares the ledger with the provider callbacks and polls we hold.
+14. Closed: there is no legal gate on holding contributions, penalties, payouts or the Rounding line (decision D7).
+15. Closed: no provider is named. `plan_amount_max` equals the lowest per-transaction deposit limit in force, refunds are closed by an operator after provider confirmation, and the reconciliation line compares the ledger with the provider callbacks and polls we hold (decision D7).
 16. **Open, external (accountants, field interviews): accounting export format.** Chart of accounts or standard export expected by Malagasy accountants (CON-18). Default used: the flat CSV of WAL-16 with the group columns.

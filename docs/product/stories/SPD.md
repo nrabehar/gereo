@@ -1,6 +1,6 @@
 # SPD: Spending and approvals
 
-Epic code SPD, release MVP. Follows [00-conventions.md](../00-conventions.md) (story format, actors, permission names, IDs). Sources: [info.md](../../../info.md) (sections "Garde-fous", "Flux d'argent", "Projets"), [competitive-analysis.md](../../research/competitive-analysis.md), [design-foundations.md](../../research/design-foundations.md) and the raw reports in `docs/research/raw/`.
+Epic code SPD, release MVP. Follows [00-conventions.md](../00-conventions.md) (story format, actors, permission names, IDs). Sources: [competitive-analysis.md](../../research/competitive-analysis.md), [design-foundations.md](../../research/design-foundations.md) and the raw reports in `docs/research/raw/`.
 
 Spending approvals are the other half of the product's trust promise: money leaves a group only when the right people have seen exactly what is paid, to whom, from which wallet, and agreed. The design rules that govern the whole epic come from [competitive-analysis.md](../../research/competitive-analysis.md) section 7 ("No single administrator can move group funds", "Every approval screen shows exact amount, payee, wallet and rule in plain language") and from [design-foundations.md](../../research/design-foundations.md) section 3 principle 4 ("Approvals authorise exactly what is shown. Any change voids earlier approvals").
 
@@ -124,11 +124,11 @@ Expense, Fee and Reversal rows, each with the request reference, the approvers o
 **Release:** MVP
 **Actor:** Member or Permission holder
 **Permission needed:** Wallet: initiate spend
-**Tags:** legal-gate, offline, audit
+**Tags:** offline, audit
 
 **Story:** As a person who can initiate spending, I want to ask my group to pay someone from a wallet or a project, with the amount, the payee, a receipt or quote and a note, so that spending is requested openly and nobody pays from their own pocket and hopes to be repaid.
 
-**Conversation:** The group's spending today runs on phone calls and memory (info.md problems 1 and 2). Open Collective's model is the best precedent: submit, approve, pay, everyone sees (`raw/04-projects-voting-governance.md` section 3). Policy text is shown on the form (`raw/08-competitor-ux-comparison.md` section 6.7; SPD-02). A request is a submission only, no money moves until the payout (SPD-10), so the screen says so. First-time payee, wrong-number and wrong-person risk is real: 25 percent of Sub-Saharan mobile money owners have sent money to the wrong person and half never recovered it (design-foundations section 1 point 1; `raw/07-ui-ux-best-practices.md` section 2.8 R-S3, section 2.6 R-E1 and R-E4). Moves client money when paid: legal-gate.
+**Conversation:** The group's spending today runs on phone calls and memory. Open Collective's model is the best precedent: submit, approve, pay, everyone sees (`raw/04-projects-voting-governance.md` section 3). Policy text is shown on the form (`raw/08-competitor-ux-comparison.md` section 6.7; SPD-02). A request is a submission only, no money moves until the payout (SPD-10), so the screen says so. First-time payee, wrong-number and wrong-person risk is real: 25 percent of Sub-Saharan mobile money owners have sent money to the wrong person and half never recovered it (design-foundations section 1 point 1; `raw/07-ui-ux-best-practices.md` section 2.8 R-S3, section 2.6 R-E1 and R-E4).
 
 **Preconditions:** The person holds Wallet: initiate spend on the source wallet. On the approval path the requester needs Tier 1 only, because a verified person signs; each approver needs the money-out tier for the amount (ACC-07, numbers in OPS-11). On the vote path (SPD-09) the requester needs the money-out tier for the amount; below it the person sees the next step from ACC-07 and the `acc.tiers.limit_hit` message before sending. Drafting is allowed while the wallet is frozen; sending is allowed too, approval and payout are not (SPD-15).
 **Trigger:** The person taps "Ask to spend" from a wallet, a project, or a decision, or arrives from WAL-09, WAL-12 or WAL-13 on a group wallet.
@@ -148,7 +148,7 @@ Expense, Fee and Reversal rows, each with the request reference, the approvers o
 **Data:** Expense request (write), Wallet (read), Membership (read), Notification (write), Audit entry (write).
 **Depends on:** WAL-03 (balance, reserved amounts), WAL-09 and WAL-10 (fee estimate, limits, pause rules), WAL-12 and WAL-13 (Gereo destinations), GRP-08 and GRP-09 (permissions), OPS-11 (limits and fees), ACC-07 (tiers), SPD-02, SPD-03, NTF-06 (SMS allowance top-up), XCT-05, XCT-06.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Open, needs Vanilla Pay: does the provider expose a payee name lookup (Confirmation of Payee)? Default used: no lookup, "Name not checked" plus the re-read of the last three digits. Closed: there is no per-request maximum of our own; the limit is the tier limit and fee table of OPS-11 and the provider limit, and a request above either is blocked before sending with the reason. Closed: one payee per request (batch is out of the MVP). Closed: members with Wallet: view history see amount, purpose, status, payee display name and approver names; attachments, notes and rejection reasons only the requester, approvers, voters of the linked vote who are members, and holders of Wallet: approve spend (Open Collective pattern).
+**Open questions:** Closed: no payee name lookup, "Name not checked" plus the re-read of the last three digits. Closed: there is no per-request maximum of our own; the limit is the tier limit and fee table of OPS-11 and the provider limit, and a request above either is blocked before sending with the reason. Closed: one payee per request (batch is out of the MVP). Closed: members with Wallet: view history see amount, purpose, status, payee display name and approver names; attachments, notes and rejection reasons only the requester, approvers, voters of the linked vote who are members, and holders of Wallet: approve spend (Open Collective pattern).
 
 ---
 
@@ -163,7 +163,7 @@ Expense, Fee and Reversal rows, each with the request reference, the approvers o
 
 **Story:** When I am about to send an expense request, I want to read in plain words who must approve it and whether a vote is needed, so I know what will happen and how long it may take.
 
-**Conversation:** The policy is displayed on the Open Collective submission page and is the strongest cue that spending is governed, not arbitrary (`raw/04-projects-voting-governance.md` section 3; `raw/08` section 6.7). Thresholds and mandatory votes live in product logic, not in the permission system (conventions section 7; info.md "Garde-fous"). The approval count is shown like a quorum ("2 of 3 approvers needed", `raw/07-ui-ux-best-practices.md` section 8.4 R-AP4).
+**Conversation:** The policy is displayed on the Open Collective submission page and is the strongest cue that spending is governed, not arbitrary (`raw/04-projects-voting-governance.md` section 3; `raw/08` section 6.7). Thresholds and mandatory votes live in product logic, not in the permission system (conventions section 7). The approval count is shown like a quorum ("2 of 3 approvers needed", `raw/07-ui-ux-best-practices.md` section 8.4 R-AP4).
 
 **Preconditions:** The person is on the request form (SPD-01) or on the wallet's "Spending rules" page.
 **Trigger:** The form opens or the amount changes.
@@ -262,11 +262,11 @@ Expense, Fee and Reversal rows, each with the request reference, the approvers o
 **Release:** MVP
 **Actor:** Permission holder
 **Permission needed:** Wallet: approve spend (for project requests, also Project: approve purchase, see SPD-13)
-**Tags:** legal-gate, audit
+**Tags:** audit
 
 **Story:** As a person who can approve spending, I want to read in plain language exactly what will be paid, to whom, from which wallet, what remains, and who already approved, and then approve that exactly, so that I never approve something I did not understand.
 
-**Conversation:** The approval card shows requester, purpose, amount, destination name and number, source wallet and balance after, evidence, related project and budget line, who approved, and what happens next (`raw/07-ui-ux-best-practices.md` section 8.4 R-AP1). Buttons name the outcome and are not styled to push approval (R-AP2). Confirmation must restate specifics, never default to yes (`raw/07` section 2.4 R-C2, R-C5, R-C6; NN/g confirmation). First-time payee, large amounts and new devices trigger a pause with "Did someone ask you to send this?" (R-S3). Approvals authorise exactly what was shown (R-AP3; PSD2 dynamic-linking principle). Moves client money: legal-gate.
+**Conversation:** The approval card shows requester, purpose, amount, destination name and number, source wallet and balance after, evidence, related project and budget line, who approved, and what happens next (`raw/07-ui-ux-best-practices.md` section 8.4 R-AP1). Buttons name the outcome and are not styled to push approval (R-AP2). Confirmation must restate specifics, never default to yes (`raw/07` section 2.4 R-C2, R-C5, R-C6; NN/g confirmation). First-time payee, large amounts and new devices trigger a pause with "Did someone ask you to send this?" (R-S3). Approvals authorise exactly what was shown (R-AP3; PSD2 dynamic-linking principle).
 
 **Preconditions:** A request is Awaiting approval. The person holds the required permission, has the identity tier OPS-11 requires for approving money-out of this amount, is online, and is not blocked by separation of duties (SPD-08).
 **Trigger:** The person opens a request from the inbox or from a notification.
@@ -286,7 +286,7 @@ Expense, Fee and Reversal rows, each with the request reference, the approvers o
 **Data:** Expense request (read, write status), Approval (write), Wallet (read), Project (read), Audit entry (write), Notification (write).
 **Depends on:** SPD-04, SPD-02, SPD-06, SPD-08, ACC-03 (PIN), ACC-04 (PIN reset), ACC-05 (new-device cooling signal), ACC-07 (tier and limit message), WAL-03 (balance, reserve), WAL-10 (pause and PIN pattern), NTF-05.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed: a PIN is required for every approval, since each one authorises money going out (`raw/07` R-C1); WAL-10 asks the same of each approver. Closed: a project request needs both gates, see SPD-13. Open, needs Vanilla Pay: the payee name check (see SPD-01); default used: "Name not checked" and the pause screen for first-time payees.
+**Open questions:** Closed: a PIN is required for every approval, since each one authorises money going out (`raw/07` R-C1); WAL-10 asks the same of each approver. Closed: a project request needs both gates, see SPD-13. Closed: there is no payee name check (see SPD-01); the screen shows "Name not checked" and the pause screen for first-time payees.
 
 ---
 
@@ -331,7 +331,7 @@ Expense, Fee and Reversal rows, each with the request reference, the approvers o
 **Release:** MVP
 **Actor:** Member (the requester)
 **Permission needed:** Wallet: initiate spend (and being the requester)
-**Tags:** legal-gate, audit
+**Tags:** audit
 
 **Story:** As a requester, I want to fix a mistake in my request even after some people approved it, knowing earlier approvals no longer count, so that approvers always authorise exactly what is paid.
 
@@ -366,7 +366,7 @@ Expense, Fee and Reversal rows, each with the request reference, the approvers o
 **Release:** MVP
 **Actor:** Permission holder
 **Permission needed:** Wallet: approve spend
-**Tags:** legal-gate, audit
+**Tags:** audit
 
 **Story:** As a member of a money group, I want the person who asks for money never to be the only person who approves it, so that no single person can move the group's funds.
 
@@ -400,11 +400,11 @@ Expense, Fee and Reversal rows, each with the request reference, the approvers o
 **Release:** MVP
 **Actor:** Permission holder or Member (requester)
 **Permission needed:** Wallet: initiate spend, plus Vote: create only for a hand-started vote (VOT-03). When the policy requires the vote, the system creates it and Vote: create is not needed
-**Tags:** legal-gate, audit
+**Tags:** audit
 
 **Story:** When an expense is big enough that the group should decide together, I want the vote to open from the request and, if it passes, the payment to start, so I can have one flow from decision to payment.
 
-**Conversation:** The vote linked to a wallet and spending in one flow is the combination nobody has (`raw/08-competitor-ux-comparison.md` section 6.8; [competitive-analysis.md](../../research/competitive-analysis.md) section 5; info.md Votes: "link a vote to an action: approve an expense"). Linked action approve an expense is the only linked action in v1 ([competitive-analysis.md](../../research/competitive-analysis.md) section 7). Decision D4 settles what info.md left open ("au-dessus d'un seuil, approbation de plusieurs personnes ou un vote"): a passed vote is the authorisation and the payment starts with no approvers. "No single person moves the money" is met by the vote itself under the floor stated once in GRP-13 (master) and, for the vote half, in VOT "Kinds of vote". This story cites them and restates no number; VOT-03 owns how the vote is created and the voters are counted. The vote is never followed by a second round of approvals, and a vote never falls back to approvals when it fails.
+**Conversation:** The vote linked to a wallet and spending in one flow is the combination nobody has (`raw/08-competitor-ux-comparison.md` section 6.8; [competitive-analysis.md](../../research/competitive-analysis.md) section 5). Linked action approve an expense is the only linked action in v1 ([competitive-analysis.md](../../research/competitive-analysis.md) section 7). Decision D4 settles what was left open ("au-dessus d'un seuil, approbation de plusieurs personnes ou un vote"): a passed vote is the authorisation and the payment starts with no approvers. "No single person moves the money" is met by the vote itself under the floor stated once in GRP-13 (master) and, for the vote half, in VOT "Kinds of vote". This story cites them and restates no number; VOT-03 owns how the vote is created and the voters are counted. The vote is never followed by a second round of approvals, and a vote never falls back to approvals when it fails.
 
 **Preconditions:** The policy requires a vote for this amount (`spd.spend_vote_threshold`), or the requester asks for one on any request in Draft, Awaiting approval, Needs changes or Awaiting vote. The vote path is available only when the GRP-13 and VOT "Kinds of vote" conditions hold; otherwise a money vote is unavailable and the approval band applies (conventions 10.7). On the vote path the requester needs the money-out tier for the amount (ACC-07), because no verified approver exists; voters need only phone and OTP, and a ballot is never limited by tier. A vote started by hand on a request in Awaiting approval sets its approvals aside; they are not reused (VOT-03).
 **Trigger:** The request is sent with an amount at or above the vote threshold, or the requester taps "Ask the group to vote first" on the request.
@@ -435,11 +435,11 @@ Expense, Fee and Reversal rows, each with the request reference, the approvers o
 **Release:** MVP
 **Actor:** System
 **Permission needed:** none (authorised by the recorded approvals or by the passed vote)
-**Tags:** legal-gate, ledger, audit
+**Tags:** ledger, audit
 
 **Story:** When the last required approval is in or the vote has passed, I want the payout to be sent safely to the payee through the payment provider and every status to be visible, so that the money goes out exactly once and everyone can follow it.
 
-**Conversation:** Payments go through Vanilla Pay behind a payment adapter so another rail can replace it (conventions section 2). Provider callbacks can time out or double-notify, so idempotency keys, pending and settled states and a reconciliation job are mandatory ([competitive-analysis.md](../../research/competitive-analysis.md) section 6 item 6; `raw/03-madagascar-mobile-money.md` section 7.1 item 5). Pending says what happens next; failed says whether money moved (`raw/07-ui-ux-best-practices.md` section 2.3 R-T1 to R-T4). A rule that cannot pay if funds are insufficient (`raw/08-competitor-ux-comparison.md` section 6.7). Money-out is online only. Moves client money: legal-gate.
+**Conversation:** Payments go through a payment adapter so the rail can be replaced (conventions section 2). Provider callbacks can time out or double-notify, so idempotency keys, pending and settled states and a reconciliation job are mandatory ([competitive-analysis.md](../../research/competitive-analysis.md) section 6 item 6; `raw/03-madagascar-mobile-money.md` section 7.1 item 5). Pending says what happens next; failed says whether money moved (`raw/07-ui-ux-best-practices.md` section 2.3 R-T1 to R-T4). A rule that cannot pay if funds are insufficient (`raw/08-competitor-ux-comparison.md` section 6.7). Money-out is online only.
 
 **Preconditions:** The request is Approved: either it has the required approvals on the current version from people who still hold the permission, or its linked vote passed (D4; floor in GRP-13 and VOT "Kinds of vote").
 **Trigger:** The last required approval is recorded, or the linked vote closes as Passed.
@@ -460,7 +460,7 @@ Expense, Fee and Reversal rows, each with the request reference, the approvers o
 **Data:** Expense request (write status), Transaction (write), Ledger entry (write), Approval (read), Vote (read), Wallet (read, reserve), Notification (write), Audit entry (write).
 **Depends on:** SPD-05, SPD-09, SPD-14, SPD-15, WAL-03, WAL-10, WAL-11, WAL-12, WAL-13, WAL-18 (reversing entries), WAL-20 (reconciliation), OPS-04, OPS-10, OPS-13, ACC-07, RUL-07, CON-14, NTF-05, NTF-09, XCT-06.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed: posting model is the one in criterion 7, the same as WAL-10 and WAL-11. Closed: payouts to non-Gereo mobile money numbers are in the MVP, because suppliers and workers are not members and WAL-09 already sends to any number. Closed: the wallet pays the fee. Open, needs Vanilla Pay: provider limits per transaction, per day and per wallet (Ar 20M individual wallet cap on MVola, the Ar 100M ceiling in info.md needs clarification, `raw/03` sections 7.1 item 3 and 7.4 item 4); default used: the limits of OPS-11, and a payout above a provider limit is blocked before sending or fails with the reason of SPD-11.
+**Open questions:** Closed: posting model is the one in criterion 7, the same as WAL-10 and WAL-11. Closed: payouts to non-Gereo mobile money numbers are in the MVP, because suppliers and workers are not members and WAL-09 already sends to any number. Closed: the wallet pays the fee. Closed: the limits are those of OPS-11 (the Ar 20M individual wallet cap on MVola is noted in `raw/03` sections 7.1 item 3 and 7.4 item 4), and a payout above a provider limit is blocked before sending or fails with the reason of SPD-11.
 
 ---
 
@@ -471,7 +471,7 @@ Expense, Fee and Reversal rows, each with the request reference, the approvers o
 **Release:** MVP
 **Actor:** Requester, Permission holder, System
 **Permission needed:** the requester or a holder of Wallet: approve spend (to try again, which adds no new authorisation); Wallet: initiate spend (requester view)
-**Tags:** legal-gate, ledger, audit
+**Tags:** ledger, audit
 
 **Story:** When a payout does not go through or the provider is down, I want to know whether the money left the wallet and what happens next, so that nobody pays twice or thinks money is lost.
 
@@ -494,7 +494,7 @@ Expense, Fee and Reversal rows, each with the request reference, the approvers o
 **Data:** Transaction (read, write), Ledger entry (write), Expense request (write status), Support ticket (create), Notification (write), Audit entry (write).
 **Depends on:** SPD-07, SPD-10, WAL-08, WAL-11, WAL-14, WAL-18, OPS-04, OPS-06, OPS-08, OPS-13, NTF-05, XCT-12.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed: the wait is `PAYOUT_PROVIDER_WAIT_MAX` (owned by WAL, not the device queue) and the attempt count is the OPS-13 cap. Closed: an operator cannot mark a payout Confirmed by hand; the outcome comes from asking the provider or from reconciliation, and a ledger correction goes through OPS-05 with a second operator, so the action is audited. Open, needs Vanilla Pay: the failure codes the provider returns (`raw/03` section 3.2); default used: the reason list of criterion 2 with "provider error" for any other code.
+**Open questions:** Closed: the wait is `PAYOUT_PROVIDER_WAIT_MAX` (owned by WAL, not the device queue) and the attempt count is the OPS-13 cap. Closed: an operator cannot mark a payout Confirmed by hand; the outcome comes from asking the provider or from reconciliation, and a ledger correction goes through OPS-05 with a second operator, so the action is audited. Closed: the reason list of criterion 2 with "provider error" for any other code.
 
 ---
 
@@ -540,11 +540,11 @@ Expense, Fee and Reversal rows, each with the request reference, the approvers o
 **Release:** MVP
 **Actor:** Member or Permission holder
 **Permission needed:** Wallet: initiate spend; Project: approve purchase (project requests); Project: view
-**Tags:** legal-gate, ledger, audit
+**Tags:** ledger, audit
 
 **Story:** As a project member, I want an expense to belong to a project and, if there is one, to the decision that authorised it, so that the project shows what was spent and why.
 
-**Conversation:** A project expense debits the linked wallet and needs Wallet: approve spend (info.md "Projets (ERP)"); every important decision is linked to a vote or to a named person. Keep tasks and money linked: each expense request references a budget line and shows remaining budget in a sentence and a bar (`raw/07-ui-ux-best-practices.md` section 8.6). A decision log entry with a "money moved" link back to the ledger is an open opportunity (`raw/08-competitor-ux-comparison.md` section 6.8). Project page timeline merges tasks, expense requests and decisions (section 6.9). Out of scope: purchase orders and supplier management ([competitive-analysis.md](../../research/competitive-analysis.md) section 7).
+**Conversation:** A project expense debits the linked wallet and needs Wallet: approve spend; every important decision is linked to a vote or to a named person. Keep tasks and money linked: each expense request references a budget line and shows remaining budget in a sentence and a bar (`raw/07-ui-ux-best-practices.md` section 8.6). A decision log entry with a "money moved" link back to the ledger is an open opportunity (`raw/08-competitor-ux-comparison.md` section 6.8). Project page timeline merges tasks, expense requests and decisions (section 6.9). Out of scope: purchase orders and supplier management ([competitive-analysis.md](../../research/competitive-analysis.md) section 7).
 
 **Preconditions:** A project with a linked wallet exists (PRJ), or the person links an existing decision.
 **Trigger:** The person starts a request from the project, or adds a project or decision on the request form.
@@ -575,11 +575,11 @@ Expense, Fee and Reversal rows, each with the request reference, the approvers o
 **Release:** MVP
 **Actor:** Permission holder (sets); System (enforces)
 **Permission needed:** Wallet: edit rules to set a cap in warn mode (RUL-09); Group: set spending policy to choose `spd.spend_cap_mode` block or vote and for any loosening or removal; none to see its effect
-**Tags:** legal-gate, ledger, audit
+**Tags:** ledger, audit
 
 **Story:** As a permission holder, I want to choose what happens when a wallet or project reaches its spending cap, so that even approved requests cannot drain it when the group wants a hard limit.
 
-**Conversation:** The spending cap with alert is one of the four rule templates in the MVP ([competitive-analysis.md](../../research/competitive-analysis.md) section 7; info.md "Wallets"). Show the remaining cap on the wallet card, warn at the warning level and at the cap, and state whether the cap blocks, asks for a vote, or only warns (`raw/07-ui-ux-best-practices.md` section 8.2 R-RB5; thresholds are U). The cap is a guard for the group when many small approved requests would add up. RUL-09 owns the cap rule, its period, its counter and its alert, and says a cap alerts and never blocks by itself (the personal cap is warn-only and has no mode field); this story is the sole owner of `spd.spend_cap_mode` for group wallets and adds the two stricter modes and their enforcement, so the mode default is warn and block or vote is a deliberate choice that protects money, which is why it needs Group: set spending policy. Nothing is enforced without `spd.spend_cap_mode`.
+**Conversation:** The spending cap with alert is one of the four rule templates in the MVP ([competitive-analysis.md](../../research/competitive-analysis.md) section 7). Show the remaining cap on the wallet card, warn at the warning level and at the cap, and state whether the cap blocks, asks for a vote, or only warns (`raw/07-ui-ux-best-practices.md` section 8.2 R-RB5; thresholds are U). The cap is a guard for the group when many small approved requests would add up. RUL-09 owns the cap rule, its period, its counter and its alert, and says a cap alerts and never blocks by itself (the personal cap is warn-only and has no mode field); this story is the sole owner of `spd.spend_cap_mode` for group wallets and adds the two stricter modes and their enforcement, so the mode default is warn and block or vote is a deliberate choice that protects money, which is why it needs Group: set spending policy. Nothing is enforced without `spd.spend_cap_mode`.
 
 **Preconditions:** A spending cap rule exists on the wallet or project (set in RUL-09) and, for block or vote mode, a mode was chosen under the spending policy.
 **Trigger:** A request is created, authorised or about to be paid.
@@ -609,7 +609,7 @@ Expense, Fee and Reversal rows, each with the request reference, the approvers o
 **Release:** MVP
 **Actor:** Permission holder
 **Permission needed:** Wallet: freeze (decision D2) to freeze and to apply a lift; lifting is authorised by `spd.freeze_lift_approvals` distinct holders of Wallet: approve spend or by an authority vote
-**Tags:** legal-gate, ledger, audit
+**Tags:** ledger, audit
 
 **Story:** When I suspect fraud, a stolen phone or a dispute, I want to stop all money leaving a wallet right away and have the group lift it together, so that nothing more is lost while we sort it out.
 
@@ -632,7 +632,7 @@ Expense, Fee and Reversal rows, each with the request reference, the approvers o
 **Data:** Wallet (write state), Expense request (read, write status), Approval (write for lift), Notification (write), Audit entry (write).
 **Depends on:** SPD-10, WAL-03 (wallet state, outgoing blocks), WAL-09, WAL-12, GRP-07, GRP-08, GRP-11, VOT-01, VOT-03, CON-14, CON-15, OPS-10, NTF-05, NTF-09, ACC-11.
 **Pages:** to be filled from the information architecture.
-**Open questions:** Closed by D2: the permission that freezes is Wallet: freeze. Closed: freeze abuse is limited by lifting needing two people, the audit, the immediate notification and `spd.freeze_cycle_limit`. Closed: internal firings and the Rounding line continue during a freeze, firings with a destination outside the group are held, and manual transfers to other wallets of the group stop (CON-14 criterion 2, CON-15). Closed: a vote to lift a freeze (criterion 5) follows VOT-01 and VOT-03 authority votes. Open, needs Vanilla Pay: which provider-level holds Gereo can place on money already dispatched; default used: none, a payout already with the provider continues and the screen says so.
+**Open questions:** Closed by D2: the permission that freezes is Wallet: freeze. Closed: freeze abuse is limited by lifting needing two people, the audit, the immediate notification and `spd.freeze_cycle_limit`. Closed: internal firings and the Rounding line continue during a freeze, firings with a destination outside the group are held, and manual transfers to other wallets of the group stop (CON-14 criterion 2, CON-15). Closed: a vote to lift a freeze (criterion 5) follows VOT-01 and VOT-03 authority votes. Closed: Gereo places no provider-level hold on money already dispatched; a payout already with the provider continues and the screen says so.
 
 ---
 
@@ -719,11 +719,11 @@ Story IDs below were checked against the other story files. Where a file names a
 4. **Closed: one rejection** is the approver's choice between closing and asking for changes, with no group setting (SPD-06).
 5. **Closed: project spending gates.** Both gates apply; one person holding both permissions meets both with one approval; over budget warns and does not block (SPD-13).
 6. **Closed: posting model for money in transit** is the WAL-10 and WAL-11 model; funds are reserved from authorisation (SPD-10).
-7. **Payee check.** Closed: payouts to non-Gereo numbers are in the MVP and the wallet pays the fee. Open, needs Vanilla Pay: whether the provider offers a payee name lookup; default: "Name not checked" plus the last-three-digits re-read (SPD-01, SPD-10).
-8. **Provider limits.** Open, needs Vanilla Pay: per-transaction, per-day and per-wallet limits, the meaning of the Ar 100 000 000 ceiling, payee wallet caps (Ar 20M on individual MVola wallets); default: OPS-11 limits and a clear reason on failure (SPD-10, SPD-11).
-9. **Closed by decision D2: freeze design.** Wallet: freeze freezes; two distinct holders of Wallet: approve spend lift; internal firings and the Rounding line continue, firings outside the group and manual transfers stop (SPD-15). Open, needs Vanilla Pay: provider-level holds; default: none.
+7. **Payee check.** Closed: payouts to non-Gereo numbers are in the MVP and the wallet pays the fee. Closed: no payee name lookup; "Name not checked" plus the last-three-digits re-read (SPD-01, SPD-10).
+8. **Provider limits.** Closed: no provider limit is assumed beyond OPS-11 limits and a clear reason on failure (SPD-10, SPD-11).
+9. **Closed by decision D2: freeze design.** Wallet: freeze freezes; two distinct holders of Wallet: approve spend lift; internal firings and the Rounding line continue, firings outside the group and manual transfers stop (SPD-15). Closed: no provider-level holds.
 10. **Closed: who edits the spending policy.** A holder of Group: set spending policy, with loosening held for two other approvers or a vote (GRP-12, SPD-02).
 11. **Closed: SMS for approvals.** Quiet hours apply, approving by SMS reply is never allowed, cost follows NTF-06 (SPD-04).
 12. **Closed: request expiry and visibility.** `spd.request_expiry` is 30 days; attachments and notes go only to the requester, approvers, member voters and holders of Wallet: approve spend (SPD-01, SPD-03, SPD-12, SPD-16).
-13. **Legal gate for the whole epic. Open, needs a lawyer and Vanilla Pay.** Holding client funds and paying out to third parties depend on the unconfirmed legal basis (Law 2016-056, competitive-analysis section 6 item 1); every story tagged `legal-gate` is blocked from release until the legal opinion and the Vanilla Pay due diligence (competitive-analysis section 10) are in.
+13. Closed: there is no legal gate on holding client funds or paying out to third parties (decision D7).
 14. **Retention. Open, tracked in ACC open question 1.** Five years proposed under art. 53, kept as `RECORD_RETENTION_YEARS` (WAL; SPD-03 files, SPD-16 receipts) and `AUDIT_RETENTION_YEARS` (OPS; audit entries, SPD-16).

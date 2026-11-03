@@ -11,7 +11,7 @@ type CardProps = Omit<ComponentProps<'section'>, 'title'> & {
 export const Card = ({ title, description, footer, className, children, ...props }: CardProps) => (
 	<section
 		className={cn(
-			'bg-card text-card-foreground border-border flex flex-col gap-4 rounded-2xl border p-6 shadow-xs',
+			'bg-card text-card-foreground ring-foreground/6 flex flex-col gap-4 rounded-3xl p-6 ring-1',
 			className,
 		)}
 		{...props}
@@ -19,7 +19,7 @@ export const Card = ({ title, description, footer, className, children, ...props
 		{(title || description) && (
 			<header className="flex flex-col gap-1">
 				{title && (
-					<h3 className="font-heading text-base leading-tight font-semibold tracking-[-0.01em]">
+					<h3 className="font-heading text-lg leading-tight font-semibold tracking-[-0.01em]">
 						{title}
 					</h3>
 				)}

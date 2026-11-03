@@ -182,7 +182,7 @@ const InputIconDemos = () => {
 }
 
 const Section = ({ title, children }: { title: string; children: ReactNode }) => (
-	<section className="bg-card border-border space-y-4 rounded-2xl border p-6 shadow-xs">
+	<section className="bg-card ring-foreground/6 space-y-4 rounded-3xl p-6 ring-1">
 		<h2 className="text-muted-foreground text-xs font-medium tracking-[0.06em] uppercase">
 			{title}
 		</h2>

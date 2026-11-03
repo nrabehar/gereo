@@ -8,13 +8,13 @@ import type { ComponentProps, ReactNode } from 'react'
 import { cn } from '$/cn'
 
 const inputVariants = cva(
-	'border-muted-foreground/70 bg-background text-foreground placeholder:text-muted-foreground w-full min-w-0 border shadow-xs transition-[border-color,box-shadow,background-color] duration-150 ease-out-strong outline-none selection:bg-primary/30 hover:border-muted-foreground focus-visible:border-foreground focus-visible:ring-[3px] focus-visible:ring-foreground/10 read-only:bg-muted aria-invalid:border-destructive aria-invalid:focus-visible:border-destructive aria-invalid:focus-visible:ring-destructive/20 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-muted-foreground/70',
+	'border-foreground/30 bg-card text-foreground placeholder:text-muted-foreground w-full min-w-0 border-[1.5px] transition-[border-color,box-shadow,background-color] duration-150 ease-out-strong outline-none selection:bg-primary/30 hover:border-foreground/60 focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/30 read-only:bg-muted aria-invalid:border-destructive aria-invalid:focus-visible:border-destructive aria-invalid:focus-visible:ring-destructive/20 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-foreground/30',
 	{
 		variants: {
 			size: {
-				sm: 'h-8 rounded-md px-3 text-xs max-sm:text-base',
-				md: 'h-10 rounded-lg px-3.5 text-sm max-sm:text-base',
-				lg: 'h-12 rounded-xl px-4 text-base',
+				sm: 'h-9 rounded-xl px-3.5 text-xs max-sm:text-base',
+				md: 'h-11 rounded-xl px-4 text-sm max-sm:text-base',
+				lg: 'h-14 rounded-2xl px-5 text-base',
 			},
 			hasStartIcon: { true: '' },
 			hasEndIcon: { true: '' },

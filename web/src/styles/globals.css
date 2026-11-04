@@ -4,6 +4,7 @@
 @import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
+@custom-variant short (@media (height < 30rem));
 
 @theme {
 	--ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
@@ -207,6 +208,7 @@
 
 	html {
 		@apply bg-background text-foreground antialiased;
+		-webkit-tap-highlight-color: transparent;
 	}
 
 	body {
@@ -221,6 +223,36 @@
 	h6 {
 		@apply font-heading;
 	}
+}
+
+@media (height >= 30rem) {
+	html:has([data-app-bar]) {
+		scroll-padding-top: 3.5rem;
+	}
+}
+
+@media (width >= 48rem) and (height >= 30rem) {
+	html:has([data-app-bar]) {
+		scroll-padding-top: 4rem;
+	}
+}
+
+@media (width < 48rem) and (height >= 30rem) {
+	html:has([data-shell='app']) {
+		scroll-padding-bottom: calc(5rem + env(safe-area-inset-bottom));
+	}
+}
+
+@keyframes reveal-on-scroll {
+	from {
+		opacity: 0;
+	}
+}
+
+@utility reveal-on-scroll {
+	animation: reveal-on-scroll linear both;
+	animation-timeline: scroll();
+	animation-range: 0 3rem;
 }
 
 ::view-transition-group(root) {

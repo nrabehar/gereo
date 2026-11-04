@@ -1,7 +1,10 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import {
 	ArrowDownLeftIcon,
+	BellIcon,
 	CalendarDaysIcon,
+	CircleHelpIcon,
+	CircleUserRoundIcon,
 	HouseIcon,
 	LayoutListIcon,
 	RowsIcon,
@@ -33,6 +36,7 @@ import type { ComponentProps, ReactNode } from 'react'
 
 import { env } from '$config/env'
 import { AlertDialog } from '@ui/alert-dialog'
+import { AppBarAction } from '@ui/app-bar'
 import { AllocationBar } from '@ui/allocation-bar'
 import { Accordion } from '@ui/accordion'
 import { Alert } from '@ui/alert'
@@ -55,6 +59,7 @@ import { FileUpload } from '@ui/file-upload'
 import { DropdownMenu } from '@ui/dropdown-menu'
 import { Input } from '@ui/input'
 import { LineChart } from '@ui/line-chart'
+import { Logo } from '@ui/logo'
 import { Money } from '@ui/money'
 import { MoneyInput } from '@ui/money-input'
 import { NumberField } from '@ui/number-field'
@@ -198,7 +203,7 @@ const NavigationDemos = () => {
 			<Breadcrumb
 				items={[
 					{ label: 'Home', to: '/' },
-					{ label: 'Settings', to: '/' },
+					{ label: 'Settings', to: '/kit' },
 					{ label: 'Profile' },
 				]}
 			/>
@@ -281,6 +286,31 @@ const NavigationDemos = () => {
 		</div>
 	)
 }
+
+const AppBarDemos = () => (
+	<div className="space-y-4">
+		<div className="border-border flex flex-wrap items-center gap-2 rounded-xl border p-3">
+			<Logo className="me-auto" />
+			<AppBarAction icon={CircleHelpIcon} label="Help" />
+			<AppBarAction
+				icon={BellIcon}
+				label="Notifications"
+				badge={{ count: 3, label: '3 need your attention' }}
+			/>
+			<AppBarAction
+				icon={BellIcon}
+				label="Notifications"
+				badge={{ count: 120, label: '120 need your attention' }}
+			/>
+			<AppBarAction icon={BellIcon} label="Notifications" badge={{ label: 'new updates' }} />
+			<AppBarAction icon={CircleUserRoundIcon} label="Me" render={<Link to="/kit" />} />
+		</div>
+		<p className="text-muted-foreground text-sm text-pretty">
+			Icon above the word on phones, side by side from 768 px. A count shows what needs
+			attention, a dot shows unread updates, and the last action is the current page.
+		</p>
+	</div>
+)
 
 const DataDemos = () => {
 	const [volume, setVolume] = useState(60)
@@ -781,21 +811,21 @@ const GovernanceDemos = () => {
 										hash: 'home',
 										label: 'Overview',
 										icon: HouseIcon,
-										to: '/',
+										to: '/kit',
 									},
 									{
 										id: 'wallets',
 										hash: 'wallets',
 										label: 'Wallets',
 										icon: WalletIcon,
-										to: '/',
+										to: '/kit',
 									},
 									{
 										id: 'projects',
 										hash: 'projects',
 										label: 'Projects',
 										icon: FolderKanbanIcon,
-										to: '/',
+										to: '/kit',
 									},
 								],
 							},
@@ -807,7 +837,7 @@ const GovernanceDemos = () => {
 										hash: 'votes',
 										label: 'Votes',
 										icon: VoteIcon,
-										to: '/',
+										to: '/kit',
 										badge: (
 											<Badge variant="primary" size="sm">
 												2
@@ -819,14 +849,14 @@ const GovernanceDemos = () => {
 										hash: 'events',
 										label: 'Events',
 										icon: CalendarDaysIcon,
-										to: '/',
+										to: '/kit',
 									},
 									{
 										id: 'journal',
 										hash: 'journal',
 										label: 'Journal',
 										icon: LayoutListIcon,
-										to: '/',
+										to: '/kit',
 									},
 								],
 							},
@@ -839,21 +869,33 @@ const GovernanceDemos = () => {
 					</div>
 					<BottomNav
 						items={[
-							{ id: 'home', hash: 'home', label: 'Home', icon: HouseIcon, to: '/' },
+							{
+								id: 'home',
+								hash: 'home',
+								label: 'Home',
+								icon: HouseIcon,
+								to: '/kit',
+							},
 							{
 								id: 'wallets',
 								hash: 'wallets',
 								label: 'Wallets',
 								icon: WalletIcon,
-								to: '/',
+								to: '/kit',
 							},
-							{ id: 'votes', hash: 'votes', label: 'Votes', icon: VoteIcon, to: '/' },
+							{
+								id: 'votes',
+								hash: 'votes',
+								label: 'Votes',
+								icon: VoteIcon,
+								to: '/kit',
+							},
 							{
 								id: 'events',
 								hash: 'events',
 								label: 'Events',
 								icon: CalendarDaysIcon,
-								to: '/',
+								to: '/kit',
 							},
 						]}
 					/>
@@ -863,7 +905,7 @@ const GovernanceDemos = () => {
 	)
 }
 
-const HomePage = () => (
+const KitPage = () => (
 	<main className="mx-auto flex min-h-dvh max-w-3xl flex-col gap-10 px-6 py-16">
 		<div className="flex flex-col items-start justify-between gap-4 sm:flex-row">
 			<div className="space-y-2">
@@ -1102,6 +1144,10 @@ const HomePage = () => (
 			<NavigationDemos />
 		</Section>
 
+		<Section title="App bar">
+			<AppBarDemos />
+		</Section>
+
 		<Section title="Data">
 			<DataDemos />
 		</Section>
@@ -1131,6 +1177,6 @@ const HomePage = () => (
 	</main>
 )
 
-export const Route = createFileRoute('/')({
-	component: HomePage,
+export const Route = createFileRoute('/kit')({
+	component: KitPage,
 })
